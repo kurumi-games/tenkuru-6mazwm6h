@@ -3361,7 +3361,8 @@ function App(){
   const bfRef=useRef(null);
   const LK_T={shadow:0,born:850,fly:1150,handIn:1650,handOut:2450,fieldIn:2950,fieldOut:3750,reveal:3900,done:4500};
   function starRingComplete(rn){
-    if(!starRingActive()||resolvingR.current||sceneOnR.current)return;
+    if(!starRingActive())return;
+    if(resolvingR.current||sceneOnR.current||countNumR.current>=0){srPendingR.current=true;return;} // v97: 今は無理でも忘れない（次のGOで発動）
     clearTimers();exitLink();lockR.current=true;resolvingR.current=true;
     const hand=dHR.current,flags=dRingR.current;
     const ringed=hand.filter((v,i)=>flags[i]),rest=hand.filter((v,i)=>!flags[i]);
