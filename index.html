@@ -2605,7 +2605,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v105'; // v105: 隠しコマンド（チュートリアルの TUTORIAL を7回タップでルナ戦へ）
+const APP_VER='v106'; // v106: タップした環の札は「その色の札」として手札に残り、出せる時に必ずその表面で場に出る
+// v105: 隠しコマンド（チュートリアルの TUTORIAL を7回タップでルナ戦へ）
 // v104: 環付きカードの表面（第1形態1種／第2形態4種）
 // v103: 10完成の瞬間に場の高さが伸びて手札マットが下がるのを固定
 // v102: 幸福標本の見直し（ルナの右へエネルギーが流れて蝶が生まれる／霧が先に場を覆ってからカードが出る／四角い背景を廃止）
@@ -3275,7 +3276,7 @@ function App(){
     const st=r2R.current;st.tappedThisRound=true;
     const R=REIPIA_RINGS[type];
     const tapVal=dHR.current[i];
-    setTapIdx(i);setTimeout(()=>{setTapIdx(-1);const f2=dRingR.current.slice();f2[i]=false;setDRing(f2);dRingR.current=f2;},700);
+    setTapIdx(i);setTimeout(()=>{setTapIdx(-1);const f2=dRingR.current.slice();if(f2[i]===type)f2[i]='tapped-'+type;setDRing(f2);dRingR.current=f2;},700); // v106: 環は消えるが「その色の札」として覚えておく
     setTimeout(()=>playTappedCard(tapVal,rn,type),type==='erase'?1000:780); // v89: タップした札は場に出す
     flashRing(R.ringColor);showSkill(type); // 技の効果処理と同時に、その色の星環だけ発光＋技名
     try{resumeAC();fxTone({f:2600,f2:900,type:'square',v:0.05,a:0.001,d:0.06,rev:0.3});fxBell({f:1568,v:0.08,d:1.2,bright:1.3,rev:0.75});fxAir({v:0.04,a:0.01,d:0.5,hp:5000,rev:0.7});}catch(e){}
@@ -3296,8 +3297,8 @@ function App(){
   function playTappedCard(val,rn,type){
     if(phaseR.current!=='playing'||countNumR.current>=0||resolvingR.current||eraseBusyR.current)return;
     const hand=dHR.current,rf=dRingR.current,cf=fieldR.current,cs=fieldSumR.current;
-    const idx=hand.findIndex((v,i)=>v===val&&!rf[i]);if(idx<0)return;
-    if(!canPlay(val,cs,cf))return;
+    let idx=hand.findIndex((v,i)=>v===val&&isTapped(rf[i]));if(idx<0)idx=hand.findIndex((v,i)=>v===val&&!rf[i]);if(idx<0)return;
+    if(!canPlay(val,cs,cf))return; // 今出せなければ手札に「その色の札」として残り、出せる時にAIが出す
     try{resumeAC();playPlaceSE(false);}catch(e){}
     const newDH=hand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx);setDealer(newDH,newRf);
     ensureDealerRefill();
@@ -3350,12 +3351,14 @@ function App(){
   }
   function starRingActive(){const so=stageOptsR.current;return !!(so&&so.ability==='starRing'&&!form2R.current);}
   function setDealer(hand,ring){setDH(hand);dHR.current=hand;const r=ring||hand.map(()=>false);setDRing(r);dRingR.current=r;}
-  function ringSum(){return dHR.current.reduce((s,v,i)=>s+(dRingR.current[i]?v:0),0);}
+  function ringSum(){return dHR.current.reduce((s,v,i)=>s+(dRingR.current[i]&&!isTapped(dRingR.current[i])?v:0),0);}
+  function isTapped(f){return typeof f==='string'&&f.indexOf('tapped-')===0;}
+  function isRing(f){return !!f&&!isTapped(f);}
   function ensureDealerRefill(){
     let hand=dHR.current,rf=dRingR.current;
     if(rf.length!==hand.length){rf=hand.map((v,i)=>rf[i]||false);setDRing(rf);dRingR.current=rf;} // 環の配列がズレてたら揃える
     if(hand.length>=10)return;
-    if(hand.filter((v,i)=>!rf[i]).length)return; // 環なしが1枚でもあれば不要
+    if(hand.filter((v,i)=>!isRing(rf[i])).length)return; // 環なしが1枚でもあれば不要
     const nd=createDeck().slice(0,10-hand.length);
     setDealer([...hand,...nd],[...rf.slice(0,hand.length),...nd.map(()=>false)]);
   }
@@ -3747,7 +3750,7 @@ function App(){
     if(resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current||eraseBusyR.current||pausedR.current)return; // v54/v75/v84/v89/v91
     const dHand=dHR.current,cf=fieldR.current,cs=fieldSumR.current;
     if(!dHand.length)return;
-    const rf=dRingR.current;const avail=dHand.filter((v,i)=>!rf[i]); // v79: 星環付きは温存
+    const rf=dRingR.current;const avail=dHand.filter((v,i)=>!isRing(rf[i])); // v79: 星環付きは温存（タップ済みは出せる）
     const playable=avail.filter(v=>canPlay(v,cs,cf));
     if(!playable.length){scheduleAi(rn);return;}
     const wins=playable.filter(v=>cs+v===10);
@@ -3770,10 +3773,11 @@ function App(){
     else{if(Math.random()<firstRate&&safe.length)chosen=safe.sort((a,b)=>a-b)[0];}
     if(!chosen){scheduleAi(rn);return;}
     resumeAC();setTimeout(()=>playPlaceSE(false),100);
-    const idx=dHand.findIndex((v,i)=>v===chosen&&!rf[i]);
+    let idx=dHand.findIndex((v,i)=>v===chosen&&isTapped(rf[i]));if(idx<0)idx=dHand.findIndex((v,i)=>v===chosen&&!rf[i]); // タップ済みの札を優先して出す
+    if(isTapped(rf[idx]))tapFaceR.current=rf[idx].slice(7); // v106: その色の表面で
     const newDH=dHand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx);
     setDealer(newDH,newRf);
-    if(!newDH.filter((v,i)=>!newRf[i]).length){ // 環付きだけ残った → 環付きを残して10枚まで補充 → 新しい環
+    if(!newDH.filter((v,i)=>!isRing(newRf[i])).length){ // 環付きだけ残った → 環付きを残して10枚まで補充 → 新しい環
       const keep=newDH,keepRf=newRf;const nd=createDeck().slice(0,10-keep.length);
       setDealer([...keep,...nd],[...keepRf,...nd.map(()=>false)]); // 新しい環は次ラウンド開始時
     }
@@ -3844,7 +3848,7 @@ function App(){
     setFieldColors(prev=>[...prev,who]);colorsR.current=[...colorsR.current,who];
     setFieldSp(prev=>[...prev,!!isSp]);
     setFieldShift(prev=>[...prev,!!shifted]);
-    setFieldRing(prev=>[...prev,tapFaceR.current||false]);tapFaceR.current=null; // v104: レイピアがタップした環の札はその色の表面
+    {const tf=tapFaceR.current||false;tapFaceR.current=null;setFieldRing(prev=>[...prev,tf]);} // v104/v106: レイピアがタップした環の札はその色の表面（更新関数は遅延実行されるので先に値を取る）
     if(ns>10){
       clearTimers();lockR.current=true;resolvingR.current=true;playBurstSE();setBurstAnim(true);
       const newPP=who==='player'?Math.max(0,pPtR.current-2):pPtR.current;
@@ -4025,7 +4029,7 @@ function App(){
     h('div',{className:'gp-dealer-area'},
       h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
       h('div',{className:'gp-dealer-cards'},
-        dH.slice(0,12).map((_,i)=>h('div',{key:i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')},dRing[i]&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined})))
+        dH.slice(0,12).map((_,i)=>h('div',{key:i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')},(dRing[i]&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined})))
       )
     ),
     srBanner&&h('div',{className:'sr-banner'},h('b',null,'STAR RING'),'星環 ── 完成'),
