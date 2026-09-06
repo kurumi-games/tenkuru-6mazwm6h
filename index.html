@@ -1283,18 +1283,19 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7 .boss-img.form2.final{background:none;top:calc(82 * var(--u));width:calc(220 * var(--u));height:calc(142 * var(--u));margin-left:calc(-110 * var(--u));opacity:.92;-webkit-mask-image:none;mask-image:none;}
 .rf-wrap{position:relative;width:100%;height:100%;}
 .rf-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none;}
-.rf-rings{position:absolute;left:50%;top:50%;width:158%;height:158%;transform:translate(-50%,-50%);pointer-events:none;} /* v88: 星環はキャラより一回り外側に大きく */
-.rf-rings img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;}
-.rf-glow{position:absolute;width:34%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);opacity:0;pointer-events:none;background:radial-gradient(circle,rgba(255,255,255,.85) 0%,var(--ring-color) 22%,transparent 68%);filter:blur(2px);}
-.rf-glow[data-ring-color="purple"]{left:16.1%;top:27.3%;--ring-color:rgba(190,120,255,.9);}
-.rf-glow[data-ring-color="blue"]{left:83.9%;top:27.3%;--ring-color:rgba(110,210,255,.9);}
-.rf-glow[data-ring-color="red"]{left:16.1%;top:65.8%;--ring-color:rgba(255,110,140,.9);}
-.rf-glow[data-ring-color="gold"]{left:83.9%;top:65.8%;--ring-color:rgba(255,215,120,.9);}
-.rf-wrap img.rf-ring{opacity:.34;filter:brightness(.5) saturate(.7);will-change:transform,opacity,filter;} /* 通常時：暗く沈んでうっすら */
-.rf-wrap img.rf-ring[data-ring-color="purple"]{transform-origin:16.1% 27.3%;--ring-color:rgba(190,120,255,.95);}
-.rf-wrap img.rf-ring[data-ring-color="blue"]{transform-origin:83.9% 27.3%;--ring-color:rgba(110,210,255,.95);}
-.rf-wrap img.rf-ring[data-ring-color="red"]{transform-origin:16.1% 65.8%;--ring-color:rgba(255,110,140,.95);}
-.rf-wrap img.rf-ring[data-ring-color="gold"]{transform-origin:83.9% 65.8%;--ring-color:rgba(255,215,120,.95);}
+/* v90: 星環4つはキャラから離した四隅に、それぞれ独立配置（画像は正方形1254×1254） */
+.rf-rings{position:absolute;inset:0;pointer-events:none;overflow:visible;}
+.rf-rings img.rf-ring{position:absolute;width:calc(62 * var(--u));height:calc(62 * var(--u));object-fit:contain;transform:translate(-50%,-50%);transform-origin:center;pointer-events:none;}
+.rf-rings img.rf-ring[data-ring-color="purple"]{left:calc(14 * var(--u));top:calc(24 * var(--u));--ring-color:rgba(190,120,255,.95);}
+.rf-rings img.rf-ring[data-ring-color="blue"]{left:calc(206 * var(--u));top:calc(24 * var(--u));--ring-color:rgba(110,210,255,.95);}
+.rf-rings img.rf-ring[data-ring-color="red"]{left:calc(14 * var(--u));top:calc(104 * var(--u));--ring-color:rgba(255,110,140,.95);}
+.rf-rings img.rf-ring[data-ring-color="gold"]{left:calc(206 * var(--u));top:calc(104 * var(--u));--ring-color:rgba(255,215,120,.95);}
+.rf-glow{position:absolute;width:calc(80 * var(--u));height:calc(80 * var(--u));border-radius:50%;transform:translate(-50%,-50%);opacity:0;pointer-events:none;background:radial-gradient(circle,rgba(255,255,255,.85) 0%,var(--ring-color) 22%,transparent 68%);filter:blur(2px);}
+.rf-glow[data-ring-color="purple"]{left:calc(14 * var(--u));top:calc(24 * var(--u));--ring-color:rgba(190,120,255,.9);}
+.rf-glow[data-ring-color="blue"]{left:calc(206 * var(--u));top:calc(24 * var(--u));--ring-color:rgba(110,210,255,.9);}
+.rf-glow[data-ring-color="red"]{left:calc(14 * var(--u));top:calc(104 * var(--u));--ring-color:rgba(255,110,140,.9);}
+.rf-glow[data-ring-color="gold"]{left:calc(206 * var(--u));top:calc(104 * var(--u));--ring-color:rgba(255,215,120,.9);}
+.rf-wrap img.rf-ring{opacity:.55;filter:brightness(.65) saturate(.8);will-change:transform,opacity,filter;} /* 通常時：暗く沈んでうっすら */
 /* 指名カード：金の外枠だけをカードの外周に重ねる（中央は透明、数字を覆わない） */
 .card-stage .rl-frame{position:absolute;inset:-6%;width:112%;height:112%;object-fit:fill;pointer-events:none;z-index:7;animation:goldBlink 2.2s ease-in-out infinite;}
 @keyframes goldBlink{0%,100%{opacity:.75;filter:drop-shadow(0 0 2px rgba(255,210,110,.5));}50%{opacity:1;filter:drop-shadow(0 0 7px rgba(255,220,130,1));}}
@@ -2543,7 +2544,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v89'; // v89: 環だけ残った時の補充保険／技名と役表示の重なり回避／タップした環カードは場に出す／10完成中の削除を防止／変身時の星環SE差し替え
+const APP_VER='v90'; // v90: 星環を新しい4枚（正方形の紋章）に差し替え、キャラから離して四隅に配置
+// v89: 環だけ残った時の補充保険／技名と役表示の重なり回避／タップした環カードは場に出す／10完成中の削除を防止／変身時の星環SE差し替え
 // v88: 星環を外側へ大きく／技名フラッシュ／状態は小アイコン／台詞を中央へ／役の二重発火バグ修正／第1形態AIをnormalに
 // v87: 星環を大きく・強い二段発光（950ms）／技表示を手札マットの上へ／指名カードは金の外枠で表示
 // v86: 第2形態レイピア＝ベース画像＋4つの発光レイヤー（同サイズ重ね）。発動した星環だけ850msで点灯→膨らむ→回る→消灯
@@ -3094,17 +3096,17 @@ function App(){
     const el=ringElR.current[color];if(!el||!el.animate)return;
     try{el.getAnimations().forEach(a=>a.cancel());}catch(e){}
     const c=RING_GLOW[color]||'rgba(255,255,255,.95)';
-    const idle='brightness(.5) saturate(.7)';
+    const idle='brightness(.65) saturate(.8)';
     const hot='brightness(1.8) saturate(1.6) contrast(1.12) drop-shadow(0 0 4px rgba(255,255,255,.95)) drop-shadow(0 0 15px '+c+') drop-shadow(0 0 34px '+c+')';
     const mid='brightness(1.45) saturate(1.4) contrast(1.08) drop-shadow(0 0 3px rgba(255,255,255,.8)) drop-shadow(0 0 10px '+c+') drop-shadow(0 0 22px '+c+')';
     const tail='brightness(1.1) saturate(1.1) drop-shadow(0 0 2px rgba(255,255,255,.5)) drop-shadow(0 0 8px '+c+')';
     el.animate([
-      {opacity:.34,transform:'scale(1) rotate(0deg)',filter:idle,offset:0,easing:'cubic-bezier(.1,.9,.2,1)'},
-      {opacity:1,transform:'scale(1.22) rotate(3deg)',filter:hot,offset:0.105,easing:'ease-in-out'},   // 100msで一気に点灯・1.22倍
-      {opacity:1,transform:'scale(1.06) rotate(1deg)',filter:mid,offset:0.34,easing:'ease-in-out'},    // 少し縮む
-      {opacity:1,transform:'scale(1.14) rotate(2.5deg)',filter:hot,offset:0.52,easing:'ease-in-out'},  // もう一度小さく脈打つ
-      {opacity:.85,transform:'scale(1.03) rotate(.5deg)',filter:tail,offset:0.74,easing:'ease-in'},    // 弱い追い発光
-      {opacity:.34,transform:'scale(1) rotate(0deg)',filter:idle,offset:1}                             // 暗い通常状態へ
+      {opacity:.55,transform:'translate(-50%,-50%) scale(1) rotate(0deg)',filter:idle,offset:0,easing:'cubic-bezier(.1,.9,.2,1)'},
+      {opacity:1,transform:'translate(-50%,-50%) scale(1.22) rotate(3deg)',filter:hot,offset:0.105,easing:'ease-in-out'},   // 100msで一気に点灯・1.22倍
+      {opacity:1,transform:'translate(-50%,-50%) scale(1.06) rotate(1deg)',filter:mid,offset:0.34,easing:'ease-in-out'},    // 少し縮む
+      {opacity:1,transform:'translate(-50%,-50%) scale(1.14) rotate(2.5deg)',filter:hot,offset:0.52,easing:'ease-in-out'},  // もう一度小さく脈打つ
+      {opacity:.85,transform:'translate(-50%,-50%) scale(1.03) rotate(.5deg)',filter:tail,offset:0.74,easing:'ease-in'},    // 弱い追い発光
+      {opacity:.55,transform:'translate(-50%,-50%) scale(1) rotate(0deg)',filter:idle,offset:1}                             // 暗い通常状態へ
     ],{duration:950,easing:'linear',fill:'none'});
     const g2=ringElR.current['glow_'+color]; // 環の後ろの光のにじみ
     if(g2&&g2.animate){try{g2.getAnimations().forEach(a=>a.cancel());}catch(e){}
