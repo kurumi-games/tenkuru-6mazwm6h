@@ -1328,28 +1328,35 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 @keyframes bfSmokeOut{0%{opacity:.9;transform:translate(var(--dx),calc(-10 * var(--u))) scale(1.2) rotate(var(--r1)) scaleX(var(--sx,1));}100%{opacity:0;transform:translate(calc(var(--dx) * 1.5),calc(-80 * var(--u))) scale(1.55) rotate(var(--r1)) scaleX(var(--sx,1));}}
 
 /* v107: 上部バーは TIME と ボタンだけ。得点はその下へ。中央を空けてキャラを上に */
-.gp-top-bar{justify-content:space-between;background:transparent;border:none;box-shadow:none;overflow:visible;position:relative;z-index:30;clip-path:none !important;-webkit-clip-path:none !important;}
+.gp-top-bar{justify-content:space-between;background:transparent !important;background-image:none !important;border:none !important;box-shadow:none !important;overflow:visible;position:relative;z-index:30;clip-path:none !important;-webkit-clip-path:none !important;}
+.gp-top-bar::before,.gp-top-bar::after{display:none !important;}
 .gp-screen:not(.ch7) .gp-dealer-area{margin-top:calc(48 * var(--u)) !important;} /* 得点ピルの下に相手の手札 */
 .gp-top-bar .gp-round-pill{display:none;}
-.gp-top-bar .gp-score{position:absolute;top:calc(84 * var(--u));width:calc(84 * var(--u));flex:none;padding:calc(4 * var(--u)) 0;background:rgba(15,12,30,.42);border:1px solid rgba(255,255,255,.14);border-radius:calc(12 * var(--u));z-index:6;}
+.gp-top-bar .gp-score{position:absolute;top:calc(74 * var(--u));width:calc(58 * var(--u));flex:none;padding:calc(2 * var(--u)) 0 calc(3 * var(--u));background:rgba(15,12,30,.35);border:1px solid rgba(255,255,255,.12);border-radius:calc(9 * var(--u));z-index:6;}
 .gp-top-bar .gp-score.you{left:calc(10 * var(--u));}
 .gp-top-bar .gp-score.dealer{right:calc(10 * var(--u));}
-.gp-top-bar .gp-score .val{font-size:calc(22 * var(--u));}
-.gp-top-bar .gp-score .sub{font-size:calc(9 * var(--u));}
+.gp-top-bar .gp-score .lbl{font-size:calc(7.5 * var(--u));margin-bottom:calc(1 * var(--u));}
+.gp-top-bar .gp-score .val{font-size:calc(16 * var(--u));}
+.gp-top-bar .gp-score .sub{font-size:calc(7.5 * var(--u));}
 .gp-top-bar .gp-icon-btn{margin-left:auto;}
-.gp-pause-btn{top:calc(136 * var(--u));}
-.gp-screen > .st-icons{top:calc(136 * var(--u));}
-.ring-info{top:calc(166 * var(--u));}
+.gp-pause-btn{top:calc(112 * var(--u));width:calc(30 * var(--u));height:calc(22 * var(--u));right:calc(24 * var(--u));}
+.gp-screen > .st-icons{top:calc(112 * var(--u));}
+.ring-info{top:calc(140 * var(--u));}
 /* キャラを上へ（上部バーの中央が空いた） */
 .gp-screen.ch7 .boss-img{top:calc(22 * var(--u));}
 .gp-screen.ch7 .boss-img.form2.final{top:calc(34 * var(--u));}
-.gp-screen.ch7 .gp-dealer-cards{margin-top:calc(44 * var(--u)) !important;}
+.gp-screen.ch7 .gp-dealer-area{position:absolute;left:0;right:0;top:calc(150 * var(--u));margin:0 !important;padding:0 !important;background:none !important;border:none !important;z-index:4;}
+.gp-screen.ch7 .gp-dealer-cards{margin-top:0 !important;}
+.gp-screen.ch7 .gp-dealer-area .gp-area-label{display:none;}
+.gp-screen.ch7 .gp-field-area{margin-top:calc(150 * var(--u)) !important;}
 /* 場を中央へ寄せて手札を上げる */
 .gp-screen .gp-field-area + .gp-spacer{min-height:calc(14 * var(--u)) !important;}
 .gp-screen .gp-hand-area .gp-area-label{margin-bottom:calc(4 * var(--u));}
 /* 相手の手札は表向き */
 .gp-dealer-card{position:relative;}
-.gp-dealer-card .dv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:calc(11 * var(--u));color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);pointer-events:none;}
+.gp-dealer-card{background:linear-gradient(170deg,#ffffff,#e9edf6) !important;border:1px solid rgba(120,130,170,.5) !important;box-shadow:0 2px 6px rgba(0,0,0,.25) !important;} /* v108: 通常ステージも表向きの白いカード */
+.gp-dealer-card .dv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:calc(11 * var(--u));color:#2b2f45;pointer-events:none;}
+.gp-screen.ch7 .gp-dealer-card{background:url('img/challenge07-rival-card-front.webp') center/contain no-repeat !important;border:none !important;box-shadow:none !important;}
 .gp-screen.ch7 .gp-dealer-card{background-image:url('img/challenge07-rival-card-front.webp');}
 .gp-screen.ch7 .gp-dealer-card .dv{color:#4a1a3e;text-shadow:0 0 3px rgba(255,255,255,.9);font-size:calc(12 * var(--u));}
 /* 相手の札がスーッと降りてくる */
@@ -1442,10 +1449,10 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7 .gp-dealer-cards{position:relative;}
 .gp-screen.ch7 .gp-dealer-cards::before{content:'';position:absolute;left:-6%;right:-6%;top:-14%;bottom:-14%;border-radius:999px;background:radial-gradient(ellipse at center,rgba(8,2,20,.55),rgba(8,2,20,0) 75%);z-index:-1;pointer-events:none;}
 /* 相手カードは妖精の胸の位置へ。ラベル・すりガラスは消す */
-.gp-screen.ch7 .gp-dealer-area{margin-top:calc(130 * var(--u)) !important;background:transparent !important;border:none !important;box-shadow:none !important;padding:0 !important;}
+.gp-screen.ch7 .gp-dealer-area{margin-top:0 !important;background:transparent !important;border:none !important;box-shadow:none !important;padding:0 !important;} /* v108: 位置は絶対配置で指定 */
 .gp-screen.ch7 .gp-dealer-area .gp-area-label{display:none !important;}
 /* 上部バー：白いガラスをやめて透明に。文字は明るく */
-.gp-screen.ch7 .gp-top-bar{background:transparent !important;background-image:none !important;border:1px solid rgba(255,190,235,.28) !important;box-shadow:none !important;filter:none !important;clip-path:none !important;border-radius:calc(22 * var(--u));}
+.gp-screen.ch7 .gp-top-bar{background:transparent !important;background-image:none !important;border:none !important;box-shadow:none !important;filter:none !important;clip-path:none !important;}
 .gp-screen.ch7 .gp-top-bar .gp-time-box{background:rgba(255,255,255,.05) !important;border:1px solid rgba(255,170,225,.45) !important;}
 .gp-screen.ch7 .gp-top-bar .gp-time-box .lbl{color:#e6c6ff !important;opacity:1 !important;}
 .gp-screen.ch7 .gp-top-bar .gp-time-box .val{color:#ff8fd2 !important;text-shadow:0 0 10px rgba(255,120,200,.55) !important;}
@@ -1476,7 +1483,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7 .card-stage.face-command{--cardimg:url('img/card-ring-command.webp');--nc:#5a3a08;}
 .gp-screen.ch7 .card-stage[class*="face-"] .sr-halo{display:none;}
 /* 相手の裏カード：既存の並び・枚数管理はそのまま、見た目だけ画像に */
-.gp-screen.ch7 .gp-dealer-card{aspect-ratio:2/3;border-radius:0;border:none;box-shadow:none;background:url('img/challenge07-rival-card.webp') center/contain no-repeat;}
+.gp-screen.ch7 .gp-dealer-card{aspect-ratio:2/3;border-radius:0;border:none;box-shadow:none;background:url('img/challenge07-rival-card-front.webp') center/contain no-repeat;} /* v108: 表向き */
 .gp-screen.ch7 .gp-dealer-area .gp-area-label,.gp-screen.ch7 .gp-hand-area .gp-area-label,.gp-screen.ch7 .gp-field-sum .sep{color:#ecdfff;text-shadow:0 1px 3px rgba(0,0,0,.6);}
 .gp-screen.ch7 .gp-field-sum .ato{color:#c9a6f0 !important;text-shadow:0 1px 3px rgba(0,0,0,.6);}
 .gp-screen.ch7 .gp-field-sum .sep{color:#c9a6f0;}
@@ -2639,7 +2646,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v107'; // v107: 画面配置の見直し（得点をTIME／曲ボタンの下へ、上部を空けてキャラを上に、場を中央寄せ、手札を上げる）／相手の手札を表向きに／相手の札はスーッと降りてくる
+const APP_VER='v108'; // v108: 得点を小さく端へ／上部の大枠を削除／相手の手札は表面カード／ルナと手札を近づけ、手札と場に距離
+// v107: 画面配置の見直し（得点をTIME／曲ボタンの下へ、上部を空けてキャラを上に、場を中央寄せ、手札を上げる）／相手の手札を表向きに／相手の札はスーッと降りてくる
 // v106: タップした環の札は「その色の札」として手札に残り、出せる時に必ずその表面で場に出る
 // v105: 隠しコマンド（チュートリアルの TUTORIAL を7回タップでルナ戦へ）
 // v104: 環付きカードの表面（第1形態1種／第2形態4種）
