@@ -734,6 +734,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
   width:calc(30 * var(--u)) !important;
 }
 .gp-dealer-cards{gap:calc(2.5 * var(--u)) !important;}
+.gp-dealer-card.empty{background:rgba(255,255,255,.06) !important;border:1px dashed rgba(255,255,255,.18) !important;box-shadow:none !important;} /* v110: 空いた枠 */
 .gp-dealer-card .dv{font-size:calc(15 * var(--u)) !important;}
 
 /* 場の中のごちゃついた模様を全部消す（スッキリ版）
@@ -2657,7 +2658,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v109'; // v109: 相手の手札を大きく／選択カーソル（1枚ずつ移動して止まり、タップしてから降りる）
+const APP_VER='v110'; // v110: 相手の手札は10枠固定。出した札の位置は空いたまま（中央に詰めない）
+// v109: 相手の手札を大きく／選択カーソル（1枚ずつ移動して止まり、タップしてから降りる）
 // v108: 得点を小さく端へ／上部の大枠を削除／相手の手札は表面カード／ルナと手札を近づけ、手札と場に距離
 // v107: 画面配置の見直し（得点をTIME／曲ボタンの下へ、上部を空けてキャラを上に、場を中央寄せ、手札を上げる）／相手の手札を表向きに／相手の札はスーッと降りてくる
 // v106: タップした環の札は「その色の札」として手札に残り、出せる時に必ずその表面で場に出る
@@ -3429,7 +3431,22 @@ function App(){
     setFieldSp(p=>p.filter((v,i)=>keep(i)));setFieldShift(p=>p.filter((v,i)=>keep(i)));setFieldRing(p=>p.filter((v,i)=>keep(i)));
   }
   function starRingActive(){const so=stageOptsR.current;return !!(so&&so.ability==='starRing'&&!form2R.current);}
-  function setDealer(hand,ring){setDH(hand);dHR.current=hand;const r=ring||hand.map(()=>false);setDRing(r);dRingR.current=r;}
+  // v110: 相手の手札に固定の枠（10スロット）。札ごとにIDを持たせて、出した札の枠は空のまま
+  const dIdsR=useRef([]);const dSlotsR=useRef(Array(10).fill(null));const[dSlots,setDSlots]=useState(Array(10).fill(null));const dSeqR=useRef(1);
+  function setDealer(hand,ring){
+    const old=dHR.current||[],oldIds=dIdsR.current||[];
+    // 旧手札と新手札を前から突き合わせて、残った札のIDを引き継ぐ。無くなった札の枠は空に、増えた札は空いてる枠へ
+    const ids=[];let j=0;const removed=new Set(oldIds);
+    for(let i=0;i<hand.length;i++){let found=-1;for(let k=j;k<old.length;k++){if(old[k]===hand[i]&&k-j<=3){found=k;break;}}
+      if(found>=0){ids.push(oldIds[found]);removed.delete(oldIds[found]);j=found+1;}else ids.push(null);}
+    const slots=dSlotsR.current.slice();slots.forEach((id,s)=>{if(id!=null&&removed.has(id))slots[s]=null;});
+    for(let i=0;i<ids.length;i++){if(ids[i]==null){const nid=dSeqR.current++;ids[i]=nid;let s=slots.indexOf(null);if(s<0){slots.push(nid);}else slots[s]=nid;}}
+    // 枠にあるが手札に無いIDは掃除
+    const alive=new Set(ids);for(let s=0;s<slots.length;s++)if(slots[s]!=null&&!alive.has(slots[s]))slots[s]=null;
+    while(slots.length>10&&slots[slots.length-1]==null)slots.pop();
+    dIdsR.current=ids;dSlotsR.current=slots;setDSlots(slots);
+    setDH(hand);dHR.current=hand;const r=ring||hand.map(()=>false);setDRing(r);dRingR.current=r;
+  }
   function ringSum(){return dHR.current.reduce((s,v,i)=>s+(dRingR.current[i]&&!isTapped(dRingR.current[i])?v:0),0);}
   function isTapped(f){return typeof f==='string'&&f.indexOf('tapped-')===0;}
   function isRing(f){return !!f&&!isTapped(f);}
@@ -3717,7 +3734,7 @@ function App(){
     chronoR.current={armed:!!opts.chrono,count:0,pending:false,deals:0};
     roundSecR.current=opts.timeLimit||10;
     coreShiftR.current={active:opts.ability==='coreShift',used:false};setCoreShiftUsed(false);
-    form2R.current=false;setForm2(false);shiftPendingR.current=false;setShiftScene(null);sceneOnR.current=false;setScreenPop(false);setPtBurst(false);srPendingR.current=false;setFieldRing([]);setSrBanner(false);setLkFx(null);r2R.current={rounds:0,timeLeft:0,cmdNext:null,tappedThisRound:false};setTimeRounds(0);setTapIdx(-1);setLocks([]);setCmd(null);rStopR.current=false;setRStop(false);setEraseIdx([]);colorsR.current=[]; // v70/v75/v79/v85
+    form2R.current=false;setForm2(false);shiftPendingR.current=false;setShiftScene(null);sceneOnR.current=false;setScreenPop(false);setPtBurst(false);srPendingR.current=false;setFieldRing([]);setSrBanner(false);setLkFx(null);dIdsR.current=[];dSlotsR.current=Array(10).fill(null);setDSlots(Array(10).fill(null));r2R.current={rounds:0,timeLeft:0,cmdNext:null,tappedThisRound:false};setTimeRounds(0);setTapIdx(-1);setLocks([]);setCmd(null);rStopR.current=false;setRStop(false);setEraseIdx([]);colorsR.current=[]; // v70/v75/v79/v85
     dealPlayer(p);setDealer(d);exitLink();
     setPPt(0);setDPt(0);pPtR.current=0;dPtR.current=0;
     setRNum(1);setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;
@@ -3867,7 +3884,7 @@ function App(){
     }
     // v107: すぐ置かず、相手の手札から場へスーッと降りてくる。着地時にまだ出せる札なら置く（プレイヤーが先に動いて出せなくなったら戻す）
     const u=window.innerHeight/640;
-    const cardEl=document.querySelectorAll('.gp-dealer-cards .gp-dealer-card')[idx];const fc=document.querySelector('.gp-field-cards');
+    const cardEl=document.querySelector('.gp-dealer-cards .gp-dealer-card[data-idx="'+idx+'"]');const fc=document.querySelector('.gp-field-cards');
     const cr=cardEl?cardEl.getBoundingClientRect():{left:window.innerWidth/2,top:150*u,width:20*u,height:30*u};
     const fr=fc?fc.getBoundingClientRect():{left:0,top:300*u,width:window.innerWidth,height:80*u};
     const gap=5*u,cardW=(fr.width-3*gap)/4,n=fieldR.current.length;
@@ -4144,8 +4161,9 @@ function App(){
     h('div',{className:'gp-dealer-area'},
       h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
       h('div',{className:'gp-dealer-cards'},
-        dH.slice(0,12).map((v,i)=>h('div',{key:i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')+(dCur.idx===i?' dsel':'')},h('span',{className:'dv'},v),
-          dCur.idx===i&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.idx===i&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined})))
+        dSlots.map((id,s)=>{const i=id==null?-1:dIdsR.current.indexOf(id);if(i<0||i>=dH.length)return h('div',{key:'e'+s,className:'gp-dealer-card empty'});const v=dH[i];
+          return h('div',{key:'c'+id,'data-idx':i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')+(dCur.idx===i?' dsel':'')},h('span',{className:'dv'},v),
+          dCur.idx===i&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.idx===i&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined}));})
       )
     ),
     srBanner&&h('div',{className:'sr-banner'},h('b',null,'STAR RING'),'星環 ── 完成'),
