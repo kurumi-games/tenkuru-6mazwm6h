@@ -1283,7 +1283,14 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7 .boss-img.form2.final{background:none;top:calc(82 * var(--u));width:calc(220 * var(--u));height:calc(142 * var(--u));margin-left:calc(-110 * var(--u));opacity:.92;-webkit-mask-image:none;mask-image:none;}
 .rf-wrap{position:relative;width:100%;height:100%;}
 .rf-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none;}
-.rf-wrap img.rf-ring{opacity:.28;filter:brightness(.45) saturate(.65);will-change:transform,opacity,filter;} /* 通常時：暗く沈んでうっすら */
+.rf-rings{position:absolute;left:50%;top:50%;width:158%;height:158%;transform:translate(-50%,-50%);pointer-events:none;} /* v88: 星環はキャラより一回り外側に大きく */
+.rf-rings img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;}
+.rf-glow{position:absolute;width:34%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);opacity:0;pointer-events:none;background:radial-gradient(circle,rgba(255,255,255,.85) 0%,var(--ring-color) 22%,transparent 68%);filter:blur(2px);}
+.rf-glow[data-ring-color="purple"]{left:16.1%;top:27.3%;--ring-color:rgba(190,120,255,.9);}
+.rf-glow[data-ring-color="blue"]{left:83.9%;top:27.3%;--ring-color:rgba(110,210,255,.9);}
+.rf-glow[data-ring-color="red"]{left:16.1%;top:65.8%;--ring-color:rgba(255,110,140,.9);}
+.rf-glow[data-ring-color="gold"]{left:83.9%;top:65.8%;--ring-color:rgba(255,215,120,.9);}
+.rf-wrap img.rf-ring{opacity:.34;filter:brightness(.5) saturate(.7);will-change:transform,opacity,filter;} /* 通常時：暗く沈んでうっすら */
 .rf-wrap img.rf-ring[data-ring-color="purple"]{transform-origin:16.1% 27.3%;--ring-color:rgba(190,120,255,.95);}
 .rf-wrap img.rf-ring[data-ring-color="blue"]{transform-origin:83.9% 27.3%;--ring-color:rgba(110,210,255,.95);}
 .rf-wrap img.rf-ring[data-ring-color="red"]{transform-origin:16.1% 65.8%;--ring-color:rgba(255,110,140,.95);}
@@ -1291,6 +1298,16 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* 指名カード：金の外枠だけをカードの外周に重ねる（中央は透明、数字を覆わない） */
 .card-stage .rl-frame{position:absolute;inset:-6%;width:112%;height:112%;object-fit:fill;pointer-events:none;z-index:7;animation:goldBlink 2.2s ease-in-out infinite;}
 @keyframes goldBlink{0%,100%{opacity:.75;filter:drop-shadow(0 0 2px rgba(255,210,110,.5));}50%{opacity:1;filter:drop-shadow(0 0 7px rgba(255,220,130,1));}}
+/* v88: 技名フラッシュ（発動の瞬間、場の上に一瞬） */
+.skill-title{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:150;pointer-events:none;text-align:center;white-space:nowrap;animation:skillTitle 1.4s ease both;}
+.skill-title .en{font-family:'Cinzel','Times New Roman',serif;font-weight:700;font-size:calc(10 * var(--u));letter-spacing:.4em;text-indent:.4em;color:var(--sc,#fff);opacity:.9;}
+.skill-title .jp{font-family:'Noto Serif JP','Hiragino Mincho ProN',serif;font-weight:800;font-size:calc(26 * var(--u));letter-spacing:.14em;text-indent:.14em;color:#fff;text-shadow:0 0 10px var(--sc,#fff),0 0 26px var(--sc,#fff),0 2px 4px rgba(0,0,0,.8);}
+@keyframes skillTitle{0%{opacity:0;transform:translate(-50%,-50%) scale(1.25);filter:blur(4px);}12%{opacity:1;transform:translate(-50%,-50%) scale(1);filter:blur(0);}75%{opacity:1;}100%{opacity:0;transform:translate(-50%,-60%);}}
+/* v88: 状態アイコン（パズドラ風の小さいバッジ。かかってる効果だけ並ぶ） */
+.st-icons{position:absolute;right:calc(14 * var(--u));top:calc(-1 * var(--u));display:flex;gap:calc(5 * var(--u));pointer-events:none;z-index:5;}
+.st-icon{position:relative;width:calc(22 * var(--u));height:calc(22 * var(--u));border-radius:50%;background:rgba(10,4,24,.7) center/80% no-repeat;border:1.5px solid var(--sc,#fff);box-shadow:0 0 8px var(--sc,#fff);animation:stIn .35s cubic-bezier(.2,1.3,.4,1) both;}
+.st-icon b{position:absolute;right:calc(-4 * var(--u));bottom:calc(-3 * var(--u));min-width:calc(12 * var(--u));height:calc(12 * var(--u));border-radius:999px;background:var(--sc,#fff);color:#140828;font-size:calc(8.5 * var(--u));font-weight:900;line-height:calc(12 * var(--u));text-align:center;padding:0 3px;}
+@keyframes stIn{0%{opacity:0;transform:scale(.4);}100%{opacity:1;transform:scale(1);}}
 /* 技表示：手札マットのすぐ上（キャラや場を覆わない） */
 .hand-hud{position:absolute;left:0;right:0;top:calc(-2 * var(--u));height:calc(24 * var(--u));pointer-events:none;z-index:5;}
 .hand-hud .sr-banner{position:absolute;left:50%;top:0;transform:translateX(-50%);max-width:94%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:calc(4 * var(--u)) calc(14 * var(--u));font-size:calc(12 * var(--u));}
@@ -1460,13 +1477,13 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .sh-ring.leave{animation:ringOut .6s ease both;}
 @keyframes ringOut{to{opacity:0;transform:scale(1.3);}}
 /* セリフ */
-.sh-dlg{position:absolute;left:calc(12 * var(--u));right:calc(12 * var(--u));bottom:max(env(safe-area-inset-bottom,0px),calc(18 * var(--u)));z-index:12;
+.sh-dlg{position:absolute;left:calc(12 * var(--u));right:calc(12 * var(--u));top:50%;transform:translateY(-50%);z-index:12;
   background:linear-gradient(180deg,rgba(6,2,14,.86),rgba(2,0,8,.94));border:1px solid rgba(255,150,220,.5);border-radius:calc(6 * var(--u));
   padding:calc(14 * var(--u)) calc(18 * var(--u)) calc(16 * var(--u));box-shadow:0 0 40px rgba(255,120,200,.18),0 20px 50px rgba(0,0,0,.7);animation:shDlg .5s cubic-bezier(.2,1.2,.3,1) both;}
 .sh-dlg.dark{border-color:rgba(190,150,255,.45);box-shadow:0 0 40px rgba(150,100,255,.18),0 20px 50px rgba(0,0,0,.7);}
 .sh-dlg.gone{animation:shDlgOut .5s ease both;}
-@keyframes shDlg{0%{opacity:0;transform:translateY(14px);}100%{opacity:1;transform:none;}}
-@keyframes shDlgOut{0%{opacity:1;}100%{opacity:0;transform:translateY(6px);}}
+@keyframes shDlg{0%{opacity:0;transform:translateY(calc(-50% + 14px));}100%{opacity:1;transform:translateY(-50%);}}
+@keyframes shDlgOut{0%{opacity:1;transform:translateY(-50%);}100%{opacity:0;transform:translateY(calc(-50% + 6px));}}
 .sh-dlg .nm{display:inline-block;font-family:'Noto Sans JP','Hiragino Sans',sans-serif;font-weight:700;font-size:calc(11 * var(--u));letter-spacing:.22em;color:#ff9fd6;border-bottom:1px solid rgba(255,150,220,.5);padding-bottom:2px;margin-bottom:calc(8 * var(--u));}
 .sh-dlg.dark .nm{color:#c8a8ff;border-color:rgba(190,150,255,.5);}
 .sh-dlg .ln{font-family:'Noto Serif JP','Hiragino Mincho ProN',serif;font-weight:700;font-size:calc(17 * var(--u));line-height:1.75;color:#fff;letter-spacing:.04em;min-height:calc(30 * var(--u));text-shadow:0 0 10px rgba(255,150,220,.45);}
@@ -2526,7 +2543,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v87'; // v87: 星環を大きく・強い二段発光（950ms）／技表示を手札マットの上へ／指名カードは金の外枠で表示
+const APP_VER='v88'; // v88: 星環を外側へ大きく／技名フラッシュ／状態は小アイコン／台詞を中央へ／役の二重発火バグ修正／第1形態AIをnormalに
+// v87: 星環を大きく・強い二段発光（950ms）／技表示を手札マットの上へ／指名カードは金の外枠で表示
 // v86: 第2形態レイピア＝ベース画像＋4つの発光レイヤー（同サイズ重ね）。発動した星環だけ850msで点灯→膨らむ→回る→消灯
 // v85: 第2形態の星環＝レイピアの手札に付く（直後1つ・2ラウンドごと1つ・種類ランダム）。タップで発動、絵の星環が膨らんで光る。時間停止は5ラウンド持続
 // v84: 第2形態の4つの星環（ロック・時間停止・削除・指名）を実装／第2形態の絵を羽全開版に／変身前のルナ1枚絵を撤去
@@ -2581,7 +2599,7 @@ const AREA_01={
     {no:6,name:'チャンピオン',description:'コア・シフト：最初に置いた4が3に変わる',icon:'crown',winPt:15,diff:'hard',rule:'normal',boss:true,chrono:true,ability:'coreShift',champion:'lux'},
     // v62: お試しチャレンジ。ST6クリアで解放。本編の進行・AREA CLEARには数えない。次のステージは解放しない
     // v70: 先取30pt。プレイヤーが shiftPt に達すると試合が止まり、ルナ→レイピア（第2形態）の演出
-    {no:7,name:'ルナ',description:'星環：温存したカードで10を組み、場ごと奪う。先取30pt',icon:'card',winPt:30,diff:'easy',rule:'normal',challenge:true,rivalName:'ルナ',form2Name:'レイピア',shiftPt:15,ability:'starRing',bgm:'Iridescent_Trap.mp3'},
+    {no:7,name:'ルナ',description:'星環：温存したカードで10を組み、場ごと奪う。先取30pt',icon:'card',winPt:30,diff:'normal',rule:'normal',challenge:true,rivalName:'ルナ',form2Name:'レイピア',shiftPt:15,ability:'starRing',bgm:'Iridescent_Trap.mp3'},
   ]
 };
 const STAGES={
@@ -2905,10 +2923,10 @@ function ChampionIntroScreen({champ,stage,onStart}){
 // ── v75 星環（4能力）：今回は画像と表示だけ。発動ロジックは未実装。後で各能力へ接続する ──
 // v84: 第2形態は毎ラウンド1つずつ順番に構える（ロック→時間停止→削除→指名→…）。HUDに構えた環を表示
 const REIPIA_RINGS={
-  lock:   {image:'img/challenge07-ring-lock.png',   ringColor:'purple',name:'ロック',   en:'LOCK',    desc:'手札3枚をロック。残りを使い切るまで解けない',       pos:'tl',color:'#c08cff',glow:'rgba(180,120,255,.45)'},
-  time:   {image:'img/challenge07-ring-time.png',   ringColor:'blue',  name:'時間停止', en:'CHRONO',  desc:'場の合計がちょうど7で3秒停止。レイピアだけ動く',   pos:'tr',color:'#7fe0ff',glow:'rgba(100,220,255,.45)'},
-  erase:  {image:'img/challenge07-ring-erase.png',  ringColor:'red',   name:'削除',     en:'ERASE',   desc:'場のあなたの札を2枚消す。1枚以下なら場ごとリセット',pos:'bl',color:'#ff7a9a',glow:'rgba(255,100,140,.45)'},
-  command:{image:'img/challenge07-ring-command.png',ringColor:'gold',  name:'指名',     en:'ORDER', desc:'指名された札を最初に出すまで他は出せない',         pos:'br',color:'#ffd27a',glow:'rgba(255,200,100,.45)'},
+  lock:   {image:'img/challenge07-ring-lock.png',   ringColor:'purple',skill:'星環・縛鎖',name:'ロック',   en:'LOCK',    desc:'手札3枚をロック。残りを使い切るまで解けない',       pos:'tl',color:'#c08cff',glow:'rgba(180,120,255,.45)'},
+  time:   {image:'img/challenge07-ring-time.png',   ringColor:'blue',  skill:'星環・停刻',name:'時間停止', en:'CHRONO',  desc:'場の合計がちょうど7で3秒停止。レイピアだけ動く',   pos:'tr',color:'#7fe0ff',glow:'rgba(100,220,255,.45)'},
+  erase:  {image:'img/challenge07-ring-erase.png',  ringColor:'red',   skill:'星環・消滅',name:'削除',     en:'ERASE',   desc:'場のあなたの札を2枚消す。1枚以下なら場ごとリセット',pos:'bl',color:'#ff7a9a',glow:'rgba(255,100,140,.45)'},
+  command:{image:'img/challenge07-ring-command.png',ringColor:'gold',  skill:'星環・指名',name:'指名',     en:'ORDER', desc:'指名された札を最初に出すまで他は出せない',         pos:'br',color:'#ffd27a',glow:'rgba(255,200,100,.45)'},
 };
 const RING_ORDER=['lock','time','erase','command'];
 // ── v74 変身シーン：ルナ（動く立ち絵）→ セリフ全文 → 鼓動・ひび → 画面が本当に砕ける → 虚空からレイピア ──
@@ -3075,18 +3093,21 @@ function App(){
     const el=ringElR.current[color];if(!el||!el.animate)return;
     try{el.getAnimations().forEach(a=>a.cancel());}catch(e){}
     const c=RING_GLOW[color]||'rgba(255,255,255,.95)';
-    const idle='brightness(.45) saturate(.65)';
+    const idle='brightness(.5) saturate(.7)';
     const hot='brightness(1.8) saturate(1.6) contrast(1.12) drop-shadow(0 0 4px rgba(255,255,255,.95)) drop-shadow(0 0 15px '+c+') drop-shadow(0 0 34px '+c+')';
     const mid='brightness(1.45) saturate(1.4) contrast(1.08) drop-shadow(0 0 3px rgba(255,255,255,.8)) drop-shadow(0 0 10px '+c+') drop-shadow(0 0 22px '+c+')';
     const tail='brightness(1.1) saturate(1.1) drop-shadow(0 0 2px rgba(255,255,255,.5)) drop-shadow(0 0 8px '+c+')';
     el.animate([
-      {opacity:.28,transform:'scale(1) rotate(0deg)',filter:idle,offset:0,easing:'cubic-bezier(.1,.9,.2,1)'},
+      {opacity:.34,transform:'scale(1) rotate(0deg)',filter:idle,offset:0,easing:'cubic-bezier(.1,.9,.2,1)'},
       {opacity:1,transform:'scale(1.22) rotate(3deg)',filter:hot,offset:0.105,easing:'ease-in-out'},   // 100msで一気に点灯・1.22倍
       {opacity:1,transform:'scale(1.06) rotate(1deg)',filter:mid,offset:0.34,easing:'ease-in-out'},    // 少し縮む
       {opacity:1,transform:'scale(1.14) rotate(2.5deg)',filter:hot,offset:0.52,easing:'ease-in-out'},  // もう一度小さく脈打つ
       {opacity:.85,transform:'scale(1.03) rotate(.5deg)',filter:tail,offset:0.74,easing:'ease-in'},    // 弱い追い発光
-      {opacity:.28,transform:'scale(1) rotate(0deg)',filter:idle,offset:1}                             // 暗い通常状態へ
+      {opacity:.34,transform:'scale(1) rotate(0deg)',filter:idle,offset:1}                             // 暗い通常状態へ
     ],{duration:950,easing:'linear',fill:'none'});
+    const g2=ringElR.current['glow_'+color]; // 環の後ろの光のにじみ
+    if(g2&&g2.animate){try{g2.getAnimations().forEach(a=>a.cancel());}catch(e){}
+      g2.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.6)',offset:0},{opacity:.95,transform:'translate(-50%,-50%) scale(1.25)',offset:0.1},{opacity:.45,transform:'translate(-50%,-50%) scale(1)',offset:0.34},{opacity:.85,transform:'translate(-50%,-50%) scale(1.15)',offset:0.52},{opacity:0,transform:'translate(-50%,-50%) scale(1.3)',offset:1}],{duration:950,easing:'linear',fill:'none'});}
   }
   // ── TEST: 4色を単独で確認する一時フック。確認後はこの useEffect ごと削除でOK ──
   useEffect(()=>{window.tenkuruTestRing=(c)=>flashRing(c);return()=>{delete window.tenkuruTestRing;};},[]);
@@ -3094,7 +3115,9 @@ function App(){
   const[tapIdx,setTapIdx]=useState(-1);   // タップ演出中の手札
   const colorsR=useRef([]);
   function r2Active(){const so=stageOptsR.current;return !!(so&&so.ability==='starRing'&&form2R.current);}
-  function r2Say(text,color){setTimeout(()=>{setR2Banner({text,color});setTimeout(()=>setR2Banner(null),2200);},120);} // 環の発光より120ms遅れて表示
+  function r2Say(text,color){setTimeout(()=>{setR2Banner({text,color});setTimeout(()=>setR2Banner(null),1500);},120);} // 短く1.5秒だけ
+  const[skillFx,setSkillFx]=useState(null);
+  function showSkill(type){const R=REIPIA_RINGS[type];setSkillFx({k:Date.now(),jp:R.skill,en:R.en,color:R.color});setTimeout(()=>setSkillFx(s=>s&&s.jp===R.skill?null:s),1400);}
   function setLocks(arr){setPLock(arr);pLockR.current=arr;}
   function setCmd(i){setCmdIdx(i);cmdIdxR.current=i;}
   // 手札1枚に星環（種類ランダム）
@@ -3138,13 +3161,13 @@ function App(){
     const st=r2R.current;st.tappedThisRound=true;
     const R=REIPIA_RINGS[type];
     setTapIdx(i);setTimeout(()=>{setTapIdx(-1);const f2=dRingR.current.slice();f2[i]=false;setDRing(f2);dRingR.current=f2;},700);
-    flashRing(R.ringColor); // 技の効果処理と同時に、その色の星環だけ発光
+    flashRing(R.ringColor);showSkill(type); // 技の効果処理と同時に、その色の星環だけ発光＋技名
     try{resumeAC();fxTone({f:2600,f2:900,type:'square',v:0.05,a:0.001,d:0.06,rev:0.3});fxBell({f:1568,v:0.08,d:1.2,bright:1.3,rev:0.75});fxAir({v:0.04,a:0.01,d:0.5,hp:5000,rev:0.7});}catch(e){}
     if(type==='lock'){
       const hand=pHR.current;const cand=hand.map((v,i)=>v!==null?i:-1).filter(i=>i>=0).sort(()=>Math.random()-0.5).slice(0,3);
-      setLocks(hand.map((v,i)=>cand.includes(i)));r2Say('手札3枚をロック',R.color);
+      setLocks(hand.map((v,i)=>cand.includes(i)));r2Say('手札3枚ロック',R.color);
     }else if(type==='time'){
-      st.timeLeft=5;setTimeRounds(5);r2Say('時間停止：合計7で発動（5ラウンド）',R.color);
+      st.timeLeft=5;setTimeRounds(5);r2Say('5ラウンド：合計7で停止',R.color);
       if(fieldSumR.current===7)setTimeout(()=>r2TimeStop(rn),300);
     }else if(type==='erase'){
       r2Erase();
@@ -3180,7 +3203,7 @@ function App(){
     const mine=fieldR.current.map((v,i)=>i).filter(i=>colorsR.current[i]==='player');
     try{resumeAC();noise({vol:0.14,dur:0.15,start:0,lpFreq:4000,q:0.7});fxTone({f:2200,f2:400,type:'sawtooth',v:0.05,a:0.002,d:0.3,rev:0.5});}catch(e){}
     if(mine.length>=2){
-      const rm=mine.slice(-2);setEraseIdx(rm);r2Say('あなたの札を2枚削除',REIPIA_RINGS.erase.color);
+      const rm=mine.slice(-2);setEraseIdx(rm);r2Say('場の札2枚を消滅',REIPIA_RINGS.erase.color);
       setTimeout(()=>{setEraseIdx([]);removeFieldIdx(rm);},520);
     }else{
       setEraseIdx(fieldR.current.map((v,i)=>i));r2Say('場をリセット',REIPIA_RINGS.erase.color);
@@ -3610,7 +3633,7 @@ function App(){
       const newPP=who==='player'?Math.max(0,pPtR.current-2):pPtR.current;
       const newDP=who==='dealer'?Math.max(0,dPtR.current-2):dPtR.current;
       setPPt(newPP);setDPt(newDP);pPtR.current=newPP;dPtR.current=newDP;
-      setComboShow({text:'BURST',pts:-2,color:'#ff3b3b',who,burst:true,opp:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||undefined});sayChamp(who==='player'?'burstYou':'burstSelf');
+      setComboShow({id:Date.now()+Math.random(),text:'BURST',pts:-2,color:'#ff3b3b',who,burst:true,opp:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||undefined});sayChamp(who==='player'?'burstYou':'burstSelf');
       setTimeout(()=>setComboShow(null),4000);
       const tokB=roundTokR.current;
       setTimeout(()=>{if(tokB!==roundTokR.current)return;setBurstAnim(false);resetField();if(newPP>=winPtR.current||newDP>=winPtR.current){endGame(newPP,newDP);return;}const nr=rn+1;setRNum(nr);doCountdown(pHR.current,dHR.current,newPP,newDP,nr);},4000);
@@ -3642,7 +3665,7 @@ function App(){
       playComboSfx(pts.voice||'役なし');
       setResetFA(true);
       const color=who==='player'?'#2e7fe8':'#f5912a';
-      setComboShow({text:pts.voice||'10達成！',pts:pts.total,color,who,opp:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||undefined});sayChamp(who==='player'?'scoreYou':'scoreSelf');
+      setComboShow({id:Date.now()+Math.random(),text:pts.voice||'10達成！',pts:pts.total,color,who,opp:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||undefined});sayChamp(who==='player'?'scoreYou':'scoreSelf');
       const waitMs=shiftNow?1400:4000; // v75: 変身する得点の時だけ短く
       setTimeout(()=>setComboShow(null),waitMs);
       const tokS=roundTokR.current;
@@ -3679,7 +3702,10 @@ function App(){
         ?h('div',{key:'f2',className:'boss-img form2 final'},
             h('div',{className:'rf-wrap'},
               h('img',{src:'img/reipia-base.png',alt:'',draggable:false}),
-              ['purple','blue','red','gold'].map(c=>h('img',{key:c,className:'rf-ring','data-ring-color':c,src:'img/ring-'+c+'-active.png',alt:'',draggable:false,ref:el=>{ringElR.current[c]=el;}}))
+              h('div',{className:'rf-rings'},
+                ['purple','blue','red','gold'].map(c=>h('div',{key:'g'+c,className:'rf-glow','data-ring-color':c,ref:el=>{ringElR.current['glow_'+c]=el;}})),
+                ['purple','blue','red','gold'].map(c=>h('img',{key:c,className:'rf-ring','data-ring-color':c,src:'img/ring-'+c+'-active.png',alt:'',draggable:false,ref:el=>{ringElR.current[c]=el;}}))
+              )
             )
           ) // v86: ベース＋発光レイヤー4枚
         :h('div',{key:'f1',className:'boss-img'}), // v75: ルナ上半身
@@ -3704,7 +3730,7 @@ function App(){
     chronoFx==='in'&&h('div',{className:'chrono-title',style:{top:burstPos.y}},CHRONO_TEXT.en),
     chronoFx==='out'&&h('div',{className:'chrono-flash'}),
     linkMode&&h('div',{className:'link-banner'},h('b',null,CHRONO_TEXT.en),CHRONO_TEXT.hint),
-    comboShow&&h(CyberComboDisplay,{key:'c_'+comboShow.text+Date.now(),combo:comboShow}),
+    comboShow&&h(CyberComboDisplay,{key:'c_'+comboShow.id,combo:comboShow}), // v88: keyにDate.now()を使うと再描画のたびに演出が再発火してた
     timeUpShow&&h(TimeUpDisplay,{key:'tu_'+Date.now(),show:true}),
     countNum>=0&&h('div',{style:{position:'fixed',inset:0,zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',background:'#2a103066',pointerEvents:'none'}},
       h('div',{key:countNum,style:{fontSize:countNum===0?96:120,fontWeight:900,color:countNum===0?'#50e080':'#fff',animation:'countDown 0.65s ease both',textShadow:countNum===0?'0 0 60px #50e080':'0 0 30px #fff'}},countNum===0?'GO!!':countNum)
@@ -3781,10 +3807,15 @@ function App(){
 
     // HAND area
     h('div',{className:'gp-hand-area hand-card-area'},
-      (form2&&(timeRounds>0||r2Banner))&&h('div',{className:'hand-hud'},
-        timeRounds>0&&h('div',{className:'ability-pill r2',style:{'--rc':REIPIA_RINGS.time.color,'--rg':REIPIA_RINGS.time.glow}},h('span',{className:'ic',style:{backgroundImage:'url('+REIPIA_RINGS.time.image+')'}}),h('span',{className:'en'},'CHRONO'),h('span',null,'合計7で停止 あと'+timeRounds+'R')),
-        r2Banner&&h('div',{className:'sr-banner',style:{borderColor:r2Banner.color,boxShadow:'0 0 16px '+r2Banner.color}},h('b',null,'STAR RING'),r2Banner.text)
+      form2&&h('div',{className:'hand-hud'},
+        h('div',{className:'st-icons'},
+          pLock.some(Boolean)&&h('div',{className:'st-icon',title:'ロック',style:{'--sc':REIPIA_RINGS.lock.color,backgroundImage:'url('+REIPIA_RINGS.lock.image+')'}},h('b',null,pLock.filter(Boolean).length)),
+          timeRounds>0&&h('div',{className:'st-icon',title:'時間停止（合計7）',style:{'--sc':REIPIA_RINGS.time.color,backgroundImage:'url('+REIPIA_RINGS.time.image+')'}},h('b',null,timeRounds+'R')),
+          cmdIdx!=null&&h('div',{className:'st-icon',title:'指名',style:{'--sc':REIPIA_RINGS.command.color,backgroundImage:'url('+REIPIA_RINGS.command.image+')'}})
+        ),
+        r2Banner&&h('div',{className:'sr-banner',style:{borderColor:r2Banner.color,boxShadow:'0 0 16px '+r2Banner.color}},r2Banner.text)
       ),
+      skillFx&&h('div',{key:skillFx.k,className:'skill-title',style:{'--sc':skillFx.color}},h('div',{className:'en'},skillFx.en),h('div',{className:'jp'},skillFx.jp)),
       h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
       h('div',{className:'gp-hand-rows'},
         h('div',{className:'gp-hand-row'},
