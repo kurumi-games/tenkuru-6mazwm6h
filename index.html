@@ -1327,6 +1327,40 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .bf-smoke.out{animation:bfSmokeOut .7s ease-in both !important;}
 @keyframes bfSmokeOut{0%{opacity:.9;transform:translate(var(--dx),calc(-10 * var(--u))) scale(1.2) rotate(var(--r1)) scaleX(var(--sx,1));}100%{opacity:0;transform:translate(calc(var(--dx) * 1.5),calc(-80 * var(--u))) scale(1.55) rotate(var(--r1)) scaleX(var(--sx,1));}}
 
+/* v107: 上部バーは TIME と ボタンだけ。得点はその下へ。中央を空けてキャラを上に */
+.gp-top-bar{justify-content:space-between;background:transparent;border:none;box-shadow:none;overflow:visible;position:relative;z-index:30;clip-path:none !important;-webkit-clip-path:none !important;}
+.gp-screen:not(.ch7) .gp-dealer-area{margin-top:calc(48 * var(--u)) !important;} /* 得点ピルの下に相手の手札 */
+.gp-top-bar .gp-round-pill{display:none;}
+.gp-top-bar .gp-score{position:absolute;top:calc(84 * var(--u));width:calc(84 * var(--u));flex:none;padding:calc(4 * var(--u)) 0;background:rgba(15,12,30,.42);border:1px solid rgba(255,255,255,.14);border-radius:calc(12 * var(--u));z-index:6;}
+.gp-top-bar .gp-score.you{left:calc(10 * var(--u));}
+.gp-top-bar .gp-score.dealer{right:calc(10 * var(--u));}
+.gp-top-bar .gp-score .val{font-size:calc(22 * var(--u));}
+.gp-top-bar .gp-score .sub{font-size:calc(9 * var(--u));}
+.gp-top-bar .gp-icon-btn{margin-left:auto;}
+.gp-pause-btn{top:calc(136 * var(--u));}
+.gp-screen > .st-icons{top:calc(136 * var(--u));}
+.ring-info{top:calc(166 * var(--u));}
+/* キャラを上へ（上部バーの中央が空いた） */
+.gp-screen.ch7 .boss-img{top:calc(22 * var(--u));}
+.gp-screen.ch7 .boss-img.form2.final{top:calc(34 * var(--u));}
+.gp-screen.ch7 .gp-dealer-cards{margin-top:calc(44 * var(--u)) !important;}
+/* 場を中央へ寄せて手札を上げる */
+.gp-screen .gp-field-area + .gp-spacer{min-height:calc(14 * var(--u)) !important;}
+.gp-screen .gp-hand-area .gp-area-label{margin-bottom:calc(4 * var(--u));}
+/* 相手の手札は表向き */
+.gp-dealer-card{position:relative;}
+.gp-dealer-card .dv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:calc(11 * var(--u));color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);pointer-events:none;}
+.gp-screen.ch7 .gp-dealer-card{background-image:url('img/challenge07-rival-card-front.webp');}
+.gp-screen.ch7 .gp-dealer-card .dv{color:#4a1a3e;text-shadow:0 0 3px rgba(255,255,255,.9);font-size:calc(12 * var(--u));}
+/* 相手の札がスーッと降りてくる */
+.fly-card{position:fixed;z-index:120;pointer-events:none;width:var(--fw);height:calc(var(--fw) * 1.4);margin:calc(var(--fw) * -0.7) 0 0 calc(var(--fw) * -0.5);
+  border-radius:calc(4 * var(--u));background:linear-gradient(165deg,#f5912a,#c4600f);border:1px solid rgba(255,255,255,.55);box-shadow:0 8px 22px rgba(0,0,0,.5),0 0 18px rgba(255,170,80,.5);
+  display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;font-size:calc(var(--fw) * 0.5);color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.6);
+  transform:translate(var(--x0),var(--y0)) scale(.6);animation:flyDown var(--d) cubic-bezier(.35,.05,.4,1) both;}
+.gp-screen.ch7 .fly-card{background:url('img/challenge07-rival-card-front.webp') center/100% 100% no-repeat;border:none;color:#4a1a3e;text-shadow:0 0 4px rgba(255,255,255,.9);}
+@keyframes flyDown{0%{transform:translate(var(--x0),var(--y0)) scale(.62);opacity:.9;}25%{opacity:1;}100%{transform:translate(var(--x1),var(--y1)) scale(1);opacity:1;}}
+.fly-card.back{animation:flyBack .35s ease-in both;}
+@keyframes flyBack{0%{transform:translate(var(--x1),var(--y1)) scale(1);opacity:1;}100%{transform:translate(var(--x0),var(--y0)) scale(.6);opacity:0;}}
 /* v91: 一時停止ボタン（曲ボタンの真下）とオーバーレイ */
 .gp-pause-btn{position:absolute;right:calc(12 * var(--u));top:calc(84 * var(--u));width:calc(40 * var(--u));height:calc(30 * var(--u));border-radius:calc(10 * var(--u));z-index:6;
   background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#e0d4f5;display:flex;align-items:center;justify-content:center;gap:calc(3 * var(--u));cursor:pointer;opacity:.75;}
@@ -2605,7 +2639,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v106'; // v106: タップした環の札は「その色の札」として手札に残り、出せる時に必ずその表面で場に出る
+const APP_VER='v107'; // v107: 画面配置の見直し（得点をTIME／曲ボタンの下へ、上部を空けてキャラを上に、場を中央寄せ、手札を上げる）／相手の手札を表向きに／相手の札はスーッと降りてくる
+// v106: タップした環の札は「その色の札」として手札に残り、出せる時に必ずその表面で場に出る
 // v105: 隠しコマンド（チュートリアルの TUTORIAL を7回タップでルナ戦へ）
 // v104: 環付きカードの表面（第1形態1種／第2形態4種）
 // v103: 10完成の瞬間に場の高さが伸びて手札マットが下がるのを固定
@@ -3307,6 +3342,7 @@ function App(){
     if(!resolvePlay(val,cf,cs,'dealer',rn))scheduleAi(rn);
   }
   const eraseBusyR=useRef(false);const tapFaceR=useRef(null);
+  const flyR=useRef(null);const[flyCard,setFlyCard]=useState(null); // v107 降りてくる相手の札
   function r2CheckUnlock(newPH){
     const fl=pLockR.current;if(!fl.some(Boolean))return;
     if(!newPH.filter((v,i)=>v!==null&&!fl[i]).length){setLocks(newPH.map(()=>false));r2Say('ロック解除',REIPIA_RINGS.lock.color);}
@@ -3603,7 +3639,7 @@ function App(){
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
   // ── ストーリー進行 ──
-  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);setLkFx(null);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
+  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
   function startStage(arIdx,stIdx){
     const ar=STAGES.areas[arIdx],st=ar.stages[stIdx];
     if(!st||st.comingSoon){goMap();return;} // v54: 準備中は開始しない
@@ -3665,7 +3701,7 @@ function App(){
     roundTokR.current++;    // 古い遷移予約を全部無効化
     clearTimers();          // 残ってるカウントダウン/タイマーも掃除
     resolvingR.current=false;exitLink(); // v54: 時間停止の残骸を必ず解除
-    rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);rStopT.current=[];setCmd(null);setEraseIdx([]);pausedR.current=false;setPaused(false);setInfoRing(null); // v84/v91
+    rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);rStopT.current=[];setCmd(null);setEraseIdx([]);pausedR.current=false;setPaused(false);setInfoRing(null);flyR.current=null;setFlyCard(null); // v84/v91/v107
     setPhase('playing');phaseR.current='playing';
     setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldSp([]);
     setFieldColors([]); // v46: 時間切れ後に前ラウンドの色記録が残って自分のカードがオレンジになるバグ修正
@@ -3774,14 +3810,38 @@ function App(){
     if(!chosen){scheduleAi(rn);return;}
     resumeAC();setTimeout(()=>playPlaceSE(false),100);
     let idx=dHand.findIndex((v,i)=>v===chosen&&isTapped(rf[i]));if(idx<0)idx=dHand.findIndex((v,i)=>v===chosen&&!rf[i]); // タップ済みの札を優先して出す
-    if(isTapped(rf[idx]))tapFaceR.current=rf[idx].slice(7); // v106: その色の表面で
+    const face=isTapped(rf[idx])?rf[idx].slice(7):null;
+    // v107: すぐ置かず、相手の手札から場へスーッと降りてくる。着地時にまだ出せる札なら置く（プレイヤーが先に動いて出せなくなったら戻す）
+    if(flyR.current)return;
+    const u=window.innerHeight/640;
+    const cardEl=document.querySelectorAll('.gp-dealer-cards .gp-dealer-card')[idx];const fc=document.querySelector('.gp-field-cards');
+    const cr=cardEl?cardEl.getBoundingClientRect():{left:window.innerWidth/2,top:150*u,width:20*u,height:30*u};
+    const fr=fc?fc.getBoundingClientRect():{left:0,top:300*u,width:window.innerWidth,height:80*u};
+    const gap=5*u,cardW=(fr.width-3*gap)/4,n=fieldR.current.length;
+    const x0=cr.left+cr.width/2,y0=cr.top+cr.height/2,x1=fr.left+n*(cardW+gap)+cardW/2,y1=fr.top+fr.height/2;
     const newDH=dHand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx);
     setDealer(newDH,newRf);
-    if(!newDH.filter((v,i)=>!isRing(newRf[i])).length){ // 環付きだけ残った → 環付きを残して10枚まで補充 → 新しい環
-      const keep=newDH,keepRf=newRf;const nd=createDeck().slice(0,10-keep.length);
-      setDealer([...keep,...nd],[...keepRf,...nd.map(()=>false)]); // 新しい環は次ラウンド開始時
-    }
-    if(!resolvePlay(chosen,cf,cs,'dealer',rn))scheduleAi(rn);
+    const FLY_MS=680;
+    flyR.current={value:chosen,face,rf:rf[idx]};setFlyCard({k:Date.now(),value:chosen,face,x0,y0,x1,y1,w:cardW,d:FLY_MS});
+    try{fxAir({v:0.03,a:0.02,d:0.5,hp:4000,rev:0.5});}catch(e){}
+    setTimeout(()=>{
+      const f=flyR.current;flyR.current=null;if(!f)return;
+      const cf2=fieldR.current,cs2=fieldSumR.current;
+      const ok=phaseR.current==='playing'&&countNumR.current<0&&!resolvingR.current&&!eraseBusyR.current&&!pausedR.current&&canPlay(f.value,cs2,cf2);
+      if(!ok){ // 戻す
+        setFlyCard(c=>c?{...c,back:true}:c);setTimeout(()=>setFlyCard(null),380);
+        const h2=[...dHR.current,f.value],r2=[...dRingR.current,f.rf||false];setDealer(h2,r2);
+        if(phaseR.current==='playing'&&!resolvingR.current)scheduleAi(rn);
+        return;
+      }
+      setFlyCard(null);
+      if(f.face)tapFaceR.current=f.face;
+      if(!dHR.current.filter((v,i)=>!isRing(dRingR.current[i])).length){ // 環付きだけ残った → 補充
+        const keep=dHR.current,keepRf=dRingR.current;const nd=createDeck().slice(0,10-keep.length);
+        setDealer([...keep,...nd],[...keepRf,...nd.map(()=>false)]);
+      }
+      if(!resolvePlay(f.value,cf2,cs2,'dealer',rn))scheduleAi(rn);
+    },FLY_MS);
   }
 
   function playCard(idx){
@@ -4019,6 +4079,7 @@ function App(){
       lkFx.smoke.map(sm=>h('div',{key:sm.k,className:'bf-smoke'+(sm.f?' f':'')+(lkFx.dust==='out'?' out':' hold'),style:{left:sm.x+'px',top:sm.y+'px','--dx':sm.dx,'--r0':sm.r0,'--r1':sm.r1,'--d':sm.d,'--dl':'0s'}})),
       lkFx.scales.map(s=>h('div',{key:s.k,className:'bf-scale',style:{left:s.x+'px',top:s.y+'px','--dx':s.dx,'--dy':s.dy,'--d':s.d}}))
     ),
+    flyCard&&h('div',{key:flyCard.k,className:'fly-card'+(flyCard.back?' back':'')+(flyCard.face?' face-'+flyCard.face:''),style:{'--fw':flyCard.w+'px','--x0':flyCard.x0+'px','--y0':flyCard.y0+'px','--x1':flyCard.x1+'px','--y1':flyCard.y1+'px','--d':flyCard.d+'ms'}},flyCard.value),
     // v91: 一時停止
     h('div',{className:'gp-pause-btn'+((paused||canPause())?'':' off'),onClick:togglePause,title:'一時停止'},h('i'),h('i')),
     paused&&h('div',{className:'pause-veil',onClick:togglePause},h('div',{className:'t'},'PAUSE'),h('div',{className:'s'},'タップで再開'),h('div',{className:'go'},'再開')),
@@ -4029,7 +4090,7 @@ function App(){
     h('div',{className:'gp-dealer-area'},
       h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
       h('div',{className:'gp-dealer-cards'},
-        dH.slice(0,12).map((_,i)=>h('div',{key:i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')},(dRing[i]&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined})))
+        dH.slice(0,12).map((v,i)=>h('div',{key:i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')},h('span',{className:'dv'},v),(dRing[i]&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined})))
       )
     ),
     srBanner&&h('div',{className:'sr-banner'},h('b',null,'STAR RING'),'星環 ── 完成'),
