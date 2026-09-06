@@ -1299,13 +1299,28 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* 指名カード：金の外枠だけをカードの外周に重ねる（中央は透明、数字を覆わない） */
 .card-stage .rl-frame{position:absolute;inset:-6%;width:112%;height:112%;object-fit:fill;pointer-events:none;z-index:7;animation:goldBlink 2.2s ease-in-out infinite;}
 @keyframes goldBlink{0%,100%{opacity:.75;filter:drop-shadow(0 0 2px rgba(255,210,110,.5));}50%{opacity:1;filter:drop-shadow(0 0 7px rgba(255,220,130,1));}}
+/* v91: 一時停止ボタン（曲ボタンの真下）とオーバーレイ */
+.gp-pause-btn{position:absolute;right:calc(12 * var(--u));top:calc(84 * var(--u));width:calc(40 * var(--u));height:calc(30 * var(--u));border-radius:calc(10 * var(--u));z-index:6;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#e0d4f5;display:flex;align-items:center;justify-content:center;gap:calc(3 * var(--u));cursor:pointer;opacity:.75;}
+.gp-pause-btn i{display:block;width:calc(4 * var(--u));height:calc(14 * var(--u));background:currentColor;border-radius:1px;}
+.gp-pause-btn.off{opacity:.3;pointer-events:none;}
+.pause-veil{position:fixed;inset:0;z-index:180;background:rgba(6,2,16,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(14 * var(--u));}
+.pause-veil .t{font-family:'Cinzel','Times New Roman',serif;font-weight:700;font-size:calc(22 * var(--u));letter-spacing:.4em;text-indent:.4em;color:#fff;text-shadow:0 0 14px rgba(200,150,255,.7);}
+.pause-veil .s{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;font-size:calc(12 * var(--u));color:#d8ccf0;letter-spacing:.1em;}
+.pause-veil .go{margin-top:calc(6 * var(--u));padding:calc(10 * var(--u)) calc(34 * var(--u));border-radius:999px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font-family:'Noto Serif JP',serif;font-weight:700;font-size:calc(15 * var(--u));letter-spacing:.2em;cursor:pointer;}
+/* v91: 状態アイコンはタイマーの直下。タップで説明 */
+.gp-screen > .st-icons{position:absolute;left:calc(14 * var(--u));top:calc(84 * var(--u));display:flex;gap:calc(6 * var(--u));z-index:6;pointer-events:auto;}
+.gp-screen > .st-icons .st-icon{cursor:pointer;pointer-events:auto;}
+.ring-info{position:absolute;left:calc(14 * var(--u));top:calc(114 * var(--u));z-index:7;max-width:calc(230 * var(--u));background:rgba(10,4,24,.92);border:1px solid var(--sc,#fff);border-radius:calc(10 * var(--u));padding:calc(8 * var(--u)) calc(11 * var(--u));box-shadow:0 0 14px var(--sc,#fff);animation:fadeUp .2s ease both;}
+.ring-info .n{font-family:'Noto Serif JP',serif;font-weight:800;font-size:calc(12.5 * var(--u));color:var(--sc,#fff);letter-spacing:.06em;}
+.ring-info .d{font-family:'Noto Sans JP',sans-serif;font-size:calc(10.5 * var(--u));color:#eee6ff;line-height:1.45;margin-top:calc(3 * var(--u));}
 /* v88: 技名フラッシュ（発動の瞬間、場の上に一瞬） */
 .skill-title{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:150;pointer-events:none;text-align:center;white-space:nowrap;animation:skillTitle 1.4s ease both;}
 .skill-title .en{font-family:'Cinzel','Times New Roman',serif;font-weight:700;font-size:calc(10 * var(--u));letter-spacing:.4em;text-indent:.4em;color:var(--sc,#fff);opacity:.9;}
 .skill-title .jp{font-family:'Noto Serif JP','Hiragino Mincho ProN',serif;font-weight:800;font-size:calc(26 * var(--u));letter-spacing:.14em;text-indent:.14em;color:#fff;text-shadow:0 0 10px var(--sc,#fff),0 0 26px var(--sc,#fff),0 2px 4px rgba(0,0,0,.8);}
 @keyframes skillTitle{0%{opacity:0;transform:translate(-50%,-50%) scale(1.25);filter:blur(4px);}12%{opacity:1;transform:translate(-50%,-50%) scale(1);filter:blur(0);}75%{opacity:1;}100%{opacity:0;transform:translate(-50%,-60%);}}
 /* v88: 状態アイコン（パズドラ風の小さいバッジ。かかってる効果だけ並ぶ） */
-.st-icons{position:absolute;right:calc(14 * var(--u));top:calc(-1 * var(--u));display:flex;gap:calc(5 * var(--u));pointer-events:none;z-index:5;}
+.hand-hud .st-icons{display:none;}
 .st-icon{position:relative;width:calc(22 * var(--u));height:calc(22 * var(--u));border-radius:50%;background:rgba(10,4,24,.7) center/80% no-repeat;border:1.5px solid var(--sc,#fff);box-shadow:0 0 8px var(--sc,#fff);animation:stIn .35s cubic-bezier(.2,1.3,.4,1) both;}
 .st-icon b{position:absolute;right:calc(-4 * var(--u));bottom:calc(-3 * var(--u));min-width:calc(12 * var(--u));height:calc(12 * var(--u));border-radius:999px;background:var(--sc,#fff);color:#140828;font-size:calc(8.5 * var(--u));font-weight:900;line-height:calc(12 * var(--u));text-align:center;padding:0 3px;}
 @keyframes stIn{0%{opacity:0;transform:scale(.4);}100%{opacity:1;transform:scale(1);}}
@@ -1934,8 +1949,9 @@ function playChronoReleaseSE(){ // 解除：「パチッ」＋光が戻る音（
 function playGlassCrackSE(){try{resumeAC();noise({vol:0.16,dur:0.05,start:0,lpFreq:6000,q:0.8});noise({vol:0.1,dur:0.04,start:0.12,lpFreq:5000,q:0.8});fxTone({f:5200,f2:3200,type:'triangle',v:0.05,a:0.002,d:0.12,rev:0.4});}catch(e){}}
 function playGlassShatterSE(){try{resumeAC();noise({vol:0.24,dur:0.35,start:0,lpFreq:7000,q:0.6});for(let i=0;i<6;i++)fxBell({f:3000+Math.random()*3000,v:0.05,d:0.5+Math.random()*0.5,t:0.05+i*0.06,bright:1.3,rev:0.8});fxTone({f:900,f2:120,type:'sine',v:0.12,a:0.005,d:0.5,rev:0.6});}catch(e){}}
 function playShiftThump(k){k=k||1;try{resumeAC();fxTone({f:70*k,f2:32,type:'sine',v:0.28,a:0.005,d:0.5,rev:0.3});noise({vol:0.12,dur:0.12,start:0,lpFreq:300,q:1});fxTone({f:110,f2:60,type:'triangle',v:0.1,a:0.05,d:0.3,t:0.12,rev:0.4});}catch(e){}}
-function playTitleHitSE(){try{resumeAC();fxTone({f:55,f2:30,type:'sine',v:0.24,a:0.005,d:1.2,rev:0.5});[392,523,659,784,1047].forEach((f,i)=>fxBell({f,v:0.1,d:2.6,t:0.02+i*0.05,bright:1.15,rev:0.9}));fxAir({v:0.06,a:0.02,d:1.2,hp:5000,rev:0.9});}catch(e){}}
-function playForm2SE(){try{resumeAC();fxAir({v:0.08,a:0.3,d:0.8,hp:2500,rev:0.8});[523,659,784,1047,1319].forEach((f,i)=>fxBell({f,v:0.09,d:2.2,t:0.25+i*0.09,bright:1.1,rev:0.9}));fxTone({f:200,f2:60,type:'sine',v:0.14,a:0.02,d:0.9,rev:0.5});}catch(e){}}
+// v91: チャイム（鐘の分散和音）は廃止。低い衝撃と空気の広がりだけ
+function playTitleHitSE(){try{resumeAC();fxTone({f:55,f2:30,type:'sine',v:0.26,a:0.005,d:1.4,rev:0.5});noise({vol:0.1,dur:0.3,start:0,lpFreq:600,q:0.8});fxAir({v:0.05,a:0.05,d:1.6,hp:3000,rev:0.9});fxTone({f:110,f2:440,type:'sine',v:0.04,a:0.6,d:1.6,t:0.1,rev:0.9});}catch(e){}}
+function playForm2SE(){try{resumeAC();fxAir({v:0.09,a:0.25,d:1.0,hp:2200,rev:0.85});fxTone({f:220,f2:40,type:'sine',v:0.18,a:0.01,d:1.1,rev:0.5});noise({vol:0.12,dur:0.5,start:0.05,lpFreq:1200,q:0.7});fxTone({f:90,f2:360,type:'triangle',v:0.04,a:0.7,d:1.8,t:0.2,rev:0.9});}catch(e){}}
 function duckBGM(on){try{if(bgmAudio)bgmAudio.volume=on?CHRONO_CONFIG.timeStopBgmVolume:0.45;}catch(e){}}
 function setBgmVolume(v){try{if(bgmAudio)bgmAudio.volume=Math.max(0,Math.min(1,v));}catch(e){}}
 function playCoreShiftSE(){ // 4が結晶のように割れて3へ
@@ -2544,7 +2560,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v90'; // v90: 星環を新しい4枚（正方形の紋章）に差し替え、キャラから離して四隅に配置
+const APP_VER='v91'; // v91: 一時停止ボタン／状態アイコンをタイマー直下＋タップで説明／変身SEのチャイム廃止／台詞の音声ファイル差し込み口
+// v90: 星環を新しい4枚（正方形の紋章）に差し替え、キャラから離して四隅に配置
 // v89: 環だけ残った時の補充保険／技名と役表示の重なり回避／タップした環カードは場に出す／10完成中の削除を防止／変身時の星環SE差し替え
 // v88: 星環を外側へ大きく／技名フラッシュ／状態は小アイコン／台詞を中央へ／役の二重発火バグ修正／第1形態AIをnormalに
 // v87: 星環を大きく・強い二段発光（950ms）／技表示を手札マットの上へ／指名カードは金の外枠で表示
@@ -2939,6 +2956,9 @@ const SHIFT_LINE2A='ルナ⋯あなたは賢い、賢い子⋯';
 const SHIFT_LINE2B='蝶（しあわせ）になって、みんなを救ってあげて⋯';
 const GLITCH_CHARS='蝶✦▮░◆彡';
 const SHIFT_VIDEO={v1:'video/shift-1-luna.mp4',v2:'video/shift-2-reipia.mp4'};
+// v91: 台詞の音声（無ければ黙って鳴らさない）。voice/ に置く
+const SHIFT_VOICE={luna1:'voice/luna-1.mp3',reipia1:'voice/reipia-1.mp3',reipia2:'voice/reipia-2.mp3'};
+function playVoice(key,vol){try{const a=new Audio(SHIFT_VOICE[key]);a.volume=vol==null?0.9:vol;a.onerror=()=>{};const p=a.play();if(p&&p.catch)p.catch(()=>{});return a;}catch(e){return null;}}
 // タイムライン（ms）。動画は各5秒
 const SHIFT_T={luna:500,type:95,glitch:2850,glitchStep:80,video1:3700,v1len:5050,line2:9200,type2:80,video2:13100,v2len:5050,wings:14300,rings:16900,title:16800,leave:18400,done:19300};
 function ShiftScene({name,form2Name,onDone,onForm2,onLeave}){
@@ -2955,7 +2975,7 @@ function ShiftScene({name,form2Name,onDone,onForm2,onLeave}){
     if(reduced){at(300,()=>setPh(1));at(1200,()=>{onForm2&&onForm2();});at(2000,()=>{onLeave&&onLeave();});at(2600,()=>{setPh(8);onDone&&onDone();});return()=>T.forEach(clearTimeout);}
     try{fxTone({f:60,f2:38,type:'sine',v:0.16,a:0.2,d:1.4,rev:0.4});fxAir({v:0.04,a:0.4,d:1.0,hp:3000,rev:0.8});}catch(e){}
     try{[v1,v2].forEach(r=>{if(r.current)r.current.load();});}catch(e){}
-    at(SHIFT_T.luna,()=>setPh(1));
+    at(SHIFT_T.luna,()=>{setPh(1);playVoice('luna1');});
     for(let i=1;i<=SHIFT_LINE.length;i++)at(SHIFT_T.luna+400+i*SHIFT_T.type,()=>{setTyped(i);try{fxTone({f:2800+Math.random()*400,type:'sine',v:0.016,a:0.002,d:0.05,rev:0.2});}catch(e){}});
     at(SHIFT_T.glitch,()=>setPh(2));
     for(let k=1;k<=10;k++)at(SHIFT_T.glitch+k*SHIFT_T.glitchStep,()=>{setGlitch(k);try{if(k%2)fxTone({f:1200+Math.random()*1800,type:'square',v:0.012,a:0.001,d:0.03,rev:0.1});}catch(e){}});
@@ -2964,9 +2984,10 @@ function ShiftScene({name,form2Name,onDone,onForm2,onLeave}){
     at(SHIFT_T.video1+1100,()=>{try{for(let i=0;i<7;i++){noise({vol:0.09,dur:0.05,start:i*0.22,lpFreq:5000,q:0.7});fxTone({f:3000+Math.random()*2000,f2:600,type:'sawtooth',v:0.025,a:0.002,d:0.12,t:i*0.22,rev:0.5});}fxTone({f:180,f2:520,type:'triangle',v:0.05,a:0.4,d:2.4,rev:0.8});}catch(e){}});
     at(SHIFT_T.video1+3300,()=>{try{playShiftThump(1.1);for(let i=0;i<5;i++)fxBell({f:1500+i*400,v:0.035,d:1.4,t:i*0.12,bright:1.3,rev:0.9});}catch(e){}});
     // 台詞（動画1の最終フレームで静止）
-    at(SHIFT_T.line2,()=>{setPh(4);try{fxBell({f:2093,v:0.08,d:1.8,bright:1.2,rev:0.85});}catch(e){}});
+    at(SHIFT_T.line2,()=>{setPh(4);playVoice('reipia1');try{fxAir({v:0.03,a:0.01,d:0.6,hp:6000,rev:0.7});}catch(e){}});
     for(let i=1;i<=SHIFT_LINE2A.length;i++)at(SHIFT_T.line2+200+i*SHIFT_T.type2,()=>setT2a(i));
     const t2b0=SHIFT_T.line2+200+SHIFT_LINE2A.length*SHIFT_T.type2+500;
+    at(t2b0,()=>playVoice('reipia2'));
     for(let i=1;i<=SHIFT_LINE2B.length;i++)at(t2b0+i*SHIFT_T.type2,()=>setT2b(i));
     // 動画2：羽が開き、星環4つが現れる
     at(SHIFT_T.video2,()=>{setPh(5);play(v2);onForm2&&onForm2();try{fxAir({v:0.06,a:0.3,d:1.0,hp:2500,rev:0.8});}catch(e){}});
@@ -3087,6 +3108,22 @@ function App(){
   const[pLock,setPLock]=useState([]);const pLockR=useRef([]);
   const[cmdIdx,setCmdIdx]=useState(null);const cmdIdxR=useRef(null);
   const[rStop,setRStop]=useState(false);const rStopR=useRef(false);const rStopT=useRef([]);
+  // v91 一時停止（対戦中・カウントダウン外・演出外のみ）
+  const[paused,setPaused]=useState(false);const pausedR=useRef(false);
+  function canPause(){return phaseR.current==='playing'&&countNumR.current<0&&!resolvingR.current&&!sceneOnR.current&&!rStopR.current&&!linkR.current;}
+  function togglePause(){
+    if(pausedR.current){ // 再開
+      pausedR.current=false;setPaused(false);
+      if(phaseR.current==='playing'){startTimer(rNum,timeLeftR.current);clearTimeout(aiRef.current);scheduleAi(rNum);}
+      try{if(bgmAudio&&musicEnabledR.current)bgmAudio.play().catch(()=>{});}catch(e){}
+      return;
+    }
+    if(!canPause())return;
+    pausedR.current=true;setPaused(true);
+    clearInterval(timerRef.current);clearTimeout(aiRef.current);
+    try{if(bgmAudio)bgmAudio.pause();}catch(e){}
+  }
+  const[infoRing,setInfoRing]=useState(null); // タップした状態アイコンの説明
   const[r2Banner,setR2Banner]=useState(null);
   const[eraseIdx,setEraseIdx]=useState([]);
   const ringElR=useRef({});              // 発光レイヤー <img> の参照（purple/blue/red/gold）
@@ -3425,7 +3462,7 @@ function App(){
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
   // ── ストーリー進行 ──
-  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
+  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
   function startStage(arIdx,stIdx){
     const ar=STAGES.areas[arIdx],st=ar.stages[stIdx];
     if(!st||st.comingSoon){goMap();return;} // v54: 準備中は開始しない
@@ -3482,7 +3519,7 @@ function App(){
     roundTokR.current++;    // 古い遷移予約を全部無効化
     clearTimers();          // 残ってるカウントダウン/タイマーも掃除
     resolvingR.current=false;exitLink(); // v54: 時間停止の残骸を必ず解除
-    rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);rStopT.current=[];setCmd(null);setEraseIdx([]); // v84
+    rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);rStopT.current=[];setCmd(null);setEraseIdx([]);pausedR.current=false;setPaused(false);setInfoRing(null); // v84/v91
     setPhase('playing');phaseR.current='playing';
     setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldSp([]);
     setFieldColors([]); // v46: 時間切れ後に前ラウンドの色記録が残って自分のカードがオレンジになるバグ修正
@@ -3563,7 +3600,7 @@ function App(){
   function aiPlay(rn){
     // 場が完成した直後にAIの出す動作が間に合ってしまった場合 → カード返却（出さない）
     // ※lockRは見ない：あれはラウンド開始時のプレイヤー用ハンデロックと共用のため
-    if(resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current||eraseBusyR.current)return; // v54/v75/v84/v89
+    if(resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current||eraseBusyR.current||pausedR.current)return; // v54/v75/v84/v89/v91
     const dHand=dHR.current,cf=fieldR.current,cs=fieldSumR.current;
     if(!dHand.length)return;
     const rf=dRingR.current;const avail=dHand.filter((v,i)=>!rf[i]); // v79: 星環付きは温存
@@ -3614,7 +3651,7 @@ function App(){
     const cf=fieldR.current,cs=fieldSumR.current;
     let value=pH[idx];
     if(!value||!canPlay(value,cs,cf))return;
-    if(rStopR.current||eraseBusyR.current)return;               // v84 時間停止中は出せない / v89 削除中も
+    if(rStopR.current||eraseBusyR.current||pausedR.current)return; // v84 時間停止中は出せない / v89 削除中も / v91 一時停止中も
     if(pLockR.current[idx]){fxLockHint('星環ロック');return;}   // v84 ロック中
     if(cmdIdxR.current!=null&&cmdIdxR.current!==idx){fxLockHint('指名された札から');return;} // v84 指名
     if(cmdIdxR.current===idx)setCmd(null);
@@ -3802,7 +3839,19 @@ function App(){
 
     // v56 チャンピオン能力の表示（使用後は暗くなる）
     coreShiftR.current.active&&h('div',{className:'ability-pill'+(coreShiftUsed?' used':'')},h('span',{className:'en'},'CORE SHIFT'),h('span',null,coreShiftUsed?'使用済み':'最初に置く 4 → 3')),
-    // v87: 第2形態の技表示は手札マットの上（hand-hud）へ移動
+    // v91: 状態アイコン（タイマー直下）＋タップで説明
+    form2&&h('div',{className:'st-icons'},
+      pLock.some(Boolean)&&h('div',{className:'st-icon',style:{'--sc':REIPIA_RINGS.lock.color,backgroundImage:'url('+REIPIA_RINGS.lock.image+')'},onClick:()=>setInfoRing(r=>r==='lock'?null:'lock')},h('b',null,pLock.filter(Boolean).length)),
+      timeRounds>0&&h('div',{className:'st-icon',style:{'--sc':REIPIA_RINGS.time.color,backgroundImage:'url('+REIPIA_RINGS.time.image+')'},onClick:()=>setInfoRing(r=>r==='time'?null:'time')},h('b',null,timeRounds+'R')),
+      cmdIdx!=null&&h('div',{className:'st-icon',style:{'--sc':REIPIA_RINGS.command.color,backgroundImage:'url('+REIPIA_RINGS.command.image+')'},onClick:()=>setInfoRing(r=>r==='command'?null:'command')})
+    ),
+    infoRing&&h('div',{className:'ring-info',style:{'--sc':REIPIA_RINGS[infoRing].color},onClick:()=>setInfoRing(null)},
+      h('div',{className:'n'},REIPIA_RINGS[infoRing].skill+'（'+REIPIA_RINGS[infoRing].name+'）'),
+      h('div',{className:'d'},REIPIA_RINGS[infoRing].desc+(infoRing==='time'?'　あと'+timeRounds+'ラウンド':infoRing==='lock'?'　ロック中 '+pLock.filter(Boolean).length+'枚':''))
+    ),
+    // v91: 一時停止
+    h('div',{className:'gp-pause-btn'+((paused||canPause())?'':' off'),onClick:togglePause,title:'一時停止'},h('i'),h('i')),
+    paused&&h('div',{className:'pause-veil',onClick:togglePause},h('div',{className:'t'},'PAUSE'),h('div',{className:'s'},'タップで再開'),h('div',{className:'go'},'再開')),
     rStop&&h('div',{className:'rs-veil'}),
 
     // DEALER 手札
@@ -3842,13 +3891,8 @@ function App(){
 
     // HAND area
     h('div',{className:'gp-hand-area hand-card-area'},
-      form2&&h('div',{className:'hand-hud'},
-        h('div',{className:'st-icons'},
-          pLock.some(Boolean)&&h('div',{className:'st-icon',title:'ロック',style:{'--sc':REIPIA_RINGS.lock.color,backgroundImage:'url('+REIPIA_RINGS.lock.image+')'}},h('b',null,pLock.filter(Boolean).length)),
-          timeRounds>0&&h('div',{className:'st-icon',title:'時間停止（合計7）',style:{'--sc':REIPIA_RINGS.time.color,backgroundImage:'url('+REIPIA_RINGS.time.image+')'}},h('b',null,timeRounds+'R')),
-          cmdIdx!=null&&h('div',{className:'st-icon',title:'指名',style:{'--sc':REIPIA_RINGS.command.color,backgroundImage:'url('+REIPIA_RINGS.command.image+')'}})
-        ),
-        r2Banner&&h('div',{className:'sr-banner',style:{borderColor:r2Banner.color,boxShadow:'0 0 16px '+r2Banner.color}},r2Banner.text)
+      form2&&r2Banner&&h('div',{className:'hand-hud'},
+        h('div',{className:'sr-banner',style:{borderColor:r2Banner.color,boxShadow:'0 0 16px '+r2Banner.color}},r2Banner.text)
       ),
       skillFx&&h('div',{key:skillFx.k,className:'skill-title',style:{'--sc':skillFx.color}},h('div',{className:'en'},skillFx.en),h('div',{className:'jp'},skillFx.jp)),
       h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
