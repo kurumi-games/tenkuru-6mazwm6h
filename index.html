@@ -1306,26 +1306,27 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.lk-on .gp-field-area{position:relative;z-index:156;}
 .bf-shadow{position:fixed;z-index:152;pointer-events:none;background:center/contain no-repeat;transform-origin:50% 50%;animation:bfShadow .9s cubic-bezier(.4,0,.6,1) both;filter:blur(1px) drop-shadow(0 0 10px rgba(150,80,255,.7));}
 @keyframes bfShadow{0%{opacity:0;transform:translate(0,0) scale(1) skewX(0);}15%{opacity:.95;transform:translate(calc(-3 * var(--u)),0) scale(1.02) skewX(-4deg);}45%{opacity:.9;transform:translate(calc(30 * var(--u)),calc(-6 * var(--u))) scale(.9) skewX(12deg);}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(.18) skewX(20deg);filter:blur(6px);}}
-.bf-fly{position:fixed;z-index:158;pointer-events:none;width:calc(64 * var(--u));height:calc(64 * var(--u));margin:calc(-32 * var(--u)) 0 0 calc(-32 * var(--u));will-change:transform;filter:drop-shadow(0 0 10px rgba(170,90,255,.95)) drop-shadow(0 0 22px rgba(120,40,220,.6));}
+.bf-fly{position:fixed;z-index:159;pointer-events:none;width:calc(64 * var(--u));height:calc(64 * var(--u));margin:calc(-32 * var(--u)) 0 0 calc(-32 * var(--u));will-change:transform;filter:drop-shadow(0 0 10px rgba(170,90,255,.95)) drop-shadow(0 0 22px rgba(120,40,220,.6));}
 .bf-fly img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
 .bf-fly img.o{animation:bfFlapO .26s steps(1) infinite;}
 .bf-fly img.c{animation:bfFlapC .26s steps(1) infinite;}
 @keyframes bfFlapO{0%,49%{opacity:1;}50%,100%{opacity:0;}}
 @keyframes bfFlapC{0%,49%{opacity:0;}50%,100%{opacity:1;}}
+.bf-flow{position:fixed;z-index:153;pointer-events:none;width:calc(9 * var(--u));height:calc(9 * var(--u));margin:calc(-4.5 * var(--u)) 0 0 calc(-4.5 * var(--u));border-radius:50%;background:radial-gradient(circle,rgba(40,10,70,.95),rgba(120,50,220,.6) 45%,transparent 75%);filter:blur(1px);opacity:0;animation:bfFlow var(--d) cubic-bezier(.4,0,.8,.6) var(--dl) both;}
+@keyframes bfFlow{0%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(.6);}20%{opacity:1;}100%{opacity:0;transform:translate(0,0) scale(1.6);}}
 .bf-born{position:fixed;z-index:157;pointer-events:none;width:calc(90 * var(--u));height:calc(90 * var(--u));margin:calc(-45 * var(--u)) 0 0 calc(-45 * var(--u));border-radius:50%;background:radial-gradient(circle,rgba(220,170,255,.9),rgba(150,70,255,.5) 35%,transparent 70%);animation:bfBorn .7s ease-out both;}
 @keyframes bfBorn{0%{opacity:0;transform:scale(.2);}30%{opacity:1;}100%{opacity:0;transform:scale(1.8);}}
-.bf-scale{position:fixed;z-index:157;pointer-events:none;width:calc(5 * var(--u));height:calc(5 * var(--u));border-radius:50%;background:radial-gradient(circle,#fff,rgba(210,160,255,.9) 40%,rgba(150,80,255,0) 75%);animation:bfScale var(--d) ease-out both;}
+.bf-scale{position:fixed;z-index:158;pointer-events:none;width:calc(5 * var(--u));height:calc(5 * var(--u));border-radius:50%;background:radial-gradient(circle,#fff,rgba(210,160,255,.9) 40%,rgba(150,80,255,0) 75%);animation:bfScale var(--d) ease-out both;}
 @keyframes bfScale{0%{opacity:0;transform:translate(0,0) scale(.6);}15%{opacity:1;}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.4);}}
-.bf-smoke{position:fixed;z-index:157;pointer-events:none;width:calc(200 * var(--u));height:calc(200 * var(--u));margin:calc(-100 * var(--u)) 0 0 calc(-100 * var(--u));background:url('img/smoke-dark.webp') center/contain no-repeat;
-  filter:brightness(1.35) saturate(1.25) drop-shadow(0 0 8px rgba(150,70,240,.5));opacity:0;transform-origin:50% 60%;animation:bfSmoke var(--d) ease-out var(--dl) both;}
+.bf-smoke{position:fixed;z-index:158;pointer-events:none;width:calc(210 * var(--u));height:calc(210 * var(--u));margin:calc(-105 * var(--u)) 0 0 calc(-105 * var(--u));background:url('img/smoke-dark.webp') center/contain no-repeat;
+  filter:brightness(1.3) saturate(1.25) drop-shadow(0 0 10px rgba(120,50,220,.7));opacity:0;transform-origin:50% 60%;animation:bfSmoke var(--d) ease-out var(--dl) both;}
 .bf-smoke.f{--sx:-1;}
 @keyframes bfSmoke{0%{opacity:0;transform:translate(0,calc(20 * var(--u))) scale(.45) rotate(var(--r0)) scaleX(var(--sx,1));}18%{opacity:.95;}60%{opacity:.9;transform:translate(var(--dx),calc(-14 * var(--u))) scale(1.15) rotate(var(--r1)) scaleX(var(--sx,1));}100%{opacity:0;transform:translate(calc(var(--dx) * 1.6),calc(-70 * var(--u))) scale(1.5) rotate(var(--r1)) scaleX(var(--sx,1));}}
 .bf-smoke.hold{animation:bfSmokeHold var(--d) ease-out var(--dl) both;}
 @keyframes bfSmokeHold{0%{opacity:0;transform:translate(0,calc(20 * var(--u))) scale(.45) rotate(var(--r0)) scaleX(var(--sx,1));}25%{opacity:1;}100%{opacity:1;transform:translate(var(--dx),calc(-6 * var(--u))) scale(1.25) rotate(var(--r1)) scaleX(var(--sx,1));}}
 .bf-smoke.out{animation:bfSmokeOut .7s ease-in both !important;}
 @keyframes bfSmokeOut{0%{opacity:.9;transform:translate(var(--dx),calc(-10 * var(--u))) scale(1.2) rotate(var(--r1)) scaleX(var(--sx,1));}100%{opacity:0;transform:translate(calc(var(--dx) * 1.5),calc(-80 * var(--u))) scale(1.55) rotate(var(--r1)) scaleX(var(--sx,1));}}
-.bf-dark{position:fixed;z-index:156;pointer-events:none;border-radius:calc(18 * var(--u));background:radial-gradient(ellipse at 50% 50%,rgba(20,6,40,.92),rgba(20,6,40,.75) 60%,rgba(20,6,40,0) 100%);opacity:0;transition:opacity .5s ease;}
-.bf-dark.on{opacity:1;}
+
 /* v91: 一時停止ボタン（曲ボタンの真下）とオーバーレイ */
 .gp-pause-btn{position:absolute;right:calc(12 * var(--u));top:calc(84 * var(--u));width:calc(40 * var(--u));height:calc(30 * var(--u));border-radius:calc(10 * var(--u));z-index:6;
   background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#e0d4f5;display:flex;align-items:center;justify-content:center;gap:calc(3 * var(--u));cursor:pointer;opacity:.75;}
@@ -2588,7 +2589,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v101'; // v101: 指名を即時に／ロックと指名の衝突を防止／ルナの立ち絵を軽く浮かせる／環だけ残った手札の補充を監視で確実に
+const APP_VER='v102'; // v102: 幸福標本の見直し（ルナの右へエネルギーが流れて蝶が生まれる／霧が先に場を覆ってからカードが出る／四角い背景を廃止）
+// v101: 指名を即時に／ロックと指名の衝突を防止／ルナの立ち絵を軽く浮かせる／環だけ残った手札の補充を監視で確実に
 // v100: 蝶の飛び方を自然に（滑らかな曲線・ふわふわ上下・進行方向に体を向ける・速度の緩急）
 // v99: 鱗粉の霧を煙スプライトの重ね合わせに作り直し（もやもや漂う）
 // v98: 蝶の経路を修正（ルナの手札を右→左、少し下がって場を左→右）
@@ -3365,7 +3367,7 @@ function App(){
   // v96 ルナの技「幸福標本」：影が剥がれて闇の蝶になる→手札の上を右から左へ→場を右から左へ通って鱗粉→晴れると10が並んでいる
   const[lkFx,setLkFx]=useState(null);
   const bfRef=useRef(null);
-  const LK_T={shadow:0,born:850,fly:1150,handIn:1650,handOut:2450,fieldIn:2950,fieldOut:3750,reveal:3900,done:4500};
+  const LK_T={shadow:0,born:900,fly:1200,handIn:1700,handOut:2500,mist:2650,fieldIn:3000,fieldOut:3800,reveal:4150,done:4800};
   function starRingComplete(rn){
     if(!starRingActive())return;
     if(resolvingR.current||sceneOnR.current||countNumR.current>=0){srPendingR.current=true;return;} // v97: 今は無理でも忘れない（次のGOで発動）
@@ -3378,7 +3380,8 @@ function App(){
     const pr=R('.boss-img')||{left:vw/2-50*u,top:70*u,width:100*u,height:150*u};
     const fr=R('.gp-field-cards')||{left:vw*0.15,top:window.innerHeight*0.38,width:vw*0.7,height:80*u};
     const dr=R('.gp-dealer-cards')||{left:vw*0.2,top:pr.top+pr.height+6*u,width:vw*0.6,height:30*u}; // ルナの手札
-    const born={x:Math.min(vw-40*u,pr.left+pr.width+34*u),y:pr.top+pr.height*0.45};
+    const born={x:Math.min(vw-36*u,vw/2+92*u),y:pr.top+pr.height*0.38}; // 見えてるルナ（幅≈100u）のすぐ右
+    const flows=[...Array(Math.round(16*FX_QUALITY))].map(()=>({sx:(pr.left+pr.width*(0.34+Math.random()*0.32))-born.x,sy:(pr.top+pr.height*(0.15+Math.random()*0.7))-born.y,dl:Math.random()*0.55,d:0.4+Math.random()*0.35}));
     // 蝶の飛行経路（px）
     // 通過点（時間はms）。実際の飛行はこれを滑らかな曲線でつないで、ふわふわ上下・体の向き・緩急を足す
     const path=[
@@ -3392,7 +3395,7 @@ function App(){
       {x:fr.left+fr.width+14*u,y:fr.top+fr.height*0.4,t:LK_T.fieldOut},              // 右端
       {x:vw+70*u,y:fr.top-90*u,t:LK_T.done}                                          // 右上へ抜ける
     ];
-    const geo={pr,fr,dr,born,path,u,shadowTx:(born.x-(pr.left+pr.width/2)),shadowTy:(born.y-(pr.top+pr.height/2))};
+    const geo={pr,fr,dr,born,path,u,flows,shadowTx:(born.x-(pr.left+pr.width/2)),shadowTy:(born.y-(pr.top+pr.height/2))};
     setLkFx({ph:0,geo,scales:[],smoke:[],dust:null,out:false});
     showLunaSkill();
     try{resumeAC();noise({vol:0.12,dur:0.35,start:0,lpFreq:900,q:0.8});fxTone({f:70,f2:40,type:'sine',v:0.14,a:0.02,d:0.7,rev:0.5});fxAir({v:0.05,a:0.1,d:0.8,hp:1800,rev:0.8});}catch(e){}
@@ -3416,20 +3419,21 @@ function App(){
         el.animate(kf,{duration:total,easing:'linear',fill:'forwards'});});
       try{fxAir({v:0.04,a:0.05,d:2.8,hp:3500,rev:0.6});}catch(e){}});
     // 鱗粉：場を横切る間、蝶の位置から粒を落とす
-    at(LK_T.fieldIn,()=>{
+    // 霧：蝶が場に入る前から場全体に湧かせて、カードを隠してから通る
+    at(LK_T.mist,()=>{
       resetField();setFieldRing([]);
       setLkFx(s=>s&&({...s,dust:'in'}));
-      // 霧：蝶の進みに合わせて煙を湧かせる（場の全体に広がる）
-      const ns=Math.round(22*FX_QUALITY),durS=LK_T.fieldOut-LK_T.fieldIn;
-      for(let i=0;i<ns;i++){const tt=(i/ns)*durS*0.85;at(tt,()=>{const k=i/ns;const bx=path[5].x+(path[7].x-path[5].x)*k;
-        setLkFx(s=>s&&({...s,smoke:[...s.smoke,{k:Date.now()+i,x:bx+(Math.random()-0.5)*50*u,y:fr.top+fr.height*(0.25+Math.random()*0.7),dx:((Math.random()-0.5)*40*u)+'px',r0:((Math.random()-0.5)*40)+'deg',r1:((Math.random()-0.5)*60)+'deg',d:(1.6+Math.random()*0.8)+'s',f:Math.random()<0.5,hold:true}]}));});}
+      const ns=Math.round(26*FX_QUALITY);
+      for(let i=0;i<ns;i++){const tt=i<10?i*30:(LK_T.fieldIn-LK_T.mist)+((i-10)/(ns-10))*(LK_T.fieldOut-LK_T.fieldIn)*0.8;at(tt,()=>{
+        const k=i<10?(i/9):(i-10)/(ns-10);const bx=fr.left+fr.width*k;
+        setLkFx(s=>s&&({...s,smoke:[...s.smoke,{k:Date.now()+i,x:bx+(Math.random()-0.5)*40*u,y:fr.top+fr.height*(0.3+Math.random()*0.5),dx:((Math.random()-0.5)*36*u)+'px',r0:((Math.random()-0.5)*40)+'deg',r1:((Math.random()-0.5)*60)+'deg',d:(1.4+Math.random()*0.7)+'s',f:Math.random()<0.5,hold:true}]}));});}
       try{fxAir({v:0.07,a:0.1,d:1.0,hp:2600,rev:0.8});for(let i=0;i<6;i++)fxBell({f:2000+i*180,v:0.02,d:0.6,t:i*0.12,bright:1.3,rev:0.8});}catch(e){}
       const n=Math.round(28*FX_QUALITY),dur=LK_T.fieldOut-LK_T.fieldIn;
       for(let i=0;i<n;i++){const tt=(i/n)*dur;at(tt,()=>{const k=i/n;const x=path[5].x+(path[7].x-path[5].x)*k,y=fr.top+fr.height*0.3+8*u;
         setLkFx(s=>s&&({...s,scales:[...s.scales.slice(-40),{k:Date.now()+i,x:x+(Math.random()-0.5)*30*u,y,dx:((Math.random()-0.5)*30*u)+'px',dy:(40+Math.random()*60)*u+'px',d:(0.9+Math.random()*0.6)+'s'}]}));});}
     });
     // 鱗粉に隠れてる間に4枚を並べる
-    at(LK_T.fieldIn+650,()=>{
+    at(LK_T.fieldOut-150,()=>{ // 蝶が通り過ぎた直後、霧の中で並べる
       const nf=ringed.slice();setField(nf);fieldR.current=nf;fieldSumR.current=nf.reduce((a,b)=>a+b,0);setFieldSum(fieldSumR.current);
       setFieldColors(nf.map(()=>'dealer'));colorsR.current=nf.map(()=>'dealer');setFieldSp(nf.map(()=>false));setFieldShift(nf.map(()=>false));setFieldRing(nf.map(()=>true));
     });
@@ -3973,13 +3977,13 @@ function App(){
     // v96: 幸福標本の演出（影→蝶→鱗粉）
     lkFx&&h(React.Fragment,null,
       h('div',{className:'lk-veil'+(lkFx.out?' out':'')}),
+      lkFx.ph===0&&lkFx.geo.flows.map((f,i)=>h('div',{key:'fl'+i,className:'bf-flow',style:{left:lkFx.geo.born.x+'px',top:lkFx.geo.born.y+'px','--sx':f.sx+'px','--sy':f.sy+'px','--dl':f.dl+'s','--d':f.d+'s'}})),
       lkFx.ph===0&&h('div',{className:'bf-shadow',style:{left:lkFx.geo.pr.left+'px',top:lkFx.geo.pr.top+'px',width:lkFx.geo.pr.width+'px',height:lkFx.geo.pr.height+'px',backgroundImage:'url(img/luna-shadow.webp)','--tx':lkFx.geo.shadowTx+'px','--ty':lkFx.geo.shadowTy+'px'}}),
       lkFx.ph>=1&&lkFx.ph<2&&h('div',{className:'bf-born',style:{left:lkFx.geo.born.x+'px',top:lkFx.geo.born.y+'px'}}),
       lkFx.ph>=1&&h('div',{ref:bfRef,className:'bf-fly',style:{left:0,top:0,transform:'translate('+lkFx.geo.born.x+'px,'+lkFx.geo.born.y+'px)'}},
         h('img',{className:'o',src:'img/butterfly-dark.webp',alt:'',draggable:false}),
         h('img',{className:'c',src:'img/butterfly-dark-closed.webp',alt:'',draggable:false})
       ),
-      lkFx.dust&&h('div',{className:'bf-dark'+(lkFx.dust==='in'?' on':''),style:{left:(lkFx.geo.fr.left-20*lkFx.geo.u)+'px',top:(lkFx.geo.fr.top-24*lkFx.geo.u)+'px',width:(lkFx.geo.fr.width+40*lkFx.geo.u)+'px',height:(lkFx.geo.fr.height+48*lkFx.geo.u)+'px'}}),
       lkFx.smoke.map(sm=>h('div',{key:sm.k,className:'bf-smoke'+(sm.f?' f':'')+(lkFx.dust==='out'?' out':' hold'),style:{left:sm.x+'px',top:sm.y+'px','--dx':sm.dx,'--r0':sm.r0,'--r1':sm.r1,'--d':sm.d,'--dl':'0s'}})),
       lkFx.scales.map(s=>h('div',{key:s.k,className:'bf-scale',style:{left:s.x+'px',top:s.y+'px','--dx':s.dx,'--dy':s.dy,'--d':s.d}}))
     ),
