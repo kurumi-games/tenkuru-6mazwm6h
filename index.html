@@ -2587,7 +2587,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v99'; // v99: 鱗粉の霧を煙スプライトの重ね合わせに作り直し（もやもや漂う）
+const APP_VER='v100'; // v100: 蝶の飛び方を自然に（滑らかな曲線・ふわふわ上下・進行方向に体を向ける・速度の緩急）
+// v99: 鱗粉の霧を煙スプライトの重ね合わせに作り直し（もやもや漂う）
 // v98: 蝶の経路を修正（ルナの手札を右→左、少し下がって場を左→右）
 // v97: 星環が途中で止まる問題（合う札が来ない）を修正。合う札が無ければルナが引き当てる／10になってたら開始時に必ず発動
 // v96: 幸福標本の演出を「影→闇の蝶→手札の上を横切る→場に鱗粉→晴れたら10完成」に作り直し
@@ -3377,13 +3378,17 @@ function App(){
     const dr=R('.gp-dealer-cards')||{left:vw*0.2,top:pr.top+pr.height+6*u,width:vw*0.6,height:30*u}; // ルナの手札
     const born={x:Math.min(vw-40*u,pr.left+pr.width+34*u),y:pr.top+pr.height*0.45};
     // 蝶の飛行経路（px）
+    // 通過点（時間はms）。実際の飛行はこれを滑らかな曲線でつないで、ふわふわ上下・体の向き・緩急を足す
     const path=[
-      {x:born.x,y:born.y,r:0,t:LK_T.fly},
-      {x:dr.left+dr.width+14*u,y:dr.top+dr.height*0.5,r:-100,t:LK_T.handIn},   // ルナの手札の右端へ
-      {x:dr.left-14*u,y:dr.top+dr.height*0.5,r:-90,t:LK_T.handOut},            // ルナの手札を右→左
-      {x:fr.left-16*u,y:fr.top+fr.height*0.4,r:100,t:LK_T.fieldIn},            // 少し下がって場の左端へ
-      {x:fr.left+fr.width+16*u,y:fr.top+fr.height*0.35,r:80,t:LK_T.fieldOut},  // 場を左→右（鱗粉）
-      {x:vw+60*u,y:fr.top-70*u,r:40,t:LK_T.done}                                // 右上へ抜ける
+      {x:born.x,y:born.y,t:LK_T.fly},
+      {x:born.x+10*u,y:born.y+40*u,t:LK_T.fly+250},                                 // ふわっと浮いてから
+      {x:dr.left+dr.width+10*u,y:dr.top+dr.height*0.2,t:LK_T.handIn},                // ルナの手札の右端へ
+      {x:dr.left+dr.width*0.5,y:dr.top-6*u,t:(LK_T.handIn+LK_T.handOut)/2},          // 手札の上を左へ（少し高く）
+      {x:dr.left-12*u,y:dr.top+dr.height*0.6,t:LK_T.handOut},                        // 左端で下がる
+      {x:fr.left-14*u,y:fr.top+fr.height*0.45,t:LK_T.fieldIn},                       // 場の左端へ
+      {x:fr.left+fr.width*0.5,y:fr.top+fr.height*0.25,t:(LK_T.fieldIn+LK_T.fieldOut)/2}, // 場の上を右へ
+      {x:fr.left+fr.width+14*u,y:fr.top+fr.height*0.4,t:LK_T.fieldOut},              // 右端
+      {x:vw+70*u,y:fr.top-90*u,t:LK_T.done}                                          // 右上へ抜ける
     ];
     const geo={pr,fr,dr,born,path,u,shadowTx:(born.x-(pr.left+pr.width/2)),shadowTy:(born.y-(pr.top+pr.height/2))};
     setLkFx({ph:0,geo,scales:[],smoke:[],dust:null,out:false});
@@ -3394,9 +3399,19 @@ function App(){
     at(LK_T.fly,()=>{setLkFx(s=>s&&({...s,ph:2}));
       // Web Animations API で経路を飛ぶ
       requestAnimationFrame(()=>{const el=bfRef.current;if(!el||!el.animate)return;
-        const total=LK_T.done-LK_T.fly;const kf=path.map(p=>({transform:'translate('+p.x+'px,'+p.y+'px) rotate('+p.r+'deg)',offset:(p.t-LK_T.fly)/total,easing:'ease-in-out'}));
-        kf[kf.length-1].opacity=0;kf[kf.length-2].opacity=1;kf[0].opacity=1;
-        el.animate(kf,{duration:total,fill:'forwards'});});
+        const total=LK_T.done-LK_T.fly;
+        // Catmull-Rom で曲線化して 90 コマにサンプリング。向き＝進行方向、上下のふわつき、速度の緩急（通過点の時間に沿う）
+        const P=path;const cr=(p0,p1,p2,p3,s)=>{const s2=s*s,s3=s2*s;return 0.5*((2*p1)+(-p0+p2)*s+(2*p0-5*p1+4*p2-p3)*s2+(-p0+3*p1-3*p2+p3)*s3);};
+        const pos=tm=>{let i=0;while(i<P.length-2&&tm>P[i+1].t)i++;const a=P[i],b=P[i+1];const s=Math.max(0,Math.min(1,(tm-a.t)/(b.t-a.t)));const p0=P[Math.max(0,i-1)],p3=P[Math.min(P.length-1,i+2)];return {x:cr(p0.x,a.x,b.x,p3.x,s),y:cr(p0.y,a.y,b.y,p3.y,s)};};
+        const N=90,kf=[];let prevAng=0;
+        for(let k=0;k<=N;k++){const tm=LK_T.fly+(total*k/N);const q=pos(tm),q2=pos(Math.min(LK_T.done,tm+40));
+          let ang=Math.atan2(q2.y-q.y,q2.x-q.x)*180/Math.PI+90;                     // 画像は上向きなので +90
+          if(k>0){let d=ang-prevAng;while(d>180)d-=360;while(d<-180)d+=360;ang=prevAng+d*0.35;} // 急に向きを変えない
+          prevAng=ang;
+          const bob=Math.sin(k*0.9)*4*u, tilt=Math.sin(k*0.9+1)*8;                   // ふわふわ上下と羽の傾き
+          if(k<N-6)q.x=Math.max(-10*u,Math.min(vw+10*u,q.x));                          // 途中で画面外へ出すぎない
+          kf.push({transform:'translate('+(q.x)+'px,'+(q.y+bob)+'px) rotate('+(ang+tilt)+'deg) scale('+(1+Math.sin(k*0.9)*0.04)+')',opacity:k===N?0:(k>N-8?(N-k)/8:1),offset:k/N});}
+        el.animate(kf,{duration:total,easing:'linear',fill:'forwards'});});
       try{fxAir({v:0.04,a:0.05,d:2.8,hp:3500,rev:0.6});}catch(e){}});
     // 鱗粉：場を横切る間、蝶の位置から粒を落とす
     at(LK_T.fieldIn,()=>{
@@ -3404,11 +3419,11 @@ function App(){
       setLkFx(s=>s&&({...s,dust:'in'}));
       // 霧：蝶の進みに合わせて煙を湧かせる（場の全体に広がる）
       const ns=Math.round(22*FX_QUALITY),durS=LK_T.fieldOut-LK_T.fieldIn;
-      for(let i=0;i<ns;i++){const tt=(i/ns)*durS*0.85;at(tt,()=>{const k=i/ns;const bx=path[3].x+(path[4].x-path[3].x)*k;
+      for(let i=0;i<ns;i++){const tt=(i/ns)*durS*0.85;at(tt,()=>{const k=i/ns;const bx=path[5].x+(path[7].x-path[5].x)*k;
         setLkFx(s=>s&&({...s,smoke:[...s.smoke,{k:Date.now()+i,x:bx+(Math.random()-0.5)*50*u,y:fr.top+fr.height*(0.25+Math.random()*0.7),dx:((Math.random()-0.5)*40*u)+'px',r0:((Math.random()-0.5)*40)+'deg',r1:((Math.random()-0.5)*60)+'deg',d:(1.6+Math.random()*0.8)+'s',f:Math.random()<0.5,hold:true}]}));});}
       try{fxAir({v:0.07,a:0.1,d:1.0,hp:2600,rev:0.8});for(let i=0;i<6;i++)fxBell({f:2000+i*180,v:0.02,d:0.6,t:i*0.12,bright:1.3,rev:0.8});}catch(e){}
       const n=Math.round(28*FX_QUALITY),dur=LK_T.fieldOut-LK_T.fieldIn;
-      for(let i=0;i<n;i++){const tt=(i/n)*dur;at(LK_T.fieldIn-LK_T.fieldIn+tt,()=>{const k=i/n;const x=path[3].x+(path[4].x-path[3].x)*k,y=path[3].y+(path[4].y-path[3].y)*k+8*u;
+      for(let i=0;i<n;i++){const tt=(i/n)*dur;at(tt,()=>{const k=i/n;const x=path[5].x+(path[7].x-path[5].x)*k,y=fr.top+fr.height*0.3+8*u;
         setLkFx(s=>s&&({...s,scales:[...s.scales.slice(-40),{k:Date.now()+i,x:x+(Math.random()-0.5)*30*u,y,dx:((Math.random()-0.5)*30*u)+'px',dy:(40+Math.random()*60)*u+'px',d:(0.9+Math.random()*0.6)+'s'}]}));});}
     });
     // 鱗粉に隠れてる間に4枚を並べる
