@@ -2560,7 +2560,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v91'; // v91: 一時停止ボタン／状態アイコンをタイマー直下＋タップで説明／変身SEのチャイム廃止／台詞の音声ファイル差し込み口
+const APP_VER='v92'; // v92: レイピアの台詞音声を1本に（reipia-1.mp3 に2文まとめて）
+// v91: 一時停止ボタン／状態アイコンをタイマー直下＋タップで説明／変身SEのチャイム廃止／台詞の音声ファイル差し込み口
 // v90: 星環を新しい4枚（正方形の紋章）に差し替え、キャラから離して四隅に配置
 // v89: 環だけ残った時の補充保険／技名と役表示の重なり回避／タップした環カードは場に出す／10完成中の削除を防止／変身時の星環SE差し替え
 // v88: 星環を外側へ大きく／技名フラッシュ／状態は小アイコン／台詞を中央へ／役の二重発火バグ修正／第1形態AIをnormalに
@@ -2957,7 +2958,7 @@ const SHIFT_LINE2B='蝶（しあわせ）になって、みんなを救ってあ
 const GLITCH_CHARS='蝶✦▮░◆彡';
 const SHIFT_VIDEO={v1:'video/shift-1-luna.mp4',v2:'video/shift-2-reipia.mp4'};
 // v91: 台詞の音声（無ければ黙って鳴らさない）。voice/ に置く
-const SHIFT_VOICE={luna1:'voice/luna-1.mp3',reipia1:'voice/reipia-1.mp3',reipia2:'voice/reipia-2.mp3'};
+const SHIFT_VOICE={luna1:'voice/luna-1.mp3',reipia1:'voice/reipia-1.mp3'}; // reipia-1 に2文まとめて入れる
 function playVoice(key,vol){try{const a=new Audio(SHIFT_VOICE[key]);a.volume=vol==null?0.9:vol;a.onerror=()=>{};const p=a.play();if(p&&p.catch)p.catch(()=>{});return a;}catch(e){return null;}}
 // タイムライン（ms）。動画は各5秒
 const SHIFT_T={luna:500,type:95,glitch:2850,glitchStep:80,video1:3700,v1len:5050,line2:9200,type2:80,video2:13100,v2len:5050,wings:14300,rings:16900,title:16800,leave:18400,done:19300};
@@ -2987,7 +2988,6 @@ function ShiftScene({name,form2Name,onDone,onForm2,onLeave}){
     at(SHIFT_T.line2,()=>{setPh(4);playVoice('reipia1');try{fxAir({v:0.03,a:0.01,d:0.6,hp:6000,rev:0.7});}catch(e){}});
     for(let i=1;i<=SHIFT_LINE2A.length;i++)at(SHIFT_T.line2+200+i*SHIFT_T.type2,()=>setT2a(i));
     const t2b0=SHIFT_T.line2+200+SHIFT_LINE2A.length*SHIFT_T.type2+500;
-    at(t2b0,()=>playVoice('reipia2'));
     for(let i=1;i<=SHIFT_LINE2B.length;i++)at(t2b0+i*SHIFT_T.type2,()=>setT2b(i));
     // 動画2：羽が開き、星環4つが現れる
     at(SHIFT_T.video2,()=>{setPh(5);play(v2);onForm2&&onForm2();try{fxAir({v:0.06,a:0.3,d:1.0,hp:2500,rev:0.8});}catch(e){}});
