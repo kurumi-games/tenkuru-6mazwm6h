@@ -734,7 +734,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
   width:calc(30 * var(--u)) !important;
 }
 .gp-dealer-cards{gap:calc(2.5 * var(--u)) !important;}
-.gp-dealer-card.empty{background:rgba(255,255,255,.06) !important;border:1px dashed rgba(255,255,255,.18) !important;box-shadow:none !important;} /* v110: 空いた枠 */
+.gp-dealer-card.empty{background:none !important;border:none !important;box-shadow:none !important;visibility:hidden;} /* v111: 空いた枠は何も見せない（幅だけ確保） */
 .gp-dealer-card .dv{font-size:calc(15 * var(--u)) !important;}
 
 /* 場の中のごちゃついた模様を全部消す（スッキリ版）
@@ -2658,7 +2658,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v110'; // v110: 相手の手札は10枠固定。出した札の位置は空いたまま（中央に詰めない）
+const APP_VER='v111'; // v111: 出した札の枠は完全に空（白紙を置かない）
+// v110: 相手の手札は10枠固定。出した札の位置は空いたまま（中央に詰めない）
 // v109: 相手の手札を大きく／選択カーソル（1枚ずつ移動して止まり、タップしてから降りる）
 // v108: 得点を小さく端へ／上部の大枠を削除／相手の手札は表面カード／ルナと手札を近づけ、手札と場に距離
 // v107: 画面配置の見直し（得点をTIME／曲ボタンの下へ、上部を空けてキャラを上に、場を中央寄せ、手札を上げる）／相手の手札を表向きに／相手の札はスーッと降りてくる
