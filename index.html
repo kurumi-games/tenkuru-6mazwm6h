@@ -1279,6 +1279,21 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 @keyframes pdFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(calc(-2 * var(--u)));}}
 @keyframes pdBlink{0%,90%{opacity:0;}92%,95%{opacity:1;}97%,100%{opacity:0;}}
 @media (prefers-reduced-motion: reduce){.pd-box>div{animation:none !important;}}
+/* v84: 第2形態＝羽全開の1枚絵（背景付きなので楕円マスクで周りを溶かす） */
+.gp-screen.ch7 .boss-img.form2.final{background-image:url('img/challenge07-reipia-form2.jpg');width:calc(220 * var(--u));margin-left:calc(-110 * var(--u));
+  -webkit-mask-image:radial-gradient(ellipse 50% 52% at 50% 46%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 50% 52% at 50% 46%,#000 55%,transparent 100%);}
+/* 手札の星環ロック／指名 */
+.card-stage .rl-badge{position:absolute;left:50%;top:50%;width:calc(var(--card-w) * 1.1);height:calc(var(--card-w) * 1.1);margin:calc(var(--card-w) * -0.55) 0 0 calc(var(--card-w) * -0.55);z-index:7;pointer-events:none;background:center/contain no-repeat;opacity:.95;animation:a1Spin 30s linear infinite;}
+.card-stage.rl-locked .card{filter:saturate(.3) brightness(.55);}
+.card-stage.rl-cmd .card{box-shadow:0 0 0 2px rgba(255,220,120,.9),0 0 18px rgba(255,200,90,.8);animation:linkPick 1s ease-in-out infinite;}
+.card-stage.rl-wait .card{filter:brightness(.6);}
+.ability-pill.r2{background:rgba(20,10,50,.6);border-color:var(--rc,#c8a8ff);color:#f0e6ff;box-shadow:0 0 14px var(--rg,rgba(180,140,255,.4));max-width:92vw;white-space:normal;text-align:left;line-height:1.3;}
+.ability-pill.r2 .en{color:var(--rc,#c8a8ff);}
+.ability-pill.r2 .ic{flex-shrink:0;width:calc(18 * var(--u));height:calc(18 * var(--u));background:center/contain no-repeat;animation:a1Spin 20s linear infinite;}
+.rs-veil{position:fixed;inset:0;z-index:140;pointer-events:none;background:radial-gradient(ellipse at 50% 30%,rgba(120,60,200,.3),rgba(20,5,40,.55) 70%);animation:chVeilIn .3s ease both;}
+.gp-time-box.frozen2 .val{color:#c8a0ff !important;text-shadow:0 0 12px rgba(180,120,255,.9) !important;}
+.fx-erase .card{animation:eraseOut .5s ease both;}
+@keyframes eraseOut{0%{opacity:1;filter:brightness(1);}40%{opacity:1;filter:brightness(2.2) saturate(0);transform:scale(1.08);}100%{opacity:0;transform:scale(.6) rotate(8deg);}}
 /* v83: 第2形態＝最終形態の1枚絵。上部バー下〜相手カードの間に全身＋四星環。軽く上下に浮く */
 .gp-screen.ch7 .boss-img.form2.final{top:calc(58 * var(--u));width:calc(200 * var(--u));height:calc(178 * var(--u));margin-left:calc(-100 * var(--u));opacity:.95;
   background:url('img/challenge07-reipia-final.png') center top/contain no-repeat;
@@ -2204,7 +2219,7 @@ function renderCardOverlay(){
   ];
 }
 
-function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,linkPick}){
+function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,linkPick,rLock,rCmd,rWait}){
   const[pressed,setPressed]=useState(false);
   const[shaking,setShaking]=useState(false);
   const isBlue=cardRole==='player'||cardRole==='host';
@@ -2212,7 +2227,7 @@ function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,
   const locked=cardState==='locked';
   const stateClass=cardState?' cs-'+cardState:'';
   return h('div',{
-    className:'card-stage '+colorClass+' n'+value+stateClass+(shaking?' cs-shake':'')+(isSpecial?' sv-card sv-born':'')+(linkPick?' link-pick':''),
+    className:'card-stage '+colorClass+' n'+value+stateClass+(shaking?' cs-shake':'')+(isSpecial?' sv-card sv-born':'')+(linkPick?' link-pick':'')+(rLock?' rl-locked':'')+(rCmd?' rl-cmd':'')+(rWait?' rl-wait':''),
     style:{
       opacity:(disabled&&!locked)?0.3:undefined, // lockedの見た目はCSSに任せる(カウントダウン中等の無効はここで薄く)
       animation:'dealIn 0.22s cubic-bezier(0.2,1.3,0.5,1) both',
@@ -2235,6 +2250,8 @@ function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,
     h('div',{className:'card'},
       ...renderCardOverlay(),
       isSpecial&&h('div',{className:'sv-wrap'},h('div',{className:'sv'})), // v54: 渦（数字より下・背景より上）
+      rLock&&h('div',{className:'rl-badge',style:{backgroundImage:'url('+REIPIA_RINGS.lock.image+')'}}), // v84 星環ロック
+      rCmd&&h('div',{className:'rl-badge',style:{backgroundImage:'url('+REIPIA_RINGS.command.image+')'}}), // v84 指名
       h('span',{className:'n-tl'},value),
       h('span',{className:'n-big'},value),
       h('span',{className:'n-br'},value)
@@ -2490,7 +2507,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v83'; // v83: 第2形態は最終形態の1枚絵をそのまま表示（四星環込み）。軽く上下に浮くだけ
+const APP_VER='v84'; // v84: 第2形態の4つの星環（ロック・時間停止・削除・指名）を実装／第2形態の絵を羽全開版に／変身前のルナ1枚絵を撤去
+// v83: 第2形態は最終形態の1枚絵をそのまま表示（四星環込み）。軽く上下に浮くだけ
 // v82: 星環はゲームのルール（3枚目は合計5以上・4枚目は10ちょうど・最大4枚）に従う／第2形態の周りに星環4つを表示
 // v81: 星環リングの大きさ・位置を絶対値で固定（カード1枚の周りに収まる）
 // v80: 星環はラウンド毎に1枚付く。時間切れ／使い切りのどちらのリセットでも環付きは残す
@@ -2863,11 +2881,12 @@ function ChampionIntroScreen({champ,stage,onStart}){
 }
 
 // ── v75 星環（4能力）：今回は画像と表示だけ。発動ロジックは未実装。後で各能力へ接続する ──
+// v84: 第2形態は毎ラウンド1つずつ順番に構える（ロック→時間停止→削除→指名→…）。HUDに構えた環を表示
 const REIPIA_RINGS={
-  lock:   {image:'img/challenge07-ring-lock.png',   name:'ロック',   desc:'手札3枚をロック',            pos:'tl'},
-  time:   {image:'img/challenge07-ring-time.png',   name:'時間停止', desc:'場の合計7で時間停止',        pos:'tr'},
-  erase:  {image:'img/challenge07-ring-erase.png',  name:'削除',     desc:'場のカードを削除',            pos:'bl'},
-  command:{image:'img/challenge07-ring-command.png',name:'命令',     desc:'次ラウンドの最初のカードを指定',pos:'br'},
+  lock:   {image:'img/challenge07-ring-lock.png',   name:'ロック',   en:'LOCK',    desc:'手札3枚をロック。残りを使い切るまで解けない',       pos:'tl',color:'#c08cff',glow:'rgba(180,120,255,.45)'},
+  time:   {image:'img/challenge07-ring-time.png',   name:'時間停止', en:'CHRONO',  desc:'場の合計がちょうど7で3秒停止。レイピアだけ動く',   pos:'tr',color:'#7fe0ff',glow:'rgba(100,220,255,.45)'},
+  erase:  {image:'img/challenge07-ring-erase.png',  name:'削除',     en:'ERASE',   desc:'場のあなたの札を2枚消す。1枚以下なら場ごとリセット',pos:'bl',color:'#ff7a9a',glow:'rgba(255,100,140,.45)'},
+  command:{image:'img/challenge07-ring-command.png',name:'指名',     en:'COMMAND', desc:'指名された札を最初に出すまで他は出せない',         pos:'br',color:'#ffd27a',glow:'rgba(255,200,100,.45)'},
 };
 const RING_ORDER=['lock','time','erase','command'];
 // ── v74 変身シーン：ルナ（動く立ち絵）→ セリフ全文 → 鼓動・ひび → 画面が本当に砕ける → 虚空からレイピア ──
@@ -2878,7 +2897,7 @@ const SHIFT_LINE2B='蝶（しあわせ）になって、みんなを救ってあ
 const GLITCH_CHARS='蝶✦▮░◆彡';
 const SHIFT_VIDEO={v1:'video/shift-1-luna.mp4',v2:'video/shift-2-reipia.mp4'};
 // タイムライン（ms）。動画は各5秒
-const SHIFT_T={luna:700,type:95,glitch:3050,glitchStep:80,video1:3900,v1len:5050,line2:9200,type2:80,video2:13100,v2len:5050,wings:14300,rings:16900,title:16800,leave:18400,done:19300};
+const SHIFT_T={luna:500,type:95,glitch:2850,glitchStep:80,video1:3700,v1len:5050,line2:9200,type2:80,video2:13100,v2len:5050,wings:14300,rings:16900,title:16800,leave:18400,done:19300};
 function ShiftScene({name,form2Name,onDone,onForm2,onLeave}){
   const reduced=useMemo(()=>{try{return window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}},[]);
   const Q=FX_QUALITY;
@@ -2926,17 +2945,10 @@ function ShiftScene({name,form2Name,onDone,onForm2,onLeave}){
   return h('div',{className:'sh-root'},
     ph<7?h('div',{className:'sh-veil'+(ph>=1?' solid':'')}):h('div',{className:'sh-veil leave'}),
     h('div',{className:'sh-vig'}),
-    ph<3&&dust.map((d,i)=>h('div',{key:'d'+i,className:'sh-dust',style:{left:d.x+'%',top:d.y+'%','--dx':d.dx,'--dy':d.dy,'--d':d.d,'--dl':d.dl}})),
     // ── 動画レイヤー（2本。表示するのは今の方だけ。ph4は動画1の最終フレームで静止） ──
     h('video',{ref:v1,className:'sh-video'+((ph===3||ph===4)?' show':''),src:SHIFT_VIDEO.v1,muted:true,playsInline:true,preload:'auto',disablePictureInPicture:true}),
     h('video',{ref:v2,className:'sh-video'+(ph>=5&&ph<7?' show':'')+(ph>=7?' show leave':''),src:SHIFT_VIDEO.v2,muted:true,playsInline:true,preload:'auto',disablePictureInPicture:true}),
-    // ── ルナ（動画の前：呼吸する立ち絵） ──
-    ph>=1&&ph<4&&h('div',{className:'sh-shk'},
-      h('div',{className:'sh-cam'+(ph===3?' leave':'')},
-        h('div',{className:'pdf drain'+(ph>=2?' on':'')},h('div',{className:'lf-wing'}),h('div',{className:'lf-deco'}),h('div',{className:'lf-body'})),
-        h('div',{className:'lf-eyes'+(ph>=2?' on':'')})
-      )
-    ),
+    // v84: 動画前のルナ1枚絵は撤去（重いため）。台詞は暗転した対戦画面の上に出す
     // セリフ
     ph>=1&&ph<3&&h('div',{className:'sh-dlg'+(glitch!=null&&glitch>=8?' gone':'')},h('div',{className:'nm'},name),h('div',{className:'ln'},glitch!=null?lineEl:[SHIFT_LINE.slice(0,typed),typed<SHIFT_LINE.length&&h('span',{key:'c',className:'cur'},'|')])),
     ph===4&&h('div',{className:'sh-dlg dark'},h('div',{className:'nm'},form2Name),h('div',{className:'ln'},SHIFT_LINE2A.slice(0,t2a),t2a>=SHIFT_LINE2A.length&&h('br'),t2a>=SHIFT_LINE2A.length&&SHIFT_LINE2B.slice(0,t2b))),
@@ -3026,6 +3038,71 @@ function App(){
   const[dRing,setDRing]=useState([]);const dRingR=useRef([]);
   const[fieldRing,setFieldRing]=useState([]);
   const[srBanner,setSrBanner]=useState(false);
+  // v84 第2形態の星環
+  const r2R=useRef({count:0,armed:null,used:false});const[r2Armed,setR2Armed]=useState(null);
+  const[pLock,setPLock]=useState([]);const pLockR=useRef([]);
+  const[cmdIdx,setCmdIdx]=useState(null);const cmdIdxR=useRef(null);
+  const[rStop,setRStop]=useState(false);const rStopR=useRef(false);const rStopT=useRef([]);
+  const[r2Banner,setR2Banner]=useState(null);
+  const[eraseIdx,setEraseIdx]=useState([]);
+  const colorsR=useRef([]);
+  function r2Active(){const so=stageOptsR.current;return !!(so&&so.ability==='starRing'&&form2R.current);}
+  function r2Say(text,color){setR2Banner({text,color});setTimeout(()=>setR2Banner(null),2200);}
+  function setLocks(arr){setPLock(arr);pLockR.current=arr;}
+  function setCmd(i){setCmdIdx(i);cmdIdxR.current=i;}
+  // ラウンド開始：次の環を構える。ロック／指名はここで即発動
+  function r2RoundStart(rn){
+    if(!r2Active())return;
+    const st=r2R.current;const key=RING_ORDER[st.count%RING_ORDER.length];st.count++;st.armed=key;st.used=false;setR2Armed(key);
+    const R=REIPIA_RINGS[key];
+    try{resumeAC();fxTone({f:2600,f2:900,type:'square',v:0.05,a:0.001,d:0.06,rev:0.3});fxBell({f:1760,v:0.06,d:0.8,bright:1.2,rev:0.7});}catch(e){}
+    if(key==='lock'){
+      const hand=pHR.current;const cand=hand.map((v,i)=>v!==null?i:-1).filter(i=>i>=0).sort(()=>Math.random()-0.5).slice(0,3);
+      setLocks(hand.map((v,i)=>cand.includes(i)));st.used=true;r2Say('手札3枚をロック',R.color);
+    }else if(key==='command'){
+      const hand=pHR.current;const cand=hand.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);
+      if(cand.length){setCmd(cand[Math.floor(Math.random()*cand.length)]);st.used=true;r2Say('この札から出せ',R.color);}
+    }
+  }
+  function r2CheckUnlock(newPH){
+    const fl=pLockR.current;if(!fl.some(Boolean))return;
+    if(!newPH.filter((v,i)=>v!==null&&!fl[i]).length){setLocks(newPH.map(()=>false));r2Say('ロック解除',REIPIA_RINGS.lock.color);}
+  }
+  // 時間停止（合計7）：3秒、プレイヤー不可・レイピアだけ動く
+  function r2TimeStop(rn){
+    const st=r2R.current;if(!r2Active()||st.armed!=='time'||st.used)return;st.used=true;
+    exitLink(); // クロノリンク中でも上書き
+    clearInterval(timerRef.current);clearTimeout(aiRef.current);
+    rStopR.current=true;setRStop(true);r2Say('合計7 ── 時間停止',REIPIA_RINGS.time.color);
+    try{resumeAC();fxTone({f:1400,f2:4000,type:'sine',v:0.09,a:0.02,d:0.3,rev:0.5});fxTone({f:3000,f2:300,type:'sine',v:0.08,a:0.005,d:0.3,t:0.3,rev:0.7});}catch(e){}
+    duckBGM(true);
+    rStopT.current.forEach(clearTimeout);rStopT.current=[];
+    [500,1500,2400].forEach(ms=>rStopT.current.push(setTimeout(()=>{if(rStopR.current&&phaseR.current==='playing'&&!resolvingR.current)aiPlay(rn);},ms)));
+    rStopT.current.push(setTimeout(()=>{
+      rStopR.current=false;setRStop(false);duckBGM(false);
+      if(phaseR.current==='playing'&&!resolvingR.current){startTimer(rn,timeLeftR.current);clearTimeout(aiRef.current);scheduleAi(rn);}
+    },3000));
+  }
+  // 削除：場のプレイヤーのカードを2枚消す。1枚以下なら場ごとリセット
+  function r2Erase(){
+    const st=r2R.current;if(!r2Active()||st.armed!=='erase'||st.used||resolvingR.current)return;st.used=true;
+    const mine=fieldR.current.map((v,i)=>i).filter(i=>colorsR.current[i]==='player');
+    try{resumeAC();noise({vol:0.14,dur:0.15,start:0,lpFreq:4000,q:0.7});fxTone({f:2200,f2:400,type:'sawtooth',v:0.05,a:0.002,d:0.3,rev:0.5});}catch(e){}
+    if(mine.length>=2){
+      const rm=mine.slice(-2);setEraseIdx(rm);r2Say('あなたの札を2枚削除',REIPIA_RINGS.erase.color);
+      setTimeout(()=>{setEraseIdx([]);removeFieldIdx(rm);},520);
+    }else{
+      setEraseIdx(fieldR.current.map((v,i)=>i));r2Say('場をリセット',REIPIA_RINGS.erase.color);
+      setTimeout(()=>{setEraseIdx([]);resetField();},520);
+    }
+  }
+  function removeFieldIdx(idxs){
+    const keep=i=>!idxs.includes(i);
+    const nf=fieldR.current.filter((v,i)=>keep(i));const ns=nf.reduce((a,b)=>a+b,0);
+    setField(nf);fieldR.current=nf;setFieldSum(ns);fieldSumR.current=ns;
+    setFieldColors(p=>p.filter((v,i)=>keep(i)));colorsR.current=colorsR.current.filter((v,i)=>keep(i));
+    setFieldSp(p=>p.filter((v,i)=>keep(i)));setFieldShift(p=>p.filter((v,i)=>keep(i)));setFieldRing(p=>p.filter((v,i)=>keep(i)));
+  }
   function starRingActive(){const so=stageOptsR.current;return !!(so&&so.ability==='starRing'&&!form2R.current);}
   function setDealer(hand,ring){setDH(hand);dHR.current=hand;const r=ring||hand.map(()=>false);setDRing(r);dRingR.current=r;}
   function ringSum(){return dHR.current.reduce((s,v,i)=>s+(dRingR.current[i]?v:0),0);}
@@ -3060,7 +3137,7 @@ function App(){
       resetField();setFieldRing([]);
       ringed.forEach((v,i)=>setTimeout(()=>{ if(tok!==roundTokR.current)return;
         const nf=[...fieldR.current,v];setField(nf);fieldR.current=nf;fieldSumR.current=nf.reduce((a,b)=>a+b,0);setFieldSum(fieldSumR.current);
-        setFieldColors(p=>[...p,'dealer']);setFieldSp(p=>[...p,false]);setFieldShift(p=>[...p,false]);setFieldRing(p=>[...p,true]);
+        setFieldColors(p=>[...p,'dealer']);colorsR.current=[...colorsR.current,'dealer'];setFieldSp(p=>[...p,false]);setFieldShift(p=>[...p,false]);setFieldRing(p=>[...p,true]);
         try{playPlaceSE(false);fxBell({f:1568+i*200,v:0.05,d:0.6,bright:1.2,rev:0.6});}catch(e){}
         if(i===ringed.length-1)setTimeout(()=>{if(tok===roundTokR.current)completeTen(ringed,'dealer',rn);},350);
       },i*260));
@@ -3172,6 +3249,7 @@ function App(){
       }
     }
     setPH(hand);pHR.current=hand;setPSp(sp);pSpR.current=sp;
+    setLocks(hand.map(()=>false));setCmd(null); // v84 配り直しでロック・指名は消える
   }
   function exitLink(){
     const was=linkR.current;
@@ -3199,7 +3277,7 @@ function App(){
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
   // ── ストーリー進行 ──
-  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
+  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
   function startStage(arIdx,stIdx){
     const ar=STAGES.areas[arIdx],st=ar.stages[stIdx];
     if(!st||st.comingSoon){goMap();return;} // v54: 準備中は開始しない
@@ -3234,7 +3312,7 @@ function App(){
     chronoR.current={armed:!!opts.chrono,count:0,pending:false,deals:0};
     roundSecR.current=opts.timeLimit||10;
     coreShiftR.current={active:opts.ability==='coreShift',used:false};setCoreShiftUsed(false);
-    form2R.current=false;setForm2(false);shiftPendingR.current=false;setShiftScene(null);sceneOnR.current=false;setScreenPop(false);setPtBurst(false);srPendingR.current=false;setFieldRing([]);setSrBanner(false); // v70/v75/v79
+    form2R.current=false;setForm2(false);shiftPendingR.current=false;setShiftScene(null);sceneOnR.current=false;setScreenPop(false);setPtBurst(false);srPendingR.current=false;setFieldRing([]);setSrBanner(false);r2R.current={count:0,armed:null,used:false};setR2Armed(null);setLocks([]);setCmd(null);rStopR.current=false;setRStop(false);setEraseIdx([]);colorsR.current=[]; // v70/v75/v79/v84
     dealPlayer(p);setDealer(d);exitLink();
     setPPt(0);setDPt(0);pPtR.current=0;dPtR.current=0;
     setRNum(1);setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;
@@ -3256,6 +3334,7 @@ function App(){
     roundTokR.current++;    // 古い遷移予約を全部無効化
     clearTimers();          // 残ってるカウントダウン/タイマーも掃除
     resolvingR.current=false;exitLink(); // v54: 時間停止の残骸を必ず解除
+    rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);rStopT.current=[];setCmd(null);setEraseIdx([]); // v84
     setPhase('playing');phaseR.current='playing';
     setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldSp([]);
     setFieldColors([]); // v46: 時間切れ後に前ラウンドの色記録が残って自分のカードがオレンジになるバグ修正
@@ -3276,6 +3355,7 @@ function App(){
           if(rn===1)sayChamp('start'); // v61
           if(starRingActive())setTimeout(()=>attachStarRing(rn),400); // v80: 毎ラウンド開始直後に1枚へ星環
           if(srPendingR.current){srPendingR.current=false;setTimeout(()=>{if(phaseR.current==='playing'&&countNumR.current<0)starRingComplete(rn);},600);}
+          if(r2Active())setTimeout(()=>r2RoundStart(rn),300); // v84 第2形態：環を構える
         },650);
         return;
       }
@@ -3289,6 +3369,7 @@ function App(){
     let t=(from==null)?roundSecR.current:from;setTimeLeft(t);timeLeftR.current=t;
     timerRef.current=setInterval(()=>{
       t--;setTimeLeft(t);timeLeftR.current=t;
+      if(t===4&&r2Active()&&r2R.current.armed==='erase'&&!r2R.current.used)r2Erase(); // v84 残り4秒で削除（2枚目が来なくても）
       if(t<=0){clearInterval(timerRef.current);clearTimeout(aiRef.current);doTimeUp(rn);}
     },1000);
   }
@@ -3333,7 +3414,7 @@ function App(){
   function aiPlay(rn){
     // 場が完成した直後にAIの出す動作が間に合ってしまった場合 → カード返却（出さない）
     // ※lockRは見ない：あれはラウンド開始時のプレイヤー用ハンデロックと共用のため
-    if(resolvingR.current||linkR.current||sceneOnR.current)return; // v54: 時間停止中は出さない / v75: 演出中も出さない
+    if(resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current)return; // v54: 時間停止中は出さない / v75: 演出中も出さない / v84: レイピアの停止中は動く
     const dHand=dHR.current,cf=fieldR.current,cs=fieldSumR.current;
     if(!dHand.length)return;
     const rf=dRingR.current;const avail=dHand.filter((v,i)=>!rf[i]); // v79: 星環付きは温存
@@ -3384,6 +3465,10 @@ function App(){
     const cf=fieldR.current,cs=fieldSumR.current;
     let value=pH[idx];
     if(!value||!canPlay(value,cs,cf))return;
+    if(rStopR.current)return;                                   // v84 時間停止中は出せない
+    if(pLockR.current[idx]){fxLockHint('星環ロック');return;}   // v84 ロック中
+    if(cmdIdxR.current!=null&&cmdIdxR.current!==idx){fxLockHint('指名された札から');return;} // v84 指名
+    if(cmdIdxR.current===idx)setCmd(null);
     const isSp=!!pSpR.current[idx];
     const wasLink=linkR.current;   // 時間停止中の「追加の1枚」か
     clearTimeout(aiRef.current);resumeAC();
@@ -3392,6 +3477,7 @@ function App(){
     const newPH=pH.map((v,i)=>i===idx?null:v);
     const newSp=pSpR.current.map((f,i)=>i===idx?false:f);
     setPH(newPH);pHR.current=newPH;setPSp(newSp);pSpR.current=newSp;
+    if(pLockR.current.length)r2CheckUnlock(newPH); // v84
     const emptied=!newPH.filter(Boolean).length;
     if(emptied){const nd=createDeck();setTimeout(()=>{dealPlayer(nd);},100);}
     // v56 チャンピオン能力「コア・シフト」：最初に置いた4が3に変わる（得点確定より先）
@@ -3404,6 +3490,7 @@ function App(){
     if(wasLink){playChronoReleaseSE();}
     const ended=resolvePlay(value,cf,cs,'player',rNum,isSp,shifted);
     if(ended){exitLink();return;} // 10完成/バースト/4枚 → 既存の終了処理が優先
+    if(r2Active()&&r2R.current.armed==='erase'&&!r2R.current.used&&colorsR.current.filter(c=>c==='player').length>=2)setTimeout(()=>r2Erase(),450); // v84 2枚目を置いた瞬間に削除
     const nf=fieldR.current,ns=fieldSumR.current;
     if(wasLink){
       // 追加の1枚を置いた → 時間停止を解除して再開（AIは1回だけ予約）
@@ -3424,7 +3511,7 @@ function App(){
   function resolvePlay(value,curField,curSum,who,rn,isSp,shifted){
     const nf=[...curField,value],ns=curSum+value;
     setField(nf);setFieldSum(ns);fieldR.current=nf;fieldSumR.current=ns;
-    setFieldColors(prev=>[...prev,who]);
+    setFieldColors(prev=>[...prev,who]);colorsR.current=[...colorsR.current,who];
     setFieldSp(prev=>[...prev,!!isSp]);
     setFieldShift(prev=>[...prev,!!shifted]);
     if(ns>10){
@@ -3439,6 +3526,7 @@ function App(){
       return true;
     }
     if(ns===10){completeTen(nf,who,rn);return true;}
+    if(ns===7&&r2Active()&&nf.length<4){setTimeout(()=>{if(phaseR.current==='playing'&&!resolvingR.current&&fieldSumR.current===7)r2TimeStop(rn);},250);} // v84 合計7で時間停止
     if(nf.length>=4){
       clearTimers();lockR.current=true;resolvingR.current=true;setResetFA(true);
       setFlashMsg({text:'4枚！強制リセット',color:DIM});
@@ -3469,7 +3557,7 @@ function App(){
       const tokS=roundTokR.current;
       setTimeout(()=>{if(tokS!==roundTokR.current)return;setResetFA(false);resetField();if(newPP>=winPtR.current||newDP>=winPtR.current){endGame(newPP,newDP);return;}const nr=rn+1;setRNum(nr);doCountdown(pHR.current,dHR.current,newPP,newDP,nr);},waitMs);
         }
-  function resetField(){setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldColors([]);setFieldSp([]);setFieldShift([]);setFieldRing([]);}
+  function resetField(){setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldColors([]);colorsR.current=[];setFieldSp([]);setFieldShift([]);setFieldRing([]);}
   function endGame(pp,dp){
     roundTokR.current++;stopBGM();
     let stars=0;
@@ -3531,7 +3619,7 @@ function App(){
 
     // TOP BAR
     h('div',{className:'gp-top-bar'},
-      h('div',{className:'gp-time-box'+(timeLeft<=5?' urgent':'')+(linkMode?' frozen':'')},
+      h('div',{className:'gp-time-box'+(timeLeft<=5?' urgent':'')+(linkMode?' frozen':'')+(rStop?' frozen2':'')},
         h('div',{className:'lbl'},'TIME'),
         h('div',{className:'val'},timeLeft)
       ),
@@ -3557,6 +3645,9 @@ function App(){
 
     // v56 チャンピオン能力の表示（使用後は暗くなる）
     coreShiftR.current.active&&h('div',{className:'ability-pill'+(coreShiftUsed?' used':'')},h('span',{className:'en'},'CORE SHIFT'),h('span',null,coreShiftUsed?'使用済み':'最初に置く 4 → 3')),
+    form2&&r2Armed&&h('div',{className:'ability-pill r2',style:{'--rc':REIPIA_RINGS[r2Armed].color,'--rg':REIPIA_RINGS[r2Armed].glow}},h('span',{className:'ic',style:{backgroundImage:'url('+REIPIA_RINGS[r2Armed].image+')'}}),h('span',{className:'en'},REIPIA_RINGS[r2Armed].en),h('span',null,REIPIA_RINGS[r2Armed].name+'：'+REIPIA_RINGS[r2Armed].desc)),
+    r2Banner&&h('div',{className:'sr-banner',style:{borderColor:r2Banner.color,boxShadow:'0 0 22px '+r2Banner.color}},h('b',null,'STAR RING'),r2Banner.text),
+    rStop&&h('div',{className:'rs-veil'}),
 
     // DEALER 手札
     h('div',{className:'gp-dealer-area'},
@@ -3578,7 +3669,7 @@ function App(){
     },
       h('div',{className:'field-planet'}),
       h('div',{className:'gp-field-cards'},
-        field.map((v,i)=>h(FieldCard,{key:i,value:v,by:fieldColors[i],isComplete:fieldSum===10&&i===field.length-1,isSpecial:!!fieldSp[i],shifted:!!fieldShift[i],ringed:!!fieldRing[i]}))
+        field.map((v,i)=>h('div',{key:i,className:eraseIdx.includes(i)?'fx-erase':undefined,style:{display:'contents'}},h(FieldCard,{value:v,by:fieldColors[i],isComplete:fieldSum===10&&i===field.length-1,isSpecial:!!fieldSp[i],shifted:!!fieldShift[i],ringed:!!fieldRing[i]})))
       ),
       // FIELD SUM（場のカードの下・前の配置に戻す＋少し強化）
       h('div',{className:'gp-field-sum gp-field-sum-strong',style:{visibility:fieldSum>0?'visible':'hidden'}},
@@ -3598,10 +3689,10 @@ function App(){
       h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
       h('div',{className:'gp-hand-rows'},
         h('div',{className:'gp-hand-row'},
-          pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):h(SlideCard,{key:i+'_'+v,value:v,onPlay:()=>playCard(i),disabled:countNum>=0||!canPlay(v,fieldSum,field),cardState:countNum>=0?null:handCardState(v,fieldSum,field),onLocked:()=>fxLockHint(lockReason(v,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(v,fieldSum,field)}))
+          pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):h(SlideCard,{key:i+'_'+v,value:v,onPlay:()=>playCard(i),disabled:countNum>=0||!canPlay(v,fieldSum,field)||rStop||!!pLock[i]||(cmdIdx!=null&&cmdIdx!==i),cardState:countNum>=0?null:handCardState(v,fieldSum,field),onLocked:()=>fxLockHint(pLock[i]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i)?'指名された札から':lockReason(v,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(v,fieldSum,field),rLock:!!pLock[i],rCmd:cmdIdx===i,rWait:cmdIdx!=null&&cmdIdx!==i}))
         ),
         h('div',{className:'gp-hand-row'},
-          pH.slice(5).map((v,i)=>v===null?h('div',{key:i+5,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):h(SlideCard,{key:(i+5)+'_'+v,value:v,onPlay:()=>playCard(i+5),disabled:countNum>=0||!canPlay(v,fieldSum,field),cardState:countNum>=0?null:handCardState(v,fieldSum,field),onLocked:()=>fxLockHint(lockReason(v,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i+5],linkPick:linkMode&&canPlay(v,fieldSum,field)}))
+          pH.slice(5).map((v,i)=>v===null?h('div',{key:i+5,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):h(SlideCard,{key:(i+5)+'_'+v,value:v,onPlay:()=>playCard(i+5),disabled:countNum>=0||!canPlay(v,fieldSum,field)||rStop||!!pLock[i+5]||(cmdIdx!=null&&cmdIdx!==i+5),cardState:countNum>=0?null:handCardState(v,fieldSum,field),onLocked:()=>fxLockHint(pLock[i+5]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i+5)?'指名された札から':lockReason(v,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i+5],linkPick:linkMode&&canPlay(v,fieldSum,field),rLock:!!pLock[i+5],rCmd:cmdIdx===i+5,rWait:cmdIdx!=null&&cmdIdx!==i+5}))
         )
       )
     ),
