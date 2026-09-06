@@ -2432,7 +2432,11 @@ const TUT_STEPS=[
     msg:'10にした最後の1枚が得点。ペアで加点。\n超えたらバースト。先に15pt。\nあとは実戦で。'},
 ];
 
-function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachName,startLabel,bg,winPt}){
+function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachName,startLabel,bg,winPt,onSecret}){
+  const secretR=useRef(0);const secretT=useRef(0);
+  function tapSecret(){const now=Date.now();if(now-secretT.current>2500)secretR.current=0;secretT.current=now;secretR.current++;
+    try{resumeAC();fxTone({f:900+secretR.current*120,type:'sine',v:0.03,a:0.002,d:0.06,rev:0.2});}catch(e){}
+    if(secretR.current>=7){secretR.current=0;onSecret&&onSecret();}}
   const WP=winPt||WIN_PT;
   const[si,setSi]=useState(0);
   const[board,setBoard]=useState({field:[],colors:[],hand:[],dealer:8});
@@ -2519,7 +2523,7 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
         h('div',{className:'val'},pPt),
         h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,WP-pPt)),'pt')
       ),
-      h('div',{className:'gp-round-pill'},
+      h('div',{className:'gp-round-pill',onClick:tapSecret,style:{cursor:'pointer'}}, // v105: 7回タップでルナ戦（隠し）
         h('span',{className:'lvl',style:{color:'#c98f00',fontWeight:900}},'TUTORIAL')
       ),
       h('div',{className:'gp-score dealer'},
@@ -2601,7 +2605,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v104'; // v104: 環付きカードの表面（第1形態1種／第2形態4種）
+const APP_VER='v105'; // v105: 隠しコマンド（チュートリアルの TUTORIAL を7回タップでルナ戦へ）
+// v104: 環付きカードの表面（第1形態1種／第2形態4種）
 // v103: 10完成の瞬間に場の高さが伸びて手札マットが下がるのを固定
 // v102: 幸福標本の見直し（ルナの右へエネルギーが流れて蝶が生まれる／霧が先に場を覆ってからカードが出る／四角い背景を廃止）
 // v101: 指名を即時に／ロックと指名の衝突を防止／ルナの立ち絵を軽く浮かせる／環だけ残った手札の補充を監視で確実に
@@ -3898,7 +3903,14 @@ function App(){
   if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>startGame(pendingDiff)});
   if(phase==='map')return h(MapScreen,{area:STAGES.areas[0],save,onSelect:i=>startStage(0,i),onBack:()=>{setPhase('menu');phaseR.current='menu';}});
-  if(phase==='tutorial')return h(TutorialScreen,{pendingDiff,onFinish:finishTutorial,onExit:()=>finishTutorial(pendingDiff),trackNum,toggleMusic,coachName:null,startLabel:curStage?'ステージ '+curStage.no+' をはじめる':null,bg:null,winPt:curStage?curStage.winPt:null});
+  if(phase==='tutorial')return h(TutorialScreen,{pendingDiff,onFinish:finishTutorial,onExit:()=>finishTutorial(pendingDiff),trackNum,toggleMusic,coachName:null,startLabel:curStage?'ステージ '+curStage.no+' をはじめる':null,bg:null,winPt:curStage?curStage.winPt:null,
+    onSecret:()=>{ // v105: 隠しコマンド → 第7（ルナ／レイピア）へ直行
+      markTutDone();tutDoneR.current=true;setPendingDiff(null);
+      const si=STAGES.areas[0].stages.findIndex(s=>s.challenge);if(si<0)return;
+      try{resumeAC();fxBell({f:1568,v:0.08,d:1.2,bright:1.3,rev:0.8});fxBell({f:2093,v:0.06,d:1.0,t:0.12,bright:1.3,rev:0.8});}catch(e){}
+      stopBGM();phaseR.current='map';setPhase('map');
+      setTimeout(()=>startStage(0,si),80);
+    }});
   if(phase==='gameEnd'&&gameEndData){
     if(stageCtx)return h(StageEndScreen,{data:gameEndData,stage:curStage,stars:gameEndData.stars||0,onNext:stageNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st),onMap:goMap,isLast:(()=>{const nx=STAGES.areas[stageCtx.ar].stages[stageCtx.st+1];return !nx||!!nx.comingSoon||!!nx.challenge;})()});
     return h(GameEndScreen,{data:gameEndData,onRestart:startGame,onHome:goHome});
