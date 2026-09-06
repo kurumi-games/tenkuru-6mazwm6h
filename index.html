@@ -2586,7 +2586,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v96'; // v96: 幸福標本の演出を「影→闇の蝶→手札の上を横切る→場に鱗粉→晴れたら10完成」に作り直し
+const APP_VER='v97'; // v97: 星環が途中で止まる問題（合う札が来ない）を修正。合う札が無ければルナが引き当てる／10になってたら開始時に必ず発動
+// v96: 幸福標本の演出を「影→闇の蝶→手札の上を横切る→場に鱗粉→晴れたら10完成」に作り直し
 // v95: 画像を全部WebP化（91MB→7MB）／第7ステージ開始前に画像を先読みしてから開始
 // v94: ルナの技「幸福標本」演出（胸の蝶→手を差し出す→魔法陣→4本の標本針→4枚強制配置）
 // v93: 台詞の文字送りを音声の長さに合わせた（ルナ3.4秒／レイピア2文9秒）
@@ -3337,8 +3338,15 @@ function App(){
     const ringed=hand.filter((v,i)=>flags[i]);
     if(ringed.length>=4)return;
     // 場に出す時と同じルール（canPlay）：3枚目は合計5以上、4枚目は10ちょうど。超える値は不可。満たす札が無ければ今ラウンドは付けない
-    const cand=hand.map((v,i)=>(!flags[i]&&sum+v<=10&&canPlay(v,sum,ringed))?i:-1).filter(i=>i>=0);
-    if(!cand.length)return;
+    let cand=hand.map((v,i)=>(!flags[i]&&sum+v<=10&&canPlay(v,sum,ringed))?i:-1).filter(i=>i>=0);
+    let hand2=hand;
+    if(!cand.length){ // v97: 合う札が手札に無い → ルナが引き当てる（裏向きなので値を差し替える）。何ラウンドも止まらないように
+      const free=hand.map((v,i)=>!flags[i]?i:-1).filter(i=>i>=0);
+      const vals=[1,2,3,4,5].filter(v=>sum+v<=10&&canPlay(v,sum,ringed));
+      if(!free.length||!vals.length)return;
+      const k=free[Math.floor(Math.random()*free.length)];hand2=hand.slice();hand2[k]=vals[Math.floor(Math.random()*vals.length)];
+      setDH(hand2);dHR.current=hand2;cand=[k];
+    }
     const k=cand[Math.floor(Math.random()*cand.length)];flags[k]=true;setDRing(flags);dRingR.current=flags;
     try{resumeAC();fxBell({f:2349,v:0.07,d:0.9,bright:1.3,rev:0.7});fxTone({f:1800,f2:3600,type:'sine',v:0.03,a:0.01,d:0.25,rev:0.5});}catch(e){}
     if(ringSum()===10){
@@ -3622,7 +3630,8 @@ function App(){
           lockR.current=false; // v40: 開始時のプレイヤーロック(50%で0.4秒)は撤廃
           scheduleAi(rn);
           if(rn===1)sayChamp('start'); // v61
-          if(starRingActive())setTimeout(()=>attachStarRing(rn),400); // v80: 毎ラウンド開始直後に1枚へ星環
+          if(starRingActive()&&ringSum()===10)srPendingR.current=true; // v97: 前ラウンドで10になってたのに発動できてなければここで
+          else if(starRingActive())setTimeout(()=>attachStarRing(rn),400); // v80: 毎ラウンド開始直後に1枚へ星環
           if(srPendingR.current){srPendingR.current=false;setTimeout(()=>{if(phaseR.current==='playing'&&countNumR.current<0)starRingComplete(rn);},600);}
           if(r2Active())setTimeout(()=>r2RoundStart(rn),300); // v84 第2形態：環を構える
           ensureDealerRefill(); // v89 保険：環付きしか残ってなければ10枚まで補充
