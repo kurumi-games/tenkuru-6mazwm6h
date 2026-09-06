@@ -2543,7 +2543,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v88'; // v88: 星環を外側へ大きく／技名フラッシュ／状態は小アイコン／台詞を中央へ／役の二重発火バグ修正／第1形態AIをnormalに
+const APP_VER='v89'; // v89: 環だけ残った時の補充保険／技名と役表示の重なり回避／タップした環カードは場に出す／10完成中の削除を防止／変身時の星環SE差し替え
+// v88: 星環を外側へ大きく／技名フラッシュ／状態は小アイコン／台詞を中央へ／役の二重発火バグ修正／第1形態AIをnormalに
 // v87: 星環を大きく・強い二段発光（950ms）／技表示を手札マットの上へ／指名カードは金の外枠で表示
 // v86: 第2形態レイピア＝ベース画像＋4つの発光レイヤー（同サイズ重ね）。発動した星環だけ850msで点灯→膨らむ→回る→消灯
 // v85: 第2形態の星環＝レイピアの手札に付く（直後1つ・2ラウンドごと1つ・種類ランダム）。タップで発動、絵の星環が膨らんで光る。時間停止は5ラウンド持続
@@ -2968,7 +2969,7 @@ function ShiftScene({name,form2Name,onDone,onForm2,onLeave}){
     // 動画2：羽が開き、星環4つが現れる
     at(SHIFT_T.video2,()=>{setPh(5);play(v2);onForm2&&onForm2();try{fxAir({v:0.06,a:0.3,d:1.0,hp:2500,rev:0.8});}catch(e){}});
     at(SHIFT_T.wings,()=>{try{playShiftThump(1.2);playForm2SE();}catch(e){}});
-    at(SHIFT_T.rings-300,()=>{try{RING_ORDER.forEach((k,i)=>{fxTone({f:2600,f2:900,type:'square',v:0.05,a:0.001,d:0.06,t:i*0.22,rev:0.3});fxTone({f:260,f2:120,type:'sine',v:0.12,a:0.002,d:0.18,t:i*0.22,rev:0.4});});}catch(e){}});
+    at(SHIFT_T.rings-300,()=>{try{fxAir({v:0.05,a:0.5,d:1.2,hp:2200,rev:0.85});fxTone({f:160,f2:640,type:'sine',v:0.06,a:0.5,d:1.4,rev:0.8});fxBell({f:392,v:0.10,d:2.8,t:1.1,bright:0.8,rev:0.9});fxBell({f:587,v:0.05,d:2.2,t:1.15,bright:0.9,rev:0.9});}catch(e){}}); // v89: 低く広がる響き（チャランは廃止）
     at(SHIFT_T.title,()=>{setPh(6);try{playTitleHitSE();}catch(e){}});
     at(SHIFT_T.leave,()=>{setPh(7);onLeave&&onLeave();});
     at(SHIFT_T.done,()=>{setPh(8);onDone&&onDone();});
@@ -3116,8 +3117,14 @@ function App(){
   const colorsR=useRef([]);
   function r2Active(){const so=stageOptsR.current;return !!(so&&so.ability==='starRing'&&form2R.current);}
   function r2Say(text,color){setTimeout(()=>{setR2Banner({text,color});setTimeout(()=>setR2Banner(null),1500);},120);} // 短く1.5秒だけ
-  const[skillFx,setSkillFx]=useState(null);
-  function showSkill(type){const R=REIPIA_RINGS[type];setSkillFx({k:Date.now(),jp:R.skill,en:R.en,color:R.color});setTimeout(()=>setSkillFx(s=>s&&s.jp===R.skill?null:s),1400);}
+  const[skillFx,setSkillFx]=useState(null);const skillQ=useRef([]);
+  // 役の表示（comboShow）と重なる時は、役が消えてから出す。役が来たら技名は即引っ込める
+  function showSkill(type){
+    const R=REIPIA_RINGS[type];const item={k:Date.now(),jp:R.skill,en:R.en,color:R.color};
+    if(comboOnR.current||resolvingR.current){skillQ.current.push(item);return;}
+    setSkillFx(item);setTimeout(()=>setSkillFx(s=>s&&s.k===item.k?null:s),1400);
+  }
+  function flushSkillQ(){const it=skillQ.current.shift();if(!it)return;setSkillFx(it);setTimeout(()=>setSkillFx(s=>s&&s.k===it.k?null:s),1400);}
   function setLocks(arr){setPLock(arr);pLockR.current=arr;}
   function setCmd(i){setCmdIdx(i);cmdIdxR.current=i;}
   // 手札1枚に星環（種類ランダム）
@@ -3139,7 +3146,7 @@ function App(){
   }
   // AIのタップ判断（1ラウンド1回まで）
   function r2Think(rn,when){
-    if(!r2Active()||r2R.current.tappedThisRound||phaseR.current!=='playing'||countNumR.current>=0||resolvingR.current)return;
+    if(!r2Active()||r2R.current.tappedThisRound||phaseR.current!=='playing'||countNumR.current>=0||resolvingR.current||eraseBusyR.current||rStopR.current)return;
     const hand=dHR.current,flags=dRingR.current;const have=t=>flags.findIndex(f=>f===t);
     const myCards=colorsR.current.filter(c=>c==='player').length;
     const st=r2R.current;let pick=null;
@@ -3160,7 +3167,9 @@ function App(){
     const flags=dRingR.current.slice();const i=flags.findIndex(f=>f===type);if(i<0)return;
     const st=r2R.current;st.tappedThisRound=true;
     const R=REIPIA_RINGS[type];
+    const tapVal=dHR.current[i];
     setTapIdx(i);setTimeout(()=>{setTapIdx(-1);const f2=dRingR.current.slice();f2[i]=false;setDRing(f2);dRingR.current=f2;},700);
+    setTimeout(()=>playTappedCard(tapVal,rn),type==='erase'?1000:780); // v89: タップした札は場に出す
     flashRing(R.ringColor);showSkill(type); // 技の効果処理と同時に、その色の星環だけ発光＋技名
     try{resumeAC();fxTone({f:2600,f2:900,type:'square',v:0.05,a:0.001,d:0.06,rev:0.3});fxBell({f:1568,v:0.08,d:1.2,bright:1.3,rev:0.75});fxAir({v:0.04,a:0.01,d:0.5,hp:5000,rev:0.7});}catch(e){}
     if(type==='lock'){
@@ -3177,6 +3186,19 @@ function App(){
         if(!colorsR.current.includes('player')){setCmd(c);r2Say('この札から出せ',R.color);}else{st.cmdNext=c;r2Say('次のラウンド：指名',R.color);}}
     }
   }
+  // タップした札を場に出す（出せる場なら）。出せなければ手札に残す
+  function playTappedCard(val,rn){
+    if(phaseR.current!=='playing'||countNumR.current>=0||resolvingR.current||eraseBusyR.current)return;
+    const hand=dHR.current,rf=dRingR.current,cf=fieldR.current,cs=fieldSumR.current;
+    const idx=hand.findIndex((v,i)=>v===val&&!rf[i]);if(idx<0)return;
+    if(!canPlay(val,cs,cf))return;
+    try{resumeAC();playPlaceSE(false);}catch(e){}
+    const newDH=hand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx);setDealer(newDH,newRf);
+    ensureDealerRefill();
+    clearTimeout(aiRef.current);
+    if(!resolvePlay(val,cf,cs,'dealer',rn))scheduleAi(rn);
+  }
+  const eraseBusyR=useRef(false);
   function r2CheckUnlock(newPH){
     const fl=pLockR.current;if(!fl.some(Boolean))return;
     if(!newPH.filter((v,i)=>v!==null&&!fl[i]).length){setLocks(newPH.map(()=>false));r2Say('ロック解除',REIPIA_RINGS.lock.color);}
@@ -3199,15 +3221,17 @@ function App(){
   }
   // 削除：場のプレイヤーのカードを2枚消す。1枚以下なら場ごとリセット
   function r2Erase(){
-    if(resolvingR.current)return;
+    if(resolvingR.current||eraseBusyR.current)return;
+    eraseBusyR.current=true;setTimeout(()=>{eraseBusyR.current=false;},560); // 消えるまでの間は誰もカードを出せない（10完成と重なるのを防ぐ）
+    clearTimeout(aiRef.current);
     const mine=fieldR.current.map((v,i)=>i).filter(i=>colorsR.current[i]==='player');
     try{resumeAC();noise({vol:0.14,dur:0.15,start:0,lpFreq:4000,q:0.7});fxTone({f:2200,f2:400,type:'sawtooth',v:0.05,a:0.002,d:0.3,rev:0.5});}catch(e){}
     if(mine.length>=2){
       const rm=mine.slice(-2);setEraseIdx(rm);r2Say('場の札2枚を消滅',REIPIA_RINGS.erase.color);
-      setTimeout(()=>{setEraseIdx([]);removeFieldIdx(rm);},520);
+      setTimeout(()=>{setEraseIdx([]);if(!resolvingR.current)removeFieldIdx(rm);},520);
     }else{
       setEraseIdx(fieldR.current.map((v,i)=>i));r2Say('場をリセット',REIPIA_RINGS.erase.color);
-      setTimeout(()=>{setEraseIdx([]);resetField();},520);
+      setTimeout(()=>{setEraseIdx([]);if(!resolvingR.current)resetField();},520);
     }
   }
   function removeFieldIdx(idxs){
@@ -3220,6 +3244,13 @@ function App(){
   function starRingActive(){const so=stageOptsR.current;return !!(so&&so.ability==='starRing'&&!form2R.current);}
   function setDealer(hand,ring){setDH(hand);dHR.current=hand;const r=ring||hand.map(()=>false);setDRing(r);dRingR.current=r;}
   function ringSum(){return dHR.current.reduce((s,v,i)=>s+(dRingR.current[i]?v:0),0);}
+  function ensureDealerRefill(){
+    const hand=dHR.current,rf=dRingR.current;
+    if(hand.length>=10)return;
+    if(hand.filter((v,i)=>!rf[i]).length)return; // 環なしが1枚でもあれば不要
+    const nd=createDeck().slice(0,10-hand.length);
+    setDealer([...hand,...nd],[...rf.slice(0,hand.length),...nd.map(()=>false)]);
+  }
   // 手札1枚に星環を付ける。合計が10ちょうどになったら完成処理へ
   function attachStarRing(rn){
     if(!starRingActive())return;
@@ -3267,7 +3298,8 @@ function App(){
   const[timeUpShow,setTimeUpShow]=useState(false);
   const[burstAnim,setBurstAnim]=useState(false);
   const[resetFA,setResetFA]=useState(false);
-  const[comboShow,setComboShow]=useState(null);
+  const[comboShow,setComboShow]=useState(null);const comboOnR=useRef(false);
+  useEffect(()=>{comboOnR.current=!!comboShow;if(comboShow)setSkillFx(null);else setTimeout(flushSkillQ,250);},[comboShow]);
   const[gameEndData,setGameEndData]=useState(null);
   const[musicEnabled,setMusicEnabled]=useState(true);
   const musicEnabledR=useRef(true);
@@ -3470,6 +3502,7 @@ function App(){
           if(starRingActive())setTimeout(()=>attachStarRing(rn),400); // v80: 毎ラウンド開始直後に1枚へ星環
           if(srPendingR.current){srPendingR.current=false;setTimeout(()=>{if(phaseR.current==='playing'&&countNumR.current<0)starRingComplete(rn);},600);}
           if(r2Active())setTimeout(()=>r2RoundStart(rn),300); // v84 第2形態：環を構える
+          ensureDealerRefill(); // v89 保険：環付きしか残ってなければ10枚まで補充
         },650);
         return;
       }
@@ -3528,7 +3561,7 @@ function App(){
   function aiPlay(rn){
     // 場が完成した直後にAIの出す動作が間に合ってしまった場合 → カード返却（出さない）
     // ※lockRは見ない：あれはラウンド開始時のプレイヤー用ハンデロックと共用のため
-    if(resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current)return; // v54: 時間停止中は出さない / v75: 演出中も出さない / v84: レイピアの停止中は動く
+    if(resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current||eraseBusyR.current)return; // v54/v75/v84/v89
     const dHand=dHR.current,cf=fieldR.current,cs=fieldSumR.current;
     if(!dHand.length)return;
     const rf=dRingR.current;const avail=dHand.filter((v,i)=>!rf[i]); // v79: 星環付きは温存
@@ -3579,7 +3612,7 @@ function App(){
     const cf=fieldR.current,cs=fieldSumR.current;
     let value=pH[idx];
     if(!value||!canPlay(value,cs,cf))return;
-    if(rStopR.current)return;                                   // v84 時間停止中は出せない
+    if(rStopR.current||eraseBusyR.current)return;               // v84 時間停止中は出せない / v89 削除中も
     if(pLockR.current[idx]){fxLockHint('星環ロック');return;}   // v84 ロック中
     if(cmdIdxR.current!=null&&cmdIdxR.current!==idx){fxLockHint('指名された札から');return;} // v84 指名
     if(cmdIdxR.current===idx)setCmd(null);
