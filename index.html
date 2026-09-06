@@ -2560,7 +2560,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v92'; // v92: レイピアの台詞音声を1本に（reipia-1.mp3 に2文まとめて）
+const APP_VER='v93'; // v93: 台詞の文字送りを音声の長さに合わせた（ルナ3.4秒／レイピア2文9秒）
+// v92: レイピアの台詞音声を1本に（reipia-1.mp3 に2文まとめて）
 // v91: 一時停止ボタン／状態アイコンをタイマー直下＋タップで説明／変身SEのチャイム廃止／台詞の音声ファイル差し込み口
 // v90: 星環を新しい4枚（正方形の紋章）に差し替え、キャラから離して四隅に配置
 // v89: 環だけ残った時の補充保険／技名と役表示の重なり回避／タップした環カードは場に出す／10完成中の削除を防止／変身時の星環SE差し替え
@@ -2961,7 +2962,8 @@ const SHIFT_VIDEO={v1:'video/shift-1-luna.mp4',v2:'video/shift-2-reipia.mp4'};
 const SHIFT_VOICE={luna1:'voice/luna-1.mp3',reipia1:'voice/reipia-1.mp3'}; // reipia-1 に2文まとめて入れる
 function playVoice(key,vol){try{const a=new Audio(SHIFT_VOICE[key]);a.volume=vol==null?0.9:vol;a.onerror=()=>{};const p=a.play();if(p&&p.catch)p.catch(()=>{});return a;}catch(e){return null;}}
 // タイムライン（ms）。動画は各5秒
-const SHIFT_T={luna:500,type:95,glitch:2850,glitchStep:80,video1:3700,v1len:5050,line2:9200,type2:80,video2:13100,v2len:5050,wings:14300,rings:16900,title:16800,leave:18400,done:19300};
+// 音声：luna-1.mp3 ≈3.4s、reipia-1.mp3 ≈9.1s（2文目は5.2sから）。文字送りをそれに合わせる
+const SHIFT_T={luna:500,type:200,glitch:4100,glitchStep:80,video1:4900,v1len:5050,line2:10400,type2:280,line2b:5200,type2b:160,video2:19800,v2len:5050,wings:21000,rings:23600,title:23500,leave:25100,done:26000};
 function ShiftScene({name,form2Name,onDone,onForm2,onLeave}){
   const reduced=useMemo(()=>{try{return window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}},[]);
   const Q=FX_QUALITY;
@@ -2987,8 +2989,8 @@ function ShiftScene({name,form2Name,onDone,onForm2,onLeave}){
     // 台詞（動画1の最終フレームで静止）
     at(SHIFT_T.line2,()=>{setPh(4);playVoice('reipia1');try{fxAir({v:0.03,a:0.01,d:0.6,hp:6000,rev:0.7});}catch(e){}});
     for(let i=1;i<=SHIFT_LINE2A.length;i++)at(SHIFT_T.line2+200+i*SHIFT_T.type2,()=>setT2a(i));
-    const t2b0=SHIFT_T.line2+200+SHIFT_LINE2A.length*SHIFT_T.type2+500;
-    for(let i=1;i<=SHIFT_LINE2B.length;i++)at(t2b0+i*SHIFT_T.type2,()=>setT2b(i));
+    const t2b0=SHIFT_T.line2+SHIFT_T.line2b; // 2文目は音声の2文目の頭に合わせる
+    for(let i=1;i<=SHIFT_LINE2B.length;i++)at(t2b0+i*SHIFT_T.type2b,()=>setT2b(i));
     // 動画2：羽が開き、星環4つが現れる
     at(SHIFT_T.video2,()=>{setPh(5);play(v2);onForm2&&onForm2();try{fxAir({v:0.06,a:0.3,d:1.0,hp:2500,rev:0.8});}catch(e){}});
     at(SHIFT_T.wings,()=>{try{playShiftThump(1.2);playForm2SE();}catch(e){}});
