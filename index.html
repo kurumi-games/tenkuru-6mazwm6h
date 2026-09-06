@@ -1261,7 +1261,8 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7 .boss-img{position:absolute;left:50%;top:calc(70 * var(--u));width:calc(200 * var(--u));height:calc(160 * var(--u));margin-left:calc(-100 * var(--u));opacity:.7;
   background:url('img/challenge07-luna-battle.webp') center top/contain no-repeat;
   -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 62%,transparent 96%);mask-image:linear-gradient(180deg,#000 0%,#000 62%,transparent 96%);
-  filter:drop-shadow(0 0 10px rgba(255,150,220,.25));animation:champIn .6s cubic-bezier(.2,1,.3,1) both, bossIdle 6s ease-in-out .6s infinite;}
+  filter:drop-shadow(0 0 10px rgba(255,150,220,.25));animation:champIn .6s cubic-bezier(.2,1,.3,1) both, lunaFloat 4.6s ease-in-out .6s infinite;}
+@keyframes lunaFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(calc(-4 * var(--u))) scale(1.012);}}
 .gp-screen.ch7 .boss-img.form2{background-image:url('img/challenge07-reipia-battle.webp');filter:drop-shadow(0 0 10px rgba(190,150,255,.3));animation:form2Pop .5s cubic-bezier(.2,1.2,.3,1) both, bossIdle 6.5s ease-in-out .5s infinite;}
 @keyframes form2Pop{0%{opacity:0;transform:scale(.9);}100%{opacity:.7;transform:scale(1);}}
 /* v76: ペーパードール（第2形態の立ち絵）。5枚のレイヤーを同じ枠に重ねて別々に動かす */
@@ -2587,7 +2588,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v100'; // v100: 蝶の飛び方を自然に（滑らかな曲線・ふわふわ上下・進行方向に体を向ける・速度の緩急）
+const APP_VER='v101'; // v101: 指名を即時に／ロックと指名の衝突を防止／ルナの立ち絵を軽く浮かせる／環だけ残った手札の補充を監視で確実に
+// v100: 蝶の飛び方を自然に（滑らかな曲線・ふわふわ上下・進行方向に体を向ける・速度の緩急）
 // v99: 鱗粉の霧を煙スプライトの重ね合わせに作り直し（もやもや漂う）
 // v98: 蝶の経路を修正（ルナの手札を右→左、少し下がって場を左→右）
 // v97: 星環が途中で止まる問題（合う札が来ない）を修正。合う札が無ければルナが引き当てる／10になってたら開始時に必ず発動
@@ -3210,7 +3212,7 @@ function App(){
   }
   function flushSkillQ(){const it=skillQ.current.shift();if(!it)return;setSkillFx(it);setTimeout(()=>setSkillFx(s=>s&&s.k===it.k?null:s),1400);}
   function setLocks(arr){setPLock(arr);pLockR.current=arr;}
-  function setCmd(i){setCmdIdx(i);cmdIdxR.current=i;}
+  function setCmd(i){setCmdIdx(i);cmdIdxR.current=i;if(i!=null&&pLockR.current[i]){const f=pLockR.current.slice();f[i]=false;setLocks(f);}} // v101: 指名された札がロック中なら外す（詰み防止）
   // 手札1枚に星環（種類ランダム）
   function r2Grant(){
     const hand=dHR.current,flags=dRingR.current.slice();
@@ -3226,7 +3228,7 @@ function App(){
     if(st.rounds===1||(st.rounds-1)%2===0)r2Grant();           // 直後に1つ、以降2ラウンドごと
     if(st.timeLeft>0){st.timeLeft--;setTimeRounds(st.timeLeft);}
     if(st.cmdNext!=null){const i=st.cmdNext;st.cmdNext=null;if(pHR.current[i]!=null){setCmd(i);r2Say('この札から出せ',REIPIA_RINGS.command.color);}}
-    setTimeout(()=>r2Think(rn,'start'),900);
+    setTimeout(()=>r2Think(rn,'start'),350); // v101: 早めに判断
   }
   // AIのタップ判断（1ラウンド1回まで）
   function r2Think(rn,when){
@@ -3257,7 +3259,7 @@ function App(){
     flashRing(R.ringColor);showSkill(type); // 技の効果処理と同時に、その色の星環だけ発光＋技名
     try{resumeAC();fxTone({f:2600,f2:900,type:'square',v:0.05,a:0.001,d:0.06,rev:0.3});fxBell({f:1568,v:0.08,d:1.2,bright:1.3,rev:0.75});fxAir({v:0.04,a:0.01,d:0.5,hp:5000,rev:0.7});}catch(e){}
     if(type==='lock'){
-      const hand=pHR.current;const cand=hand.map((v,i)=>v!==null?i:-1).filter(i=>i>=0).sort(()=>Math.random()-0.5).slice(0,3);
+      const hand=pHR.current;const cand=hand.map((v,i)=>(v!==null&&i!==cmdIdxR.current)?i:-1).filter(i=>i>=0).sort(()=>Math.random()-0.5).slice(0,3); // 指名中の札はロックしない
       setLocks(hand.map((v,i)=>cand.includes(i)));r2Say('手札3枚ロック',R.color);
     }else if(type==='time'){
       st.timeLeft=5;setTimeRounds(5);r2Say('5ラウンド：合計7で停止',R.color);
@@ -3265,9 +3267,8 @@ function App(){
     }else if(type==='erase'){
       r2Erase();
     }else if(type==='command'){
-      const hand=pHR.current;const cand=hand.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);
-      if(cand.length){const c=cand[Math.floor(Math.random()*cand.length)];
-        if(!colorsR.current.includes('player')){setCmd(c);r2Say('この札から出せ',R.color);}else{st.cmdNext=c;r2Say('次のラウンド：指名',R.color);}}
+      const hand=pHR.current;const cand=hand.map((v,i)=>(v!==null&&!pLockR.current[i])?i:-1).filter(i=>i>=0); // ロック中の札は指名しない
+      if(cand.length){const c=cand[Math.floor(Math.random()*cand.length)];setCmd(c);r2Say('この札から出せ',R.color);} // v101: 即時（次に出す札を縛る）
     }
   }
   // タップした札を場に出す（出せる場なら）。出せなければ手札に残す
@@ -3329,7 +3330,8 @@ function App(){
   function setDealer(hand,ring){setDH(hand);dHR.current=hand;const r=ring||hand.map(()=>false);setDRing(r);dRingR.current=r;}
   function ringSum(){return dHR.current.reduce((s,v,i)=>s+(dRingR.current[i]?v:0),0);}
   function ensureDealerRefill(){
-    const hand=dHR.current,rf=dRingR.current;
+    let hand=dHR.current,rf=dRingR.current;
+    if(rf.length!==hand.length){rf=hand.map((v,i)=>rf[i]||false);setDRing(rf);dRingR.current=rf;} // 環の配列がズレてたら揃える
     if(hand.length>=10)return;
     if(hand.filter((v,i)=>!rf[i]).length)return; // 環なしが1枚でもあれば不要
     const nd=createDeck().slice(0,10-hand.length);
@@ -3448,6 +3450,8 @@ function App(){
   const[burstAnim,setBurstAnim]=useState(false);
   const[resetFA,setResetFA]=useState(false);
   const[comboShow,setComboShow]=useState(null);const comboOnR=useRef(false);
+  // v101: 監視。対戦中、相手の手札が環だけ／空になってたら補充する（どの経路で起きても拾う）
+  useEffect(()=>{const id=setInterval(()=>{try{const so=stageOptsR.current;if(!so||!so.challenge||phaseR.current!=='playing'||countNumR.current>=0||resolvingR.current||sceneOnR.current)return;ensureDealerRefill();}catch(e){}},800);return()=>clearInterval(id);},[]);
   useEffect(()=>{comboOnR.current=!!comboShow;if(comboShow)setSkillFx(null);else setTimeout(flushSkillQ,250);},[comboShow]);
   const[gameEndData,setGameEndData]=useState(null);
   const[musicEnabled,setMusicEnabled]=useState(true);
