@@ -1283,11 +1283,19 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7 .boss-img.form2.final{background:none;top:calc(82 * var(--u));width:calc(220 * var(--u));height:calc(142 * var(--u));margin-left:calc(-110 * var(--u));opacity:.92;-webkit-mask-image:none;mask-image:none;}
 .rf-wrap{position:relative;width:100%;height:100%;}
 .rf-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none;}
-.rf-wrap img.rf-ring{opacity:0;will-change:transform,opacity,filter;}
-.rf-wrap img.rf-ring[data-ring-color="purple"]{transform-origin:21.1% 12.5%;}
-.rf-wrap img.rf-ring[data-ring-color="blue"]{transform-origin:79.1% 12.5%;}
-.rf-wrap img.rf-ring[data-ring-color="red"]{transform-origin:12.7% 42.8%;}
-.rf-wrap img.rf-ring[data-ring-color="gold"]{transform-origin:90% 42.8%;}
+.rf-wrap img.rf-ring{opacity:.28;filter:brightness(.45) saturate(.65);will-change:transform,opacity,filter;} /* 通常時：暗く沈んでうっすら */
+.rf-wrap img.rf-ring[data-ring-color="purple"]{transform-origin:16.1% 27.3%;--ring-color:rgba(190,120,255,.95);}
+.rf-wrap img.rf-ring[data-ring-color="blue"]{transform-origin:83.9% 27.3%;--ring-color:rgba(110,210,255,.95);}
+.rf-wrap img.rf-ring[data-ring-color="red"]{transform-origin:16.1% 65.8%;--ring-color:rgba(255,110,140,.95);}
+.rf-wrap img.rf-ring[data-ring-color="gold"]{transform-origin:83.9% 65.8%;--ring-color:rgba(255,215,120,.95);}
+/* 指名カード：金の外枠だけをカードの外周に重ねる（中央は透明、数字を覆わない） */
+.card-stage .rl-frame{position:absolute;inset:-6%;width:112%;height:112%;object-fit:fill;pointer-events:none;z-index:7;animation:goldBlink 2.2s ease-in-out infinite;}
+@keyframes goldBlink{0%,100%{opacity:.75;filter:drop-shadow(0 0 2px rgba(255,210,110,.5));}50%{opacity:1;filter:drop-shadow(0 0 7px rgba(255,220,130,1));}}
+/* 技表示：手札マットのすぐ上（キャラや場を覆わない） */
+.hand-hud{position:absolute;left:0;right:0;top:calc(-2 * var(--u));height:calc(24 * var(--u));pointer-events:none;z-index:5;}
+.hand-hud .sr-banner{position:absolute;left:50%;top:0;transform:translateX(-50%);max-width:94%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:calc(4 * var(--u)) calc(14 * var(--u));font-size:calc(12 * var(--u));}
+.hand-hud .ability-pill.r2{position:absolute;right:calc(12 * var(--u));top:calc(2 * var(--u));margin:0;padding:calc(3 * var(--u)) calc(9 * var(--u));font-size:calc(9.5 * var(--u));white-space:nowrap;max-width:none;}
+.hand-hud .ability-pill.r2 .ic{width:calc(14 * var(--u));height:calc(14 * var(--u));}
 /* v85: レイピアの手札の星環（種類で色分け：ピンクの環を色相で変える） */
 .star-ring.t-lock{filter:hue-rotate(35deg) saturate(1.2) brightness(1.3) drop-shadow(0 0 5px rgba(190,120,255,.9));}
 .star-ring.t-time{filter:hue-rotate(160deg) saturate(1.3) brightness(1.35) drop-shadow(0 0 5px rgba(100,220,255,.9));}
@@ -1299,7 +1307,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* 手札の星環ロック／指名 */
 .card-stage .rl-badge{position:absolute;left:50%;top:50%;width:calc(var(--card-w) * 1.1);height:calc(var(--card-w) * 1.1);margin:calc(var(--card-w) * -0.55) 0 0 calc(var(--card-w) * -0.55);z-index:7;pointer-events:none;background:center/contain no-repeat;opacity:.95;animation:a1Spin 30s linear infinite;}
 .card-stage.rl-locked .card{filter:saturate(.3) brightness(.55);}
-.card-stage.rl-cmd .card{box-shadow:0 0 0 2px rgba(255,220,120,.9),0 0 18px rgba(255,200,90,.8);animation:linkPick 1s ease-in-out infinite;}
+.card-stage.rl-cmd .card{box-shadow:none;}
 .card-stage.rl-wait .card{filter:brightness(.6);}
 .ability-pill.r2{background:rgba(20,10,50,.6);border-color:var(--rc,#c8a8ff);color:#f0e6ff;box-shadow:0 0 14px var(--rg,rgba(180,140,255,.4));max-width:92vw;white-space:normal;text-align:left;line-height:1.3;}
 .ability-pill.r2 .en{color:var(--rc,#c8a8ff);}
@@ -2262,7 +2270,7 @@ function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,
       ...renderCardOverlay(),
       isSpecial&&h('div',{className:'sv-wrap'},h('div',{className:'sv'})), // v54: 渦（数字より下・背景より上）
       rLock&&h('div',{className:'rl-badge',style:{backgroundImage:'url('+REIPIA_RINGS.lock.image+')'}}), // v84 星環ロック
-      rCmd&&h('div',{className:'rl-badge',style:{backgroundImage:'url('+REIPIA_RINGS.command.image+')'}}), // v84 指名
+      rCmd&&h('img',{className:'rl-frame',src:'img/card-gold-designation-frame.png',alt:'',draggable:false}), // v87 指名：金の外枠
       h('span',{className:'n-tl'},value),
       h('span',{className:'n-big'},value),
       h('span',{className:'n-br'},value)
@@ -2518,7 +2526,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v86'; // v86: 第2形態レイピア＝ベース画像＋4つの発光レイヤー（同サイズ重ね）。発動した星環だけ850msで点灯→膨らむ→回る→消灯
+const APP_VER='v87'; // v87: 星環を大きく・強い二段発光（950ms）／技表示を手札マットの上へ／指名カードは金の外枠で表示
+// v86: 第2形態レイピア＝ベース画像＋4つの発光レイヤー（同サイズ重ね）。発動した星環だけ850msで点灯→膨らむ→回る→消灯
 // v85: 第2形態の星環＝レイピアの手札に付く（直後1つ・2ラウンドごと1つ・種類ランダム）。タップで発動、絵の星環が膨らんで光る。時間停止は5ラウンド持続
 // v84: 第2形態の4つの星環（ロック・時間停止・削除・指名）を実装／第2形態の絵を羽全開版に／変身前のルナ1枚絵を撤去
 // v83: 第2形態は最終形態の1枚絵をそのまま表示（四星環込み）。軽く上下に浮くだけ
@@ -2899,7 +2908,7 @@ const REIPIA_RINGS={
   lock:   {image:'img/challenge07-ring-lock.png',   ringColor:'purple',name:'ロック',   en:'LOCK',    desc:'手札3枚をロック。残りを使い切るまで解けない',       pos:'tl',color:'#c08cff',glow:'rgba(180,120,255,.45)'},
   time:   {image:'img/challenge07-ring-time.png',   ringColor:'blue',  name:'時間停止', en:'CHRONO',  desc:'場の合計がちょうど7で3秒停止。レイピアだけ動く',   pos:'tr',color:'#7fe0ff',glow:'rgba(100,220,255,.45)'},
   erase:  {image:'img/challenge07-ring-erase.png',  ringColor:'red',   name:'削除',     en:'ERASE',   desc:'場のあなたの札を2枚消す。1枚以下なら場ごとリセット',pos:'bl',color:'#ff7a9a',glow:'rgba(255,100,140,.45)'},
-  command:{image:'img/challenge07-ring-command.png',ringColor:'gold',  name:'指名',     en:'COMMAND', desc:'指名された札を最初に出すまで他は出せない',         pos:'br',color:'#ffd27a',glow:'rgba(255,200,100,.45)'},
+  command:{image:'img/challenge07-ring-command.png',ringColor:'gold',  name:'指名',     en:'ORDER', desc:'指名された札を最初に出すまで他は出せない',         pos:'br',color:'#ffd27a',glow:'rgba(255,200,100,.45)'},
 };
 const RING_ORDER=['lock','time','erase','command'];
 // ── v74 変身シーン：ルナ（動く立ち絵）→ セリフ全文 → 鼓動・ひび → 画面が本当に砕ける → 虚空からレイピア ──
@@ -3065,14 +3074,19 @@ function App(){
   function flashRing(color){
     const el=ringElR.current[color];if(!el||!el.animate)return;
     try{el.getAnimations().forEach(a=>a.cancel());}catch(e){}
-    const g=RING_GLOW[color]||'rgba(255,255,255,.9)';
+    const c=RING_GLOW[color]||'rgba(255,255,255,.95)';
+    const idle='brightness(.45) saturate(.65)';
+    const hot='brightness(1.8) saturate(1.6) contrast(1.12) drop-shadow(0 0 4px rgba(255,255,255,.95)) drop-shadow(0 0 15px '+c+') drop-shadow(0 0 34px '+c+')';
+    const mid='brightness(1.45) saturate(1.4) contrast(1.08) drop-shadow(0 0 3px rgba(255,255,255,.8)) drop-shadow(0 0 10px '+c+') drop-shadow(0 0 22px '+c+')';
+    const tail='brightness(1.1) saturate(1.1) drop-shadow(0 0 2px rgba(255,255,255,.5)) drop-shadow(0 0 8px '+c+')';
     el.animate([
-      {opacity:0,transform:'scale(1) rotate(0deg)',filter:'brightness(1) saturate(1) drop-shadow(0 0 0 transparent)',offset:0,easing:'ease-out'},          // 0〜100ms：一瞬で点灯
-      {opacity:1,transform:'scale(1.05) rotate(2deg)',filter:'brightness(1.9) saturate(1.5) drop-shadow(0 0 14px '+g+')',offset:0.12,easing:'ease-in-out'}, // 強い発光を一度
-      {opacity:1,transform:'scale(1.13) rotate(5deg)',filter:'brightness(1.45) saturate(1.3) drop-shadow(0 0 8px '+g+')',offset:0.45,easing:'ease-in-out'},  // 1.13倍・5度
-      {opacity:0.85,transform:'scale(1.08) rotate(3deg)',filter:'brightness(1.3) saturate(1.2) drop-shadow(0 0 5px '+g+')',offset:0.7,easing:'ease-in'},
-      {opacity:0,transform:'scale(1) rotate(0deg)',filter:'brightness(1) saturate(1) drop-shadow(0 0 0 transparent)',offset:1}                                  // 元に戻って消灯
-    ],{duration:850,easing:'linear',fill:'none'});
+      {opacity:.28,transform:'scale(1) rotate(0deg)',filter:idle,offset:0,easing:'cubic-bezier(.1,.9,.2,1)'},
+      {opacity:1,transform:'scale(1.22) rotate(3deg)',filter:hot,offset:0.105,easing:'ease-in-out'},   // 100msで一気に点灯・1.22倍
+      {opacity:1,transform:'scale(1.06) rotate(1deg)',filter:mid,offset:0.34,easing:'ease-in-out'},    // 少し縮む
+      {opacity:1,transform:'scale(1.14) rotate(2.5deg)',filter:hot,offset:0.52,easing:'ease-in-out'},  // もう一度小さく脈打つ
+      {opacity:.85,transform:'scale(1.03) rotate(.5deg)',filter:tail,offset:0.74,easing:'ease-in'},    // 弱い追い発光
+      {opacity:.28,transform:'scale(1) rotate(0deg)',filter:idle,offset:1}                             // 暗い通常状態へ
+    ],{duration:950,easing:'linear',fill:'none'});
   }
   // ── TEST: 4色を単独で確認する一時フック。確認後はこの useEffect ごと削除でOK ──
   useEffect(()=>{window.tenkuruTestRing=(c)=>flashRing(c);return()=>{delete window.tenkuruTestRing;};},[]);
@@ -3080,7 +3094,7 @@ function App(){
   const[tapIdx,setTapIdx]=useState(-1);   // タップ演出中の手札
   const colorsR=useRef([]);
   function r2Active(){const so=stageOptsR.current;return !!(so&&so.ability==='starRing'&&form2R.current);}
-  function r2Say(text,color){setR2Banner({text,color});setTimeout(()=>setR2Banner(null),2200);}
+  function r2Say(text,color){setTimeout(()=>{setR2Banner({text,color});setTimeout(()=>setR2Banner(null),2200);},120);} // 環の発光より120ms遅れて表示
   function setLocks(arr){setPLock(arr);pLockR.current=arr;}
   function setCmd(i){setCmdIdx(i);cmdIdxR.current=i;}
   // 手札1枚に星環（種類ランダム）
@@ -3727,8 +3741,7 @@ function App(){
 
     // v56 チャンピオン能力の表示（使用後は暗くなる）
     coreShiftR.current.active&&h('div',{className:'ability-pill'+(coreShiftUsed?' used':'')},h('span',{className:'en'},'CORE SHIFT'),h('span',null,coreShiftUsed?'使用済み':'最初に置く 4 → 3')),
-    form2&&timeRounds>0&&h('div',{className:'ability-pill r2',style:{'--rc':REIPIA_RINGS.time.color,'--rg':REIPIA_RINGS.time.glow}},h('span',{className:'ic',style:{backgroundImage:'url('+REIPIA_RINGS.time.image+')'}}),h('span',{className:'en'},'CHRONO'),h('span',null,'合計7で時間停止　あと'+timeRounds+'R')),
-    r2Banner&&h('div',{className:'sr-banner',style:{borderColor:r2Banner.color,boxShadow:'0 0 22px '+r2Banner.color}},h('b',null,'STAR RING'),r2Banner.text),
+    // v87: 第2形態の技表示は手札マットの上（hand-hud）へ移動
     rStop&&h('div',{className:'rs-veil'}),
 
     // DEALER 手札
@@ -3768,6 +3781,10 @@ function App(){
 
     // HAND area
     h('div',{className:'gp-hand-area hand-card-area'},
+      (form2&&(timeRounds>0||r2Banner))&&h('div',{className:'hand-hud'},
+        timeRounds>0&&h('div',{className:'ability-pill r2',style:{'--rc':REIPIA_RINGS.time.color,'--rg':REIPIA_RINGS.time.glow}},h('span',{className:'ic',style:{backgroundImage:'url('+REIPIA_RINGS.time.image+')'}}),h('span',{className:'en'},'CHRONO'),h('span',null,'合計7で停止 あと'+timeRounds+'R')),
+        r2Banner&&h('div',{className:'sr-banner',style:{borderColor:r2Banner.color,boxShadow:'0 0 16px '+r2Banner.color}},h('b',null,'STAR RING'),r2Banner.text)
+      ),
       h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
       h('div',{className:'gp-hand-rows'},
         h('div',{className:'gp-hand-row'},
