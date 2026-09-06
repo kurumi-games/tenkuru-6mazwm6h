@@ -731,8 +731,10 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 }
 /* 裏面カードを小さく（高さ縮小＝情報密度up） */
 .gp-dealer-card{
-  width:calc(20 * var(--u)) !important;
+  width:calc(30 * var(--u)) !important;
 }
+.gp-dealer-cards{gap:calc(2.5 * var(--u)) !important;}
+.gp-dealer-card .dv{font-size:calc(15 * var(--u)) !important;}
 
 /* 場の中のごちゃついた模様を全部消す（スッキリ版）
    同心円(::before) / 微粒子(::after) / 惑星アイコン を非表示に。
@@ -1359,6 +1361,15 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7 .gp-dealer-card{background:url('img/challenge07-rival-card-front.webp') center/contain no-repeat !important;border:none !important;box-shadow:none !important;}
 .gp-screen.ch7 .gp-dealer-card{background-image:url('img/challenge07-rival-card-front.webp');}
 .gp-screen.ch7 .gp-dealer-card .dv{color:#4a1a3e;text-shadow:0 0 3px rgba(255,255,255,.9);font-size:calc(12 * var(--u));}
+/* v109: 相手の手札の選択カーソル。1枚ずつ移動して、出す札で止まってタップ */
+.gp-dealer-card .dcur{position:absolute;inset:calc(-3 * var(--u));border:2px solid rgba(255,170,230,.95);border-radius:calc(4 * var(--u));box-shadow:0 0 10px rgba(255,150,230,.8),inset 0 0 8px rgba(255,150,230,.35);pointer-events:none;z-index:8;animation:dcurBlink 1.1s ease-in-out infinite;}
+.gp-screen.ch7.f2 .gp-dealer-card .dcur{border-color:rgba(200,140,255,.95);box-shadow:0 0 10px rgba(180,110,255,.85),inset 0 0 8px rgba(180,110,255,.35);}
+@keyframes dcurBlink{0%,100%{opacity:.85;}50%{opacity:1;}}
+.gp-dealer-card.dsel{transform:translateY(calc(-5 * var(--u)));transition:transform .12s ease;z-index:6;}
+.gp-dealer-card .dcur.tap{animation:dcurTap .28s ease-out both;border-color:#fff;}
+@keyframes dcurTap{0%{transform:scale(1);box-shadow:0 0 14px rgba(255,255,255,1),inset 0 0 12px rgba(255,255,255,.6);}100%{transform:scale(1.35);opacity:0;}}
+.dcur-ripple{position:absolute;left:50%;top:50%;width:calc(50 * var(--u));height:calc(50 * var(--u));margin:calc(-25 * var(--u)) 0 0 calc(-25 * var(--u));border-radius:50%;border:2px solid rgba(255,255,255,.9);pointer-events:none;z-index:9;animation:dcurRip .4s ease-out both;}
+@keyframes dcurRip{0%{transform:scale(.3);opacity:1;}100%{transform:scale(1.4);opacity:0;}}
 /* 相手の札がスーッと降りてくる */
 .fly-card{position:fixed;z-index:120;pointer-events:none;width:var(--fw);height:calc(var(--fw) * 1.4);margin:calc(var(--fw) * -0.7) 0 0 calc(var(--fw) * -0.5);
   border-radius:calc(4 * var(--u));background:linear-gradient(165deg,#f5912a,#c4600f);border:1px solid rgba(255,255,255,.55);box-shadow:0 8px 22px rgba(0,0,0,.5),0 0 18px rgba(255,170,80,.5);
@@ -2646,7 +2657,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v108'; // v108: 得点を小さく端へ／上部の大枠を削除／相手の手札は表面カード／ルナと手札を近づけ、手札と場に距離
+const APP_VER='v109'; // v109: 相手の手札を大きく／選択カーソル（1枚ずつ移動して止まり、タップしてから降りる）
+// v108: 得点を小さく端へ／上部の大枠を削除／相手の手札は表面カード／ルナと手札を近づけ、手札と場に距離
 // v107: 画面配置の見直し（得点をTIME／曲ボタンの下へ、上部を空けてキャラを上に、場を中央寄せ、手札を上げる）／相手の手札を表向きに／相手の札はスーッと降りてくる
 // v106: タップした環の札は「その色の札」として手札に残り、出せる時に必ずその表面で場に出る
 // v105: 隠しコマンド（チュートリアルの TUTORIAL を7回タップでルナ戦へ）
@@ -3315,6 +3327,13 @@ function App(){
   }
   // 発動：手札の環が弾け、絵の星環が膨らんで光る
   function r2Tap(type,rn){
+    const flags0=dRingR.current;const i0=flags0.findIndex(f=>f===type);if(i0<0)return;
+    if(!r2Tap._go){ // v109: まずカーソルがその環の札まで移動してタップ
+      if(curBusyR.current||flyR.current)return;
+      r2R.current.tappedThisRound=true;
+      cursorTo(i0,()=>{r2Tap._go=true;try{r2Tap(type,rn);}finally{r2Tap._go=false;}},()=>phaseR.current==='playing'&&!resolvingR.current&&countNumR.current<0);
+      return;
+    }
     const flags=dRingR.current.slice();const i=flags.findIndex(f=>f===type);if(i<0)return;
     const st=r2R.current;st.tappedThisRound=true;
     const R=REIPIA_RINGS[type];
@@ -3351,6 +3370,22 @@ function App(){
   }
   const eraseBusyR=useRef(false);const tapFaceR=useRef(null);
   const flyR=useRef(null);const[flyCard,setFlyCard]=useState(null); // v107 降りてくる相手の札
+  // v109 選択カーソル：常に相手の手札のどこかにいて、出す札まで1枚ずつ移動→タップ→降下
+  const[dCur,setDCur]=useState({idx:0,tap:false});const dCurR=useRef(0);const curBusyR=useRef(false);const curT=useRef([]);
+  const CUR_STEP=110,CUR_HOLD=230;
+  function cursorTo(target,onArrive,check){ // check(): 途中で中止すべきなら false
+    if(curBusyR.current)return false;
+    curT.current.forEach(clearTimeout);curT.current=[];curBusyR.current=true;
+    const n=dHR.current.length;let cur=Math.max(0,Math.min(dCurR.current,Math.max(0,n-1)));const tgt=Math.max(0,Math.min(target,n-1));
+    const steps=[];while(cur!==tgt){cur+=cur<tgt?1:-1;steps.push(cur);}
+    const at=(ms,f)=>curT.current.push(setTimeout(f,ms));
+    steps.forEach((ix,k)=>at((k+1)*CUR_STEP,()=>{if(check&&!check()){curBusyR.current=false;return;}dCurR.current=ix;setDCur({idx:ix,tap:false});try{fxTone({f:1500,type:'sine',v:0.012,a:0.002,d:0.03,rev:0.1});}catch(e){}}));
+    const arrive=(steps.length+1)*CUR_STEP+120;
+    at(arrive,()=>{if(check&&!check()){curBusyR.current=false;return;}setDCur({idx:tgt,tap:true});try{fxTone({f:2200,f2:1200,type:'sine',v:0.05,a:0.002,d:0.12,rev:0.3});}catch(e){}});
+    at(arrive+CUR_HOLD,()=>{curBusyR.current=false;setDCur({idx:tgt,tap:false});if(check&&!check())return;onArrive&&onArrive();});
+    return true;
+  }
+  function cancelCursor(){curT.current.forEach(clearTimeout);curT.current=[];curBusyR.current=false;setDCur(c=>({idx:c.idx,tap:false}));}
   function r2CheckUnlock(newPH){
     const fl=pLockR.current;if(!fl.some(Boolean))return;
     if(!newPH.filter((v,i)=>v!==null&&!fl[i]).length){setLocks(newPH.map(()=>false));r2Say('ロック解除',REIPIA_RINGS.lock.color);}
@@ -3647,7 +3682,7 @@ function App(){
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
   // ── ストーリー進行 ──
-  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
+  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
   function startStage(arIdx,stIdx){
     const ar=STAGES.areas[arIdx],st=ar.stages[stIdx];
     if(!st||st.comingSoon){goMap();return;} // v54: 準備中は開始しない
@@ -3709,7 +3744,7 @@ function App(){
     roundTokR.current++;    // 古い遷移予約を全部無効化
     clearTimers();          // 残ってるカウントダウン/タイマーも掃除
     resolvingR.current=false;exitLink(); // v54: 時間停止の残骸を必ず解除
-    rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);rStopT.current=[];setCmd(null);setEraseIdx([]);pausedR.current=false;setPaused(false);setInfoRing(null);flyR.current=null;setFlyCard(null); // v84/v91/v107
+    rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);rStopT.current=[];setCmd(null);setEraseIdx([]);pausedR.current=false;setPaused(false);setInfoRing(null);flyR.current=null;setFlyCard(null);cancelCursor(); // v84/v91/v107/v109
     setPhase('playing');phaseR.current='playing';
     setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldSp([]);
     setFieldColors([]); // v46: 時間切れ後に前ラウンドの色記録が残って自分のカードがオレンジになるバグ修正
@@ -3819,8 +3854,18 @@ function App(){
     resumeAC();setTimeout(()=>playPlaceSE(false),100);
     let idx=dHand.findIndex((v,i)=>v===chosen&&isTapped(rf[i]));if(idx<0)idx=dHand.findIndex((v,i)=>v===chosen&&!rf[i]); // タップ済みの札を優先して出す
     const face=isTapped(rf[idx])?rf[idx].slice(7):null;
+    if(flyR.current||curBusyR.current)return;
+    // v109: まずカーソルが出す札まで1枚ずつ移動して止まり、タップ。その後で降りてくる
+    if(!aiPlay._fromCursor){
+      const ok=cursorTo(idx,()=>{ // 到着・タップ後：まだ出せるなら降下開始
+        const h=dHR.current,r=dRingR.current;let j=h.findIndex((v,i)=>v===chosen&&isTapped(r[i]));if(j<0)j=h.findIndex((v,i)=>v===chosen&&!r[i]);
+        if(j<0||!canPlay(chosen,fieldSumR.current,fieldR.current)||resolvingR.current||countNumR.current>=0){scheduleAi(rn);return;}
+        aiPlay._fromCursor=true;try{aiPlay(rn);}finally{aiPlay._fromCursor=false;}
+      },()=>phaseR.current==='playing'&&!resolvingR.current&&countNumR.current<0&&!pausedR.current&&canPlay(chosen,fieldSumR.current,fieldR.current));
+      if(!ok)scheduleAi(rn);
+      return;
+    }
     // v107: すぐ置かず、相手の手札から場へスーッと降りてくる。着地時にまだ出せる札なら置く（プレイヤーが先に動いて出せなくなったら戻す）
-    if(flyR.current)return;
     const u=window.innerHeight/640;
     const cardEl=document.querySelectorAll('.gp-dealer-cards .gp-dealer-card')[idx];const fc=document.querySelector('.gp-field-cards');
     const cr=cardEl?cardEl.getBoundingClientRect():{left:window.innerWidth/2,top:150*u,width:20*u,height:30*u};
@@ -3829,6 +3874,7 @@ function App(){
     const x0=cr.left+cr.width/2,y0=cr.top+cr.height/2,x1=fr.left+n*(cardW+gap)+cardW/2,y1=fr.top+fr.height/2;
     const newDH=dHand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx);
     setDealer(newDH,newRf);
+    {const ci=Math.max(0,Math.min(dCurR.current,newDH.length-1));dCurR.current=ci;setDCur({idx:ci,tap:false});}
     const FLY_MS=680;
     flyR.current={value:chosen,face,rf:rf[idx]};setFlyCard({k:Date.now(),value:chosen,face,x0,y0,x1,y1,w:cardW,d:FLY_MS});
     try{fxAir({v:0.03,a:0.02,d:0.5,hp:4000,rev:0.5});}catch(e){}
@@ -3991,7 +4037,7 @@ function App(){
   const so=stageOptsR.current||{};
   const rival=(form2&&so.form2Name)||so.rivalName||'DEALER';
   // v62: 第7は「ルナ」／v70: 第2形態は「レイピア」
-  return h('div',{className:'gp-screen'+(so.challenge?' ch7':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
+  return h('div',{className:'gp-screen'+(so.challenge?' ch7':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
     h(ChampionLayer,{champ:stageOptsR.current&&stageOptsR.current.champion?CHAMPIONS[stageOptsR.current.champion]:null}), // v61 チャンピオン戦は立ち絵
     so.challenge&&h('div',{className:'champ-layer'},
       form2
@@ -4098,7 +4144,8 @@ function App(){
     h('div',{className:'gp-dealer-area'},
       h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
       h('div',{className:'gp-dealer-cards'},
-        dH.slice(0,12).map((v,i)=>h('div',{key:i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')},h('span',{className:'dv'},v),(dRing[i]&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined})))
+        dH.slice(0,12).map((v,i)=>h('div',{key:i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')+(dCur.idx===i?' dsel':'')},h('span',{className:'dv'},v),
+          dCur.idx===i&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.idx===i&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined})))
       )
     ),
     srBanner&&h('div',{className:'sr-banner'},h('b',null,'STAR RING'),'星環 ── 完成'),
