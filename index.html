@@ -1299,6 +1299,33 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* 指名カード：金の外枠だけをカードの外周に重ねる（中央は透明、数字を覆わない） */
 .card-stage .rl-frame{position:absolute;inset:-6%;width:112%;height:112%;object-fit:fill;pointer-events:none;z-index:7;animation:goldBlink 2.2s ease-in-out infinite;}
 @keyframes goldBlink{0%,100%{opacity:.75;filter:drop-shadow(0 0 2px rgba(255,210,110,.5));}50%{opacity:1;filter:drop-shadow(0 0 7px rgba(255,220,130,1));}}
+/* v94: ルナの技「幸福標本」 */
+.lk-veil{position:fixed;inset:0;z-index:150;pointer-events:none;background:radial-gradient(ellipse at 50% 30%,rgba(255,120,200,.10),rgba(6,2,16,.62) 70%);animation:chVeilIn .35s ease both;}
+.lk-veil.out{animation:chVeilOut .5s ease both;}
+.lk-luna{position:fixed;left:50%;z-index:152;pointer-events:none;width:calc(120 * var(--u));height:calc(180 * var(--u));margin-left:calc(-60 * var(--u));transform-origin:50% 30%;animation:lkLunaIn .6s cubic-bezier(.2,1,.3,1) both;}
+.gp-screen.lk-on .gp-field-area{position:relative;z-index:156;} /* 演出中は場のカードを演出より前に */
+@keyframes lkLunaIn{0%{opacity:0;transform:scale(.8) translateY(calc(8 * var(--u)));}100%{opacity:1;transform:scale(1) translateY(0);}}
+.lk-luna.out{animation:lkLunaOut .5s ease both;}
+@keyframes lkLunaOut{to{opacity:0;transform:scale(1.04);}}
+.lk-luna img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
+.lk-luna .back{animation:lkWing 3s ease-in-out infinite;transform-origin:50% 40%;}
+@keyframes lkWing{0%,100%{transform:scale(1);opacity:.95;}50%{transform:scale(1.03);opacity:1;}}
+.lk-luna .body{animation:lkBody .9s cubic-bezier(.2,1,.3,1) .15s both;}
+@keyframes lkBody{0%{transform:translateY(calc(6 * var(--u))) scale(.97);}100%{transform:none;}}
+.lk-luna .chest{position:absolute;left:44%;top:39%;width:22%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(255,170,230,.9) 25%,rgba(255,120,210,.35) 50%,transparent 70%);opacity:0;animation:lkChest 1.4s ease-out .1s both;}
+@keyframes lkChest{0%{opacity:0;transform:translate(-50%,-50%) scale(.3);}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}55%{opacity:.7;transform:translate(-50%,-50%) scale(.9);}80%{opacity:1;transform:translate(-50%,-50%) scale(1.3);}100%{opacity:0;transform:translate(-50%,-50%) scale(1.6);}}
+.lk-sigil{position:fixed;z-index:151;pointer-events:none;transform:translate(-50%,-50%);background:url('img/luna-sigil.png') center/contain no-repeat;animation:lkSigilIn .7s cubic-bezier(.2,1,.3,1) both, lkSigilSpin 14s linear .7s infinite;filter:drop-shadow(0 0 14px rgba(255,140,220,.8));}
+@keyframes lkSigilIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-40deg);}100%{opacity:.95;transform:translate(-50%,-50%) scale(1) rotate(0);}}
+@keyframes lkSigilSpin{to{transform:translate(-50%,-50%) rotate(360deg);}}
+.lk-sigil.out{animation:lkSigilOut .5s ease both;}
+@keyframes lkSigilOut{to{opacity:0;transform:translate(-50%,-50%) scale(1.15);}}
+.lk-pin{position:fixed;z-index:157;pointer-events:none;transform:translate(-50%,0);background:center bottom/contain no-repeat;filter:drop-shadow(0 0 6px rgba(255,170,240,.9));animation:lkPinDrop .32s cubic-bezier(.5,0,.9,.6) both;}
+@keyframes lkPinDrop{0%{opacity:0;transform:translate(-50%,calc(-220 * var(--u)));}30%{opacity:1;}100%{opacity:1;transform:translate(-50%,0);}}
+.lk-pin.out{animation:lkPinOut .5s ease both;}
+@keyframes lkPinOut{to{opacity:0;transform:translate(-50%,calc(-30 * var(--u)));}}
+.lk-hit{position:fixed;z-index:158;pointer-events:none;width:calc(60 * var(--u));height:calc(60 * var(--u));margin:calc(-30 * var(--u)) 0 0 calc(-30 * var(--u));border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.9),rgba(255,160,230,.6) 40%,transparent 70%);animation:lkHit .45s ease-out both;}
+@keyframes lkHit{0%{opacity:1;transform:scale(.2);}100%{opacity:0;transform:scale(1.6);}}
 /* v91: 一時停止ボタン（曲ボタンの真下）とオーバーレイ */
 .gp-pause-btn{position:absolute;right:calc(12 * var(--u));top:calc(84 * var(--u));width:calc(40 * var(--u));height:calc(30 * var(--u));border-radius:calc(10 * var(--u));z-index:6;
   background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#e0d4f5;display:flex;align-items:center;justify-content:center;gap:calc(3 * var(--u));cursor:pointer;opacity:.75;}
@@ -2560,7 +2587,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v93'; // v93: 台詞の文字送りを音声の長さに合わせた（ルナ3.4秒／レイピア2文9秒）
+const APP_VER='v94'; // v94: ルナの技「幸福標本」演出（胸の蝶→手を差し出す→魔法陣→4本の標本針→4枚強制配置）
+// v93: 台詞の文字送りを音声の長さに合わせた（ルナ3.4秒／レイピア2文9秒）
 // v92: レイピアの台詞音声を1本に（reipia-1.mp3 に2文まとめて）
 // v91: 一時停止ボタン／状態アイコンをタイマー直下＋タップで説明／変身SEのチャイム廃止／台詞の音声ファイル差し込み口
 // v90: 星環を新しい4枚（正方形の紋章）に差し替え、キャラから離して四隅に配置
@@ -3310,26 +3338,42 @@ function App(){
   }
   const srPendingR=useRef(false);
   // 星環完成：場を全部消して、温存した環付きカードを表向きで並べ、10完成として得点
+  // v94 ルナの技「幸福標本（こうふくひょうほん）」：胸の蝶が光る→手を差し出す→魔法陣→標本針が1本ずつ落ちて温存カードを場に留める→10完成
+  const[lkFx,setLkFx]=useState(null); // {ph, slots:[x..], sigil:{x,y,size}, lunaTop, pins:[{i,x,y}], hits:[]}
+  const LK_T={sigil:900,pin0:1600,pinGap:320,pinFall:300,end:0};
   function starRingComplete(rn){
     if(!starRingActive()||resolvingR.current||sceneOnR.current)return;
     clearTimers();exitLink();lockR.current=true;resolvingR.current=true;
     const hand=dHR.current,flags=dRingR.current;
     const ringed=hand.filter((v,i)=>flags[i]),rest=hand.filter((v,i)=>!flags[i]);
     setDealer(rest,rest.map(()=>false));
-    setSrBanner(true);setTimeout(()=>setSrBanner(false),2600);
-    try{resumeAC();fxTone({f:900,f2:200,type:'sine',v:0.12,a:0.005,d:0.5,rev:0.6});noise({vol:0.1,dur:0.2,start:0,lpFreq:3000,q:0.7});}catch(e){}
-    const tok=roundTokR.current;
-    setTimeout(()=>{ if(tok!==roundTokR.current)return;
-      resetField();setFieldRing([]);
-      ringed.forEach((v,i)=>setTimeout(()=>{ if(tok!==roundTokR.current)return;
+    // 画面上の位置を測る（場の4枚枠・立ち絵）
+    const u=window.innerHeight/640;
+    const fc=document.querySelector('.gp-field-cards');const fr=fc?fc.getBoundingClientRect():{left:0,top:window.innerHeight*0.4,width:window.innerWidth,height:80};
+    const gap=5*u,cardW=(fr.width-3*gap)/4,frameW=fr.width,fl=fr.left; // 場の枠＝4枚ぶん（v73）
+    const slots=[0,1,2,3].map(i=>fl+i*(cardW+gap)+cardW/2);
+    const bi=document.querySelector('.boss-img');const br=bi?bi.getBoundingClientRect():{top:70*u};
+    const geo={slots,cardTop:fr.top,sigil:{x:fr.left+fr.width/2,y:fr.top+fr.height/2,size:Math.min(fr.width,230*u)},lunaTop:Math.max(52*u,br.top-12*u)};
+    setLkFx({ph:0,geo,pins:[],hits:[],out:false});
+    showLunaSkill();
+    try{resumeAC();fxBell({f:2637,v:0.06,d:1.4,bright:1.3,rev:0.85});fxTone({f:160,f2:320,type:'sine',v:0.08,a:0.4,d:1.2,rev:0.8});}catch(e){}
+    const tok=roundTokR.current;const T=[];const at=(ms,f)=>T.push(setTimeout(()=>{if(tok===roundTokR.current)f();},ms));
+    at(LK_T.sigil,()=>{setLkFx(s=>s&&({...s,ph:1}));resetField();setFieldRing([]);try{fxAir({v:0.06,a:0.2,d:0.9,hp:2500,rev:0.85});fxTone({f:110,f2:55,type:'sine',v:0.16,a:0.01,d:0.7,rev:0.5});}catch(e){}});
+    ringed.forEach((v,i)=>{
+      const t0=LK_T.pin0+i*LK_T.pinGap;
+      at(t0,()=>{setLkFx(s=>s&&({...s,pins:[...s.pins,{i}]}));try{noise({vol:0.08,dur:0.08,start:0,lpFreq:6000,q:0.8});}catch(e){}});
+      at(t0+LK_T.pinFall,()=>{
         const nf=[...fieldR.current,v];setField(nf);fieldR.current=nf;fieldSumR.current=nf.reduce((a,b)=>a+b,0);setFieldSum(fieldSumR.current);
         setFieldColors(p=>[...p,'dealer']);colorsR.current=[...colorsR.current,'dealer'];setFieldSp(p=>[...p,false]);setFieldShift(p=>[...p,false]);setFieldRing(p=>[...p,true]);
-        try{playPlaceSE(false);fxBell({f:1568+i*200,v:0.05,d:0.6,bright:1.2,rev:0.6});}catch(e){}
-        if(i===ringed.length-1)setTimeout(()=>{if(tok===roundTokR.current)completeTen(ringed,'dealer',rn);},350);
-      },i*260));
-    },450);
-    if(!rest.length){const nd=createDeck();setTimeout(()=>{if(tok===roundTokR.current)setDealer(nd);},ringed.length*260+900);}
+        setLkFx(s=>s&&({...s,hits:[...s.hits,{i,k:Date.now()}]}));
+        try{playPlaceSE(false);fxTone({f:3200,f2:1200,type:'sine',v:0.06,a:0.002,d:0.25,rev:0.5});noise({vol:0.12,dur:0.06,start:0,lpFreq:9000,hpFreq:2000,q:0.9});}catch(e){}
+        if(i===ringed.length-1){at(t0+LK_T.pinFall+450,()=>{setLkFx(s=>s&&({...s,out:true}));completeTen(ringed,'dealer',rn);});at(t0+LK_T.pinFall+1100,()=>setLkFx(null));}
+      });
+    });
+    if(!rest.length){const nd=createDeck();at(LK_T.pin0+ringed.length*LK_T.pinGap+900,()=>setDealer(nd));}
   }
+  const LUNA_SKILL={jp:'幸福標本',en:'SPECIMEN OF BLISS',color:'#ff9fd6'};
+  function showLunaSkill(){const item={k:Date.now(),jp:LUNA_SKILL.jp,en:LUNA_SKILL.en,color:LUNA_SKILL.color};setSkillFx(item);setTimeout(()=>setSkillFx(s=>s&&s.k===item.k?null:s),1500);}
   const[pPt,setPPt]=useState(0);
   const[dPt,setDPt]=useState(0);
   const[rNum,setRNum]=useState(1);
@@ -3464,7 +3508,7 @@ function App(){
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
   // ── ストーリー進行 ──
-  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
+  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);setLkFx(null);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
   function startStage(arIdx,stIdx){
     const ar=STAGES.areas[arIdx],st=ar.stages[stIdx];
     if(!st||st.comingSoon){goMap();return;} // v54: 準備中は開始しない
@@ -3499,7 +3543,7 @@ function App(){
     chronoR.current={armed:!!opts.chrono,count:0,pending:false,deals:0};
     roundSecR.current=opts.timeLimit||10;
     coreShiftR.current={active:opts.ability==='coreShift',used:false};setCoreShiftUsed(false);
-    form2R.current=false;setForm2(false);shiftPendingR.current=false;setShiftScene(null);sceneOnR.current=false;setScreenPop(false);setPtBurst(false);srPendingR.current=false;setFieldRing([]);setSrBanner(false);r2R.current={rounds:0,timeLeft:0,cmdNext:null,tappedThisRound:false};setTimeRounds(0);setTapIdx(-1);setLocks([]);setCmd(null);rStopR.current=false;setRStop(false);setEraseIdx([]);colorsR.current=[]; // v70/v75/v79/v85
+    form2R.current=false;setForm2(false);shiftPendingR.current=false;setShiftScene(null);sceneOnR.current=false;setScreenPop(false);setPtBurst(false);srPendingR.current=false;setFieldRing([]);setSrBanner(false);setLkFx(null);r2R.current={rounds:0,timeLeft:0,cmdNext:null,tappedThisRound:false};setTimeRounds(0);setTapIdx(-1);setLocks([]);setCmd(null);rStopR.current=false;setRStop(false);setEraseIdx([]);colorsR.current=[]; // v70/v75/v79/v85
     dealPlayer(p);setDealer(d);exitLink();
     setPPt(0);setDPt(0);pPtR.current=0;dPtR.current=0;
     setRNum(1);setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;
@@ -3769,7 +3813,7 @@ function App(){
   const so=stageOptsR.current||{};
   const rival=(form2&&so.form2Name)||so.rivalName||'DEALER';
   // v62: 第7は「ルナ」／v70: 第2形態は「レイピア」
-  return h('div',{className:'gp-screen'+(so.challenge?' ch7':'')+(screenPop?' form2-pop':'')},
+  return h('div',{className:'gp-screen'+(so.challenge?' ch7':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
     h(ChampionLayer,{champ:stageOptsR.current&&stageOptsR.current.champion?CHAMPIONS[stageOptsR.current.champion]:null}), // v61 チャンピオン戦は立ち絵
     so.challenge&&h('div',{className:'champ-layer'},
       form2
@@ -3850,6 +3894,18 @@ function App(){
     infoRing&&h('div',{className:'ring-info',style:{'--sc':REIPIA_RINGS[infoRing].color},onClick:()=>setInfoRing(null)},
       h('div',{className:'n'},REIPIA_RINGS[infoRing].skill+'（'+REIPIA_RINGS[infoRing].name+'）'),
       h('div',{className:'d'},REIPIA_RINGS[infoRing].desc+(infoRing==='time'?'　あと'+timeRounds+'ラウンド':infoRing==='lock'?'　ロック中 '+pLock.filter(Boolean).length+'枚':''))
+    ),
+    // v94: 幸福標本の演出
+    lkFx&&h(React.Fragment,null,
+      h('div',{className:'lk-veil'+(lkFx.out?' out':'')}),
+      h('div',{className:'lk-luna'+(lkFx.out?' out':''),style:{top:lkFx.geo.lunaTop+'px'}},
+        h('img',{className:'back',src:'img/luna-action-back.png',alt:'',draggable:false}),
+        h('img',{className:'body',src:'img/luna-action-body.png',alt:'',draggable:false}),
+        h('div',{className:'chest'})
+      ),
+      lkFx.ph>=1&&h('div',{className:'lk-sigil'+(lkFx.out?' out':''),style:{left:lkFx.geo.sigil.x+'px',top:lkFx.geo.sigil.y+'px',width:lkFx.geo.sigil.size+'px',height:lkFx.geo.sigil.size+'px'}}),
+      lkFx.pins.map(p=>h('div',{key:'p'+p.i,className:'lk-pin'+(lkFx.out?' out':''),style:{left:lkFx.geo.slots[p.i]+'px',top:(lkFx.geo.cardTop-130*(window.innerHeight/640))+'px',width:'calc(26 * var(--u))',height:'calc(140 * var(--u))',backgroundImage:'url(img/luna-pin-'+(p.i+1)+'.png)'}})),
+      lkFx.hits.map(hh=>h('div',{key:'h'+hh.k,className:'lk-hit',style:{left:lkFx.geo.slots[hh.i]+'px',top:lkFx.geo.cardTop+'px'}}))
     ),
     // v91: 一時停止
     h('div',{className:'gp-pause-btn'+((paused||canPause())?'':' off'),onClick:togglePause,title:'一時停止'},h('i'),h('i')),
