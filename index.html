@@ -1441,6 +1441,10 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7 .gp-field-sum .sep{color:#c9a6f0;}
 .gp-screen.ch7 .gp-field-sum .ato b{color:#fff !important;}
 
+/* v103: 場の高さを固定（完成演出で中身が膨らんでも下の手札マットが動かない） */
+.gp-screen .gp-field-cards{height:calc(var(--card-w) * 1.4);min-height:calc(var(--card-w) * 1.4);max-height:calc(var(--card-w) * 1.4);overflow:visible;}
+.gp-screen .gp-field-sum{height:calc(26 * var(--u));min-height:calc(26 * var(--u));max-height:calc(26 * var(--u));overflow:visible;align-items:center;}
+.gp-screen .gp-field-sum .num{display:inline-block;transform-origin:50% 50%;}
 /* ===== v73: 場のカードは4枚ぶんの枠を中央に置き、その左端から順に並べる（1枚目の位置が動かない） ===== */
 .gp-screen .gp-field-cards{width:calc(var(--card-w) * 4 + calc(5 * var(--u)) * 3);max-width:100%;margin:0 auto;justify-content:flex-start !important;}
 
@@ -2589,7 +2593,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v102'; // v102: 幸福標本の見直し（ルナの右へエネルギーが流れて蝶が生まれる／霧が先に場を覆ってからカードが出る／四角い背景を廃止）
+const APP_VER='v103'; // v103: 10完成の瞬間に場の高さが伸びて手札マットが下がるのを固定
+// v102: 幸福標本の見直し（ルナの右へエネルギーが流れて蝶が生まれる／霧が先に場を覆ってからカードが出る／四角い背景を廃止）
 // v101: 指名を即時に／ロックと指名の衝突を防止／ルナの立ち絵を軽く浮かせる／環だけ残った手札の補充を監視で確実に
 // v100: 蝶の飛び方を自然に（滑らかな曲線・ふわふわ上下・進行方向に体を向ける・速度の緩急）
 // v99: 鱗粉の霧を煙スプライトの重ね合わせに作り直し（もやもや漂う）
