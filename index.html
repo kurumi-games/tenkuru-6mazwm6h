@@ -2586,7 +2586,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v97'; // v97: 星環が途中で止まる問題（合う札が来ない）を修正。合う札が無ければルナが引き当てる／10になってたら開始時に必ず発動
+const APP_VER='v98'; // v98: 蝶の経路を修正（ルナの手札を右→左、少し下がって場を左→右）
+// v97: 星環が途中で止まる問題（合う札が来ない）を修正。合う札が無ければルナが引き当てる／10になってたら開始時に必ず発動
 // v96: 幸福標本の演出を「影→闇の蝶→手札の上を横切る→場に鱗粉→晴れたら10完成」に作り直し
 // v95: 画像を全部WebP化（91MB→7MB）／第7ステージ開始前に画像を先読みしてから開始
 // v94: ルナの技「幸福標本」演出（胸の蝶→手を差し出す→魔法陣→4本の標本針→4枚強制配置）
@@ -3371,16 +3372,16 @@ function App(){
     const R=sel=>{const e=document.querySelector(sel);return e?e.getBoundingClientRect():null;};
     const pr=R('.boss-img')||{left:vw/2-50*u,top:70*u,width:100*u,height:150*u};
     const fr=R('.gp-field-cards')||{left:vw*0.15,top:window.innerHeight*0.38,width:vw*0.7,height:80*u};
-    const hr=R('.gp-hand-rows')||{left:0,top:window.innerHeight*0.62,width:vw,height:150*u};
+    const dr=R('.gp-dealer-cards')||{left:vw*0.2,top:pr.top+pr.height+6*u,width:vw*0.6,height:30*u}; // ルナの手札
     const born={x:Math.min(vw-40*u,pr.left+pr.width+34*u),y:pr.top+pr.height*0.45};
     // 蝶の飛行経路（px）
     const path=[
       {x:born.x,y:born.y,r:0,t:LK_T.fly},
-      {x:vw-38*u,y:hr.top-14*u,r:150,t:LK_T.handIn},                 // 右端を下って手札の右上へ
-      {x:36*u,y:hr.top+6*u,r:-90,t:LK_T.handOut},                    // 手札の上を左へ
-      {x:vw-26*u,y:fr.top+fr.height*0.45,r:90,t:LK_T.fieldIn},       // 右へ上がって場の右端へ
-      {x:20*u,y:fr.top+fr.height*0.3,r:-80,t:LK_T.fieldOut},         // 場を左へ横切る（鱗粉）
-      {x:-60*u,y:fr.top-80*u,r:-40,t:LK_T.done}                       // 左上へ抜ける
+      {x:dr.left+dr.width+14*u,y:dr.top+dr.height*0.5,r:-100,t:LK_T.handIn},   // ルナの手札の右端へ
+      {x:dr.left-14*u,y:dr.top+dr.height*0.5,r:-90,t:LK_T.handOut},            // ルナの手札を右→左
+      {x:fr.left-16*u,y:fr.top+fr.height*0.4,r:100,t:LK_T.fieldIn},            // 少し下がって場の左端へ
+      {x:fr.left+fr.width+16*u,y:fr.top+fr.height*0.35,r:80,t:LK_T.fieldOut},  // 場を左→右（鱗粉）
+      {x:vw+60*u,y:fr.top-70*u,r:40,t:LK_T.done}                                // 右上へ抜ける
     ];
     const geo={pr,fr,hr,born,path,u,shadowTx:(born.x-(pr.left+pr.width/2)),shadowTy:(born.y-(pr.top+pr.height/2))};
     setLkFx({ph:0,geo,scales:[],dust:null,out:false});
