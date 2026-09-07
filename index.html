@@ -2667,7 +2667,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v114'; // v114(2026/09/07): モルフォを強化。カーソル移動30ms・到達60ms・保持70ms・降下240ms（合計で約35%短縮）。10完成の一手だけ下限220msを維持
+const APP_VER='v115'; // v115(2026/09/07): 場のカードを拡大 fieldW 53→64（元の値は53。DEFAULT_LAYOUT のコメント参照）
+// v114(2026/09/07): モルフォを強化。カーソル移動30ms・到達60ms・保持70ms・降下240ms（合計で約35%短縮）。10完成の一手だけ下限220msを維持
 // v113(2026/09/07): 素材の最適化。画像を表示サイズに合わせて縮小（展開RAM 244MB→103MB）／BGM 112kbps・ボイス モノラル96kbps／変身動画 720x1280
 // v112: 第8ステージ「モルフォ」追加（出すのが速い／2ラウンドに1度、手札2枚の数字が1秒ごとに変わる幻惑）
 // v111: 出した札の枠は完全に空（白紙を置かない）
@@ -3205,7 +3206,10 @@ function GameEndScreen({data,onRestart,onHome}){
   );
 }
 
-const DEFAULT_LAYOUT={handW:53,handY:0,fieldW:53,sumSize:30,sumX:1,sumY:-8,gapDF:10,gapFH:38};
+const DEFAULT_LAYOUT={handW:53,handY:0,fieldW:64,sumSize:30,sumX:1,sumY:-8,gapDF:10,gapFH:38};
+// v115: 場のカードを 53 → 64 に拡大（場は4枚までなので余白に余裕がある）
+// ★元に戻す時は fieldW を 53 に。試すなら 60(控えめ) / 70(さらに大きい) / 76(ほぼ限界)
+// 参考: 4枚+隙間の合計 = fieldW*4+15u、画面幅は360u
 
 // ── App ──
 function App(){
