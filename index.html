@@ -1381,11 +1381,16 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .dcur-ripple{position:absolute;left:50%;top:50%;width:calc(50 * var(--u));height:calc(50 * var(--u));margin:calc(-25 * var(--u)) 0 0 calc(-25 * var(--u));border-radius:50%;border:2px solid rgba(255,255,255,.9);pointer-events:none;z-index:9;animation:dcurRip .4s ease-out both;}
 @keyframes dcurRip{0%{transform:scale(.3);opacity:1;}100%{transform:scale(1.4);opacity:0;}}
 /* 相手の札がスーッと降りてくる */
+/* v116: 通常ステージ(1〜6)の飛ぶ札を、手札や場と同じ白い表向きカードに統一。
+   以前はv108以前のオレンジ配色が残っていて、移動中だけ色と数字色が変わっていた */
 .fly-card{position:fixed;z-index:120;pointer-events:none;width:var(--fw);height:calc(var(--fw) * 1.4);margin:calc(var(--fw) * -0.7) 0 0 calc(var(--fw) * -0.5);
-  border-radius:calc(4 * var(--u));background:linear-gradient(165deg,#f5912a,#c4600f);border:1px solid rgba(255,255,255,.55);box-shadow:0 8px 22px rgba(0,0,0,.5),0 0 18px rgba(255,170,80,.5);
-  display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;font-size:calc(var(--fw) * 0.5);color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.6);
+  border-radius:calc(4 * var(--u));background:linear-gradient(170deg,#ffffff,#e9edf6);border:1px solid rgba(120,130,170,.5);box-shadow:0 8px 22px rgba(0,0,0,.35),0 2px 6px rgba(0,0,0,.25);
+  display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;font-size:calc(var(--fw) * 0.5);color:#2b2f45;text-shadow:none;
   transform:translate(var(--x0),var(--y0)) scale(.6);animation:flyDown var(--d) cubic-bezier(.35,.05,.4,1) both;}
-.gp-screen.ch7 .fly-card{background:url('img/challenge07-rival-card-front.webp') center/100% 100% no-repeat;border:none;color:#4a1a3e;text-shadow:0 0 4px rgba(255,255,255,.9);}
+.gp-screen.ch7 .fly-card{background:url('img/challenge07-rival-card-front.webp') center/100% 100% no-repeat;border:none;color:#4a1a3e;text-shadow:0 0 4px rgba(255,255,255,.9);box-shadow:none;}
+/* v116: 第8(モルフォ)は手札が別の絵＋色相回転なので、飛ぶ札もそれに合わせる。
+   これが無いと移動中だけルナの札の絵になる */
+.gp-screen.ch7.ch8 .fly-card{background:url('img/challenge07-player-card.webp') center/100% 100% no-repeat;filter:hue-rotate(150deg) saturate(.8);border:none;box-shadow:none;}
 @keyframes flyDown{0%{transform:translate(var(--x0),var(--y0)) scale(.62);opacity:.9;}25%{opacity:1;}100%{transform:translate(var(--x1),var(--y1)) scale(1);opacity:1;}}
 .fly-card.back{animation:flyBack .35s ease-in both;}
 @keyframes flyBack{0%{transform:translate(var(--x1),var(--y1)) scale(1);opacity:1;}100%{transform:translate(var(--x0),var(--y0)) scale(.6);opacity:0;}}
@@ -2667,7 +2672,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v115'; // v115(2026/09/07): 場のカードを拡大 fieldW 53→64（元の値は53。DEFAULT_LAYOUT のコメント参照）
+const APP_VER='v116'; // v116(2026/09/07): 飛ぶ札の色ズレを修正。通常ステージ(1〜6)は白い表向きカードに統一（v108の直し忘れ）。第8も手札と同じ絵に
+// v115(2026/09/07): 場のカードを拡大 fieldW 53→64（元の値は53。DEFAULT_LAYOUT のコメント参照）
 // v114(2026/09/07): モルフォを強化。カーソル移動30ms・到達60ms・保持70ms・降下240ms（合計で約35%短縮）。10完成の一手だけ下限220msを維持
 // v113(2026/09/07): 素材の最適化。画像を表示サイズに合わせて縮小（展開RAM 244MB→103MB）／BGM 112kbps・ボイス モノラル96kbps／変身動画 720x1280
 // v112: 第8ステージ「モルフォ」追加（出すのが速い／2ラウンドに1度、手札2枚の数字が1秒ごとに変わる幻惑）
