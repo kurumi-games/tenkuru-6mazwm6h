@@ -1391,6 +1391,11 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* v116: 第8(モルフォ)は手札が別の絵＋色相回転なので、飛ぶ札もそれに合わせる。
    これが無いと移動中だけルナの札の絵になる */
 .gp-screen.ch7.ch8 .fly-card{background:url('img/challenge07-player-card.webp') center/100% 100% no-repeat;filter:hue-rotate(150deg) saturate(.8);border:none;box-shadow:none;}
+/* v117: モルフォの星環札。手札にいる間からこの絵で見え、飛んでいる間も場に出た後も同じ絵のまま */
+.gp-screen.ch7.ch8 .gp-dealer-card.mring{background:url('img/card-morpho-ring.webp') center/contain no-repeat !important;filter:none !important;}
+.gp-screen.ch7.ch8 .gp-dealer-card.mring .dv{color:#3a3f6a;text-shadow:0 0 3px rgba(255,255,255,.95);}
+.gp-screen.ch7.ch8 .fly-card.face-morpho{background:url('img/card-morpho-ring.webp') center/100% 100% no-repeat !important;filter:none !important;color:#3a3f6a;text-shadow:0 0 4px rgba(255,255,255,.95);}
+.gp-screen.ch7.ch8 .card-stage.face-morpho{--cardimg:url('img/card-morpho-ring.webp');--nc:#3a3f6a;}
 @keyframes flyDown{0%{transform:translate(var(--x0),var(--y0)) scale(.62);opacity:.9;}25%{opacity:1;}100%{transform:translate(var(--x1),var(--y1)) scale(1);opacity:1;}}
 .fly-card.back{animation:flyBack .35s ease-in both;}
 @keyframes flyBack{0%{transform:translate(var(--x1),var(--y1)) scale(1);opacity:1;}100%{transform:translate(var(--x0),var(--y0)) scale(.6);opacity:0;}}
@@ -2672,7 +2677,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v116'; // v116(2026/09/07): 飛ぶ札の色ズレを修正。通常ステージ(1〜6)は白い表向きカードに統一（v108の直し忘れ）。第8も手札と同じ絵に
+const APP_VER='v117'; // v117(2026/09/07): モルフォの鱗粉の幻惑を変更。無条件発動をやめ、2ラウンドに1回モルフォの手札1枚に星環が付与され、その札が場に出た時に発動。星環札は手札にいる間から専用の絵で表示
+// v116(2026/09/07): 飛ぶ札の色ズレを修正。通常ステージ(1〜6)は白い表向きカードに統一（v108の直し忘れ）。第8も手札と同じ絵に
 // v115(2026/09/07): 場のカードを拡大 fieldW 53→64（元の値は53。DEFAULT_LAYOUT のコメント参照）
 // v114(2026/09/07): モルフォを強化。カーソル移動30ms・到達60ms・保持70ms・降下240ms（合計で約35%短縮）。10完成の一手だけ下限220msを維持
 // v113(2026/09/07): 素材の最適化。画像を表示サイズに合わせて縮小（展開RAM 244MB→103MB）／BGM 112kbps・ボイス モノラル96kbps／変身動画 720x1280
@@ -2757,7 +2763,7 @@ const AREA_01={
     // v62: お試しチャレンジ。ST6クリアで解放。本編の進行・AREA CLEARには数えない。次のステージは解放しない
     // v70: 先取30pt。プレイヤーが shiftPt に達すると試合が止まり、ルナ→レイピア（第2形態）の演出
     {no:7,name:'ルナ',description:'星環：温存したカードで10を組み、場ごと奪う。先取30pt',icon:'card',winPt:30,diff:'normal',rule:'normal',challenge:true,rivalName:'ルナ',form2Name:'レイピア',shiftPt:15,ability:'starRing',bgm:'Iridescent_Trap.mp3'},
-    {no:8,name:'モルフォ',description:'鱗粉の幻惑：2ラウンドに1度、手札2枚の数字が1秒ごとに変わる。出すのが速い。先取30pt',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,rivalName:'モルフォ',ability:'confuse',speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,bgm:'Cold Logic.mp3'},
+    {no:8,name:'モルフォ',description:'鱗粉の幻惑：2ラウンドに1回、相手の手札1枚に星環が付く。その札が場に出ると手札2枚の数字が1秒ごとに変わる。出すのが速い。先取30pt',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,rivalName:'モルフォ',ability:'confuse',speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,bgm:'Cold Logic.mp3'},
   ]
 };
 const STAGES={
@@ -3412,6 +3418,18 @@ function App(){
       try{fxTone({f:2400+Math.random()*800,type:'sine',v:0.015,a:0.002,d:0.05,rev:0.2});}catch(e){}},1000);
   }
   function clearConfuse(){clearInterval(confuseIv.current);setConf({});}
+  // v117: 2ラウンドに1回、モルフォの手札の1枚に星環が付く。付いた瞬間から星環の絵で見える。
+  // その札が場に出た時に初めて鱗粉の幻惑が発動する（無条件発動をやめた）
+  function attachMorphoRing(rn){
+    const hand=dHR.current,flags=dRingR.current.slice();
+    if(flags.some(f=>f==='morpho'))return; // 既に構えているなら重ねない
+    const cand=hand.map((v,i)=>(v!=null&&!flags[i])?i:-1).filter(i=>i>=0);
+    if(!cand.length)return;
+    const k=cand[Math.floor(Math.random()*cand.length)];
+    flags[k]='morpho';setDRing(flags);dRingR.current=flags;
+    showSkillCustom('鱗粉の環','SCALE RING','#8fd8ff');r2Say('星環をまとった',"#8fd8ff");
+    try{resumeAC();fxTone({f:900,f2:1600,type:'sine',v:0.04,a:0.02,d:0.5,rev:0.6});}catch(e){}
+  }
   function showSkillCustom(jp,en,color){const item={k:Date.now(),jp,en,color};if(comboOnR.current||resolvingR.current){skillQ.current.push(item);return;}setSkillFx(item);setTimeout(()=>setSkillFx(s=>s&&s.k===item.k?null:s),1400);}
   const flyR=useRef(null);const[flyCard,setFlyCard]=useState(null); // v107 降りてくる相手の札
   // v109 選択カーソル：常に相手の手札のどこかにいて、出す札まで1枚ずつ移動→タップ→降下
@@ -3494,11 +3512,13 @@ function App(){
   function ringSum(){return dHR.current.reduce((s,v,i)=>s+(dRingR.current[i]&&!isTapped(dRingR.current[i])?v:0),0);}
   function isTapped(f){return typeof f==='string'&&f.indexOf('tapped-')===0;}
   function isRing(f){return !!f&&!isTapped(f);}
+  // v117: ルナ/レイピアの環は「付いた札は温存」だが、モルフォの環は出すために付く
+  function isHoldRing(f){return isRing(f)&&f!=='morpho';}
   function ensureDealerRefill(){
     let hand=dHR.current,rf=dRingR.current;
     if(rf.length!==hand.length){rf=hand.map((v,i)=>rf[i]||false);setDRing(rf);dRingR.current=rf;} // 環の配列がズレてたら揃える
     if(hand.length>=10)return;
-    if(hand.filter((v,i)=>!isRing(rf[i])).length)return; // 環なしが1枚でもあれば不要
+    if(hand.filter((v,i)=>!isHoldRing(rf[i])).length)return; // 環なしが1枚でもあれば不要（v117: モルフォの環は出せるので在庫に数える）
     const nd=createDeck().slice(0,10-hand.length);
     setDealer([...hand,...nd],[...rf.slice(0,hand.length),...nd.map(()=>false)]);
   }
@@ -3828,7 +3848,7 @@ function App(){
           else if(starRingActive())setTimeout(()=>attachStarRing(rn),400); // v80: 毎ラウンド開始直後に1枚へ星環
           if(srPendingR.current){srPendingR.current=false;setTimeout(()=>{if(phaseR.current==='playing'&&countNumR.current<0)starRingComplete(rn);},600);}
           if(r2Active())setTimeout(()=>r2RoundStart(rn),300); // v84 第2形態：環を構える
-          if(confuseActive()&&rn%2===1)setTimeout(()=>startConfuse(rn),500); // v112 モルフォ：2ラウンドに1度
+          if(confuseActive()&&rn%2===1)setTimeout(()=>attachMorphoRing(rn),500); // v117 モルフォ：2ラウンドに1回、環を1枚に付与（発動はその札を出した時）
           ensureDealerRefill(); // v89 保険：環付きしか残ってなければ10枚まで補充
         },650);
         return;
@@ -3896,7 +3916,7 @@ function App(){
     if(resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current||eraseBusyR.current||pausedR.current)return; // v54/v75/v84/v89/v91
     const dHand=dHR.current,cf=fieldR.current,cs=fieldSumR.current;
     if(!dHand.length)return;
-    const rf=dRingR.current;const avail=dHand.filter((v,i)=>!isRing(rf[i])); // v79: 星環付きは温存（タップ済みは出せる）
+    const rf=dRingR.current;const avail=dHand.filter((v,i)=>!isHoldRing(rf[i])); // v79: 星環付きは温存（タップ済みは出せる）／v117: モルフォの環は出せる
     const playable=avail.filter(v=>canPlay(v,cs,cf));
     if(!playable.length){scheduleAi(rn);return;}
     const wins=playable.filter(v=>cs+v===10);
@@ -3919,8 +3939,10 @@ function App(){
     else{if(Math.random()<firstRate&&safe.length)chosen=safe.sort((a,b)=>a-b)[0];}
     if(!chosen){scheduleAi(rn);return;}
     resumeAC();setTimeout(()=>playPlaceSE(false),100);
-    let idx=dHand.findIndex((v,i)=>v===chosen&&isTapped(rf[i]));if(idx<0)idx=dHand.findIndex((v,i)=>v===chosen&&!rf[i]); // タップ済みの札を優先して出す
-    const face=isTapped(rf[idx])?rf[idx].slice(7):null;
+    let idx=dHand.findIndex((v,i)=>v===chosen&&isTapped(rf[i]));
+    if(idx<0)idx=dHand.findIndex((v,i)=>v===chosen&&rf[i]==='morpho'); // v117: 同じ数字なら環付きを優先して出す
+    if(idx<0)idx=dHand.findIndex((v,i)=>v===chosen&&!rf[i]); // タップ済みの札を優先して出す
+    const face=isTapped(rf[idx])?rf[idx].slice(7):(rf[idx]==='morpho'?'morpho':null);
     if(flyR.current||curBusyR.current)return;
     // v109: まずカーソルが出す札まで1枚ずつ移動して止まり、タップ。その後で降りてくる
     if(!aiPlay._fromCursor){
@@ -3957,7 +3979,8 @@ function App(){
       }
       setFlyCard(null);
       if(f.face)tapFaceR.current=f.face;
-      if(!dHR.current.filter((v,i)=>!isRing(dRingR.current[i])).length){ // 環付きだけ残った → 補充
+      if(f.rf==='morpho')startConfuse(rn); // v117: 環の札が場に出た瞬間に鱗粉の幻惑が発動
+      if(!dHR.current.filter((v,i)=>!isHoldRing(dRingR.current[i])).length){ // 環付きだけ残った → 補充
         const keep=dHR.current,keepRf=dRingR.current;const nd=createDeck().slice(0,10-keep.length);
         setDealer([...keep,...nd],[...keepRf,...nd.map(()=>false)]);
       }
@@ -4214,8 +4237,8 @@ function App(){
       h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
       h('div',{className:'gp-dealer-cards'},
         dSlots.map((id,s)=>{const i=id==null?-1:dIdsR.current.indexOf(id);if(i<0||i>=dH.length)return h('div',{key:'e'+s,className:'gp-dealer-card empty'});const v=dH[i];
-          return h('div',{key:'c'+id,'data-idx':i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')+(dCur.idx===i?' dsel':'')},h('span',{className:'dv'},v),
-          dCur.idx===i&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.idx===i&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined}));})
+          return h('div',{key:'c'+id,'data-idx':i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dCur.idx===i?' dsel':'')},h('span',{className:'dv'},v),
+          dCur.idx===i&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.idx===i&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined}));})
       )
     ),
     srBanner&&h('div',{className:'sr-banner'},h('b',null,'STAR RING'),'星環 ── 完成'),
