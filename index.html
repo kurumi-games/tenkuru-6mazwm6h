@@ -1397,6 +1397,14 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7.ch8 .fly-card.face-morpho{background:url('img/card-morpho-ring.webp') center/100% 100% no-repeat !important;filter:none !important;color:#3a3f6a;text-shadow:0 0 4px rgba(255,255,255,.95);}
 .gp-screen.ch7.ch8 .card-stage.face-morpho{--cardimg:url('img/card-morpho-ring.webp');--nc:#3a3f6a;}
 
+/* v120: イントロ動画。画面いっぱいに出し、タップでスキップ */
+.iv-screen{position:fixed;inset:0;z-index:210;background:#05070f;display:flex;align-items:center;justify-content:center;cursor:pointer;animation:bfIn .3s ease both;}
+.iv-video{width:100%;height:100%;object-fit:cover;}
+.iv-skip{position:absolute;bottom:calc(28 * var(--u));left:0;right:0;text-align:center;
+  font-size:calc(11 * var(--u));letter-spacing:.14em;color:rgba(230,238,255,.72);
+  text-shadow:0 calc(2 * var(--u)) calc(6 * var(--u)) rgba(0,0,0,.8);pointer-events:none;animation:ivSkip 2.4s ease-in-out infinite;}
+@keyframes ivSkip{0%,100%{opacity:.45;}50%{opacity:.95;}}
+
 /* v119: 対戦前のギミック説明画面 */
 .bf-screen{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:calc(18 * var(--u));
   background:radial-gradient(120% 90% at 50% 30%,#1b2246,#080b1c 70%);animation:bfIn .35s ease both;}
@@ -2497,6 +2505,24 @@ function stageBrief(st){
     diff:DIFF_LABEL[st.diff]||'NORMAL'
   };
 }
+// v120: ステージ専用のイントロ動画。画面タップでいつでもスキップできる
+function IntroVideoScreen({src,onDone}){
+  const vRef=useRef(null);const doneR=useRef(false);
+  const[canSkip,setCanSkip]=useState(false);
+  function finish(){if(doneR.current)return;doneR.current=true;onDone();}
+  useEffect(()=>{
+    const t=setTimeout(()=>setCanSkip(true),600); // 誤タップで一瞬で飛ぶのを防ぐ
+    const v=vRef.current;
+    if(v){v.play().catch(()=>finish());} // 再生が拒否された端末では素通し
+    const guard=setTimeout(finish,13000);  // 動画が壊れていても必ず先へ進む
+    return()=>{clearTimeout(t);clearTimeout(guard);};
+  },[]);
+  return h('div',{className:'iv-screen',onClick:()=>{if(canSkip)finish();}},
+    h('video',{ref:vRef,className:'iv-video',src,playsInline:true,muted:true,autoPlay:true,preload:'auto',
+      onEnded:finish,onError:finish}),
+    canSkip&&h('div',{className:'iv-skip'},'タップでスキップ')
+  );
+}
 function BriefScreen({stage,onStart}){
   const b=stageBrief(stage);
   useEffect(()=>{try{resumeAC();fxBell({f:988,v:0.07,d:1.2,bright:1.0,rev:0.8});}catch(e){}},[]);
@@ -2735,7 +2761,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v119'; // v119(2026/09/07): 対戦開始前に相手のギミック説明画面を追加。「確認した」を押すとカウントダウン開始
+const APP_VER='v120'; // v120(2026/09/07): モルフォのイントロ動画を追加。対戦ボタン→動画(タップでスキップ可)→ギミック説明→カウントダウンの流れ
+// v119(2026/09/07): 対戦開始前に相手のギミック説明画面を追加。「確認した」を押すとカウントダウン開始
 // v118(2026/09/07): モルフォの手札が星環札1枚だけになると出せず永久にタップし続けるバグを修正。幻惑はラウンドをまたいで持続し、その札を場に出すまで解けない仕様に変更
 // v117(2026/09/07): モルフォの鱗粉の幻惑を変更。無条件発動をやめ、2ラウンドに1回モルフォの手札1枚に星環が付与され、その札が場に出た時に発動。星環札は手札にいる間から専用の絵で表示
 // v116(2026/09/07): 飛ぶ札の色ズレを修正。通常ステージ(1〜6)は白い表向きカードに統一（v108の直し忘れ）。第8も手札と同じ絵に
@@ -2823,7 +2850,7 @@ const AREA_01={
     // v62: お試しチャレンジ。ST6クリアで解放。本編の進行・AREA CLEARには数えない。次のステージは解放しない
     // v70: 先取30pt。プレイヤーが shiftPt に達すると試合が止まり、ルナ→レイピア（第2形態）の演出
     {no:7,name:'ルナ',description:'星環：温存したカードで10を組み、場ごと奪う。先取30pt',icon:'card',winPt:30,diff:'normal',rule:'normal',challenge:true,rivalName:'ルナ',form2Name:'レイピア',shiftPt:15,ability:'starRing',bgm:'Iridescent_Trap.mp3'},
-    {no:8,name:'モルフォ',description:'鱗粉の幻惑：2ラウンドに1回、相手の手札1枚に星環が付く。その札が場に出ると自分の手札2枚の数字が変わり続け、その2枚を場に出すまで解けない。出すのが速い。先取30pt',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,rivalName:'モルフォ',ability:'confuse',speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,bgm:'Cold Logic.mp3'},
+    {no:8,name:'モルフォ',description:'鱗粉の幻惑：2ラウンドに1回、相手の手札1枚に星環が付く。その札が場に出ると自分の手札2枚の数字が変わり続け、その2枚を場に出すまで解けない。出すのが速い。先取30pt',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,rivalName:'モルフォ',ability:'confuse',speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,intro:'video/intro-8-morpho.mp4',bgm:'Cold Logic.mp3'},
   ]
 };
 const STAGES={
@@ -3820,7 +3847,7 @@ function App(){
   function finishTutorial(diff){
     markTutDone();tutDoneR.current=true;
     setPendingDiff(null);
-    if(diff)goBrief(diff); // v119: チュートリアル後もギミック説明を挟む
+    if(diff)goIntro(diff); // v119/v120: チュートリアル後もイントロ・ギミック説明を通る
     else if(stageR.current)goMap();
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
@@ -3844,7 +3871,14 @@ function App(){
     if(st.challenge&&typeof SHIFT_VIDEO!=='undefined'){try{[SHIFT_VIDEO.v1,SHIFT_VIDEO.v2].forEach(u=>fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(()=>{}));}catch(e){}} // v78: 変身動画を先読み
     if(st.champion&&CHAMPIONS[st.champion]){setPendingDiff(st.diff);setPhase('champIntro');phaseR.current='champIntro';return;} // v61 登場画面を挟む
     if(st.tutorial&&!tutDoneR.current){openTutorial(st.diff);return;}
-    goBrief(st.diff);
+    goIntro(st.diff);
+  }
+  // v120: イントロ動画があれば先に流し、無ければそのままギミック説明へ
+  function goIntro(diff){
+    const c=stageR.current;
+    const st=c?STAGES.areas[c.ar].stages[c.st]:null;
+    if(st&&st.intro){clearTimers();roundTokR.current++;setPendingDiff(diff||null);setPhase('intro');phaseR.current='intro';return;}
+    goBrief(diff);
   }
   // v119: カウントダウンの前にギミック説明を挟む
   function goBrief(diff){clearTimers();roundTokR.current++;setPendingDiff(diff||null);setPhase('brief');phaseR.current='brief';}
@@ -4178,7 +4212,8 @@ function App(){
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
   if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
-  if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goBrief(pendingDiff)});
+  if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
+  if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
   if(phase==='brief'&&curStage)return h(BriefScreen,{stage:curStage,onStart:()=>startGame(pendingDiff)}); // v119
   if(phase==='map')return h(MapScreen,{area:STAGES.areas[0],save,onSelect:i=>startStage(0,i),onBack:()=>{setPhase('menu');phaseR.current='menu';}});
   if(phase==='tutorial')return h(TutorialScreen,{pendingDiff,onFinish:finishTutorial,onExit:()=>finishTutorial(pendingDiff),trackNum,toggleMusic,coachName:null,startLabel:curStage?'ステージ '+curStage.no+' をはじめる':null,bg:null,winPt:curStage?curStage.winPt:null,
