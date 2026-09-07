@@ -1362,6 +1362,15 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7 .gp-dealer-card{background:url('img/challenge07-rival-card-front.webp') center/contain no-repeat !important;border:none !important;box-shadow:none !important;}
 .gp-screen.ch7 .gp-dealer-card{background-image:url('img/challenge07-rival-card-front.webp');}
 .gp-screen.ch7 .gp-dealer-card .dv{color:#4a1a3e;text-shadow:0 0 3px rgba(255,255,255,.9);font-size:calc(12 * var(--u));}
+/* v112: 第8「モルフォ」：同じ舞台を青緑に沈めて、立ち絵はモルフォ。幻惑中の札は数字がちらつく */
+.gp-screen.ch7.ch8{background-color:#0d3a3f;background-blend-mode:luminosity;}
+.gp-screen.ch7.ch8 .boss-img{background-image:url('img/challenge08-moth.webp');top:calc(12 * var(--u));height:calc(176 * var(--u));width:calc(220 * var(--u));margin-left:calc(-110 * var(--u));opacity:.92;filter:drop-shadow(0 0 12px rgba(120,220,255,.35));
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 74%,transparent 98%);mask-image:linear-gradient(180deg,#000 0%,#000 74%,transparent 98%);}
+.gp-screen.ch7.ch8 .gp-dealer-card .dcur{border-color:rgba(140,230,255,.95);box-shadow:0 0 10px rgba(120,220,255,.85),inset 0 0 8px rgba(120,220,255,.35);}
+.gp-screen.ch7.ch8 .gp-dealer-card{background:url('img/challenge07-player-card.webp') center/contain no-repeat !important;filter:hue-rotate(150deg) saturate(.8);}
+.card-stage.confused .card{box-shadow:0 0 0 2px rgba(140,230,255,.85),0 0 16px rgba(120,220,255,.7);}
+.card-stage.confused .n-big,.card-stage.confused .n-tl,.card-stage.confused .n-br{animation:confNum 1s steps(1) infinite;color:#4fc8ff !important;}
+@keyframes confNum{0%{filter:blur(0);}88%{filter:blur(0);}90%{filter:blur(2px);opacity:.5;}100%{filter:blur(0);}}
 /* v109: 相手の手札の選択カーソル。1枚ずつ移動して、出す札で止まってタップ */
 .gp-dealer-card .dcur{position:absolute;inset:calc(-3 * var(--u));border:2px solid rgba(255,170,230,.95);border-radius:calc(4 * var(--u));box-shadow:0 0 10px rgba(255,150,230,.8),inset 0 0 8px rgba(255,150,230,.35);pointer-events:none;z-index:8;animation:dcurBlink 1.1s ease-in-out infinite;}
 .gp-screen.ch7.f2 .gp-dealer-card .dcur{border-color:rgba(200,140,255,.95);box-shadow:0 0 10px rgba(180,110,255,.85),inset 0 0 8px rgba(180,110,255,.35);}
@@ -2365,7 +2374,7 @@ function renderCardOverlay(){
   ];
 }
 
-function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,linkPick,rLock,rCmd,rWait}){
+function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,linkPick,rLock,rCmd,rWait,confused}){
   const[pressed,setPressed]=useState(false);
   const[shaking,setShaking]=useState(false);
   const isBlue=cardRole==='player'||cardRole==='host';
@@ -2373,7 +2382,7 @@ function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,
   const locked=cardState==='locked';
   const stateClass=cardState?' cs-'+cardState:'';
   return h('div',{
-    className:'card-stage '+colorClass+' n'+value+stateClass+(shaking?' cs-shake':'')+(isSpecial?' sv-card sv-born':'')+(linkPick?' link-pick':'')+(rLock?' rl-locked':'')+(rCmd?' rl-cmd':'')+(rWait?' rl-wait':''),
+    className:'card-stage '+colorClass+' n'+value+stateClass+(shaking?' cs-shake':'')+(isSpecial?' sv-card sv-born':'')+(linkPick?' link-pick':'')+(rLock?' rl-locked':'')+(rCmd?' rl-cmd':'')+(rWait?' rl-wait':'')+(confused?' confused':''),
     style:{
       opacity:(disabled&&!locked)?0.3:undefined, // lockedの見た目はCSSに任せる(カウントダウン中等の無効はここで薄く)
       animation:'dealIn 0.22s cubic-bezier(0.2,1.3,0.5,1) both',
@@ -2658,7 +2667,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v111'; // v111: 出した札の枠は完全に空（白紙を置かない）
+const APP_VER='v112'; // v112: 第8ステージ「モルフォ」追加（出すのが速い／2ラウンドに1度、手札2枚の数字が1秒ごとに変わる幻惑）
+// v111: 出した札の枠は完全に空（白紙を置かない）
 // v110: 相手の手札は10枠固定。出した札の位置は空いたまま（中央に詰めない）
 // v109: 相手の手札を大きく／選択カーソル（1枚ずつ移動して止まり、タップしてから降りる）
 // v108: 得点を小さく端へ／上部の大枠を削除／相手の手札は表面カード／ルナと手札を近づけ、手札と場に距離
@@ -2738,12 +2748,13 @@ const AREA_01={
     // v62: お試しチャレンジ。ST6クリアで解放。本編の進行・AREA CLEARには数えない。次のステージは解放しない
     // v70: 先取30pt。プレイヤーが shiftPt に達すると試合が止まり、ルナ→レイピア（第2形態）の演出
     {no:7,name:'ルナ',description:'星環：温存したカードで10を組み、場ごと奪う。先取30pt',icon:'card',winPt:30,diff:'normal',rule:'normal',challenge:true,rivalName:'ルナ',form2Name:'レイピア',shiftPt:15,ability:'starRing',bgm:'Iridescent_Trap.mp3'},
+    {no:8,name:'モルフォ',description:'鱗粉の幻惑：2ラウンドに1度、手札2枚の数字が1秒ごとに変わる。出すのが速い。先取30pt',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,rivalName:'モルフォ',ability:'confuse',speed:0.5,bgm:'Cold Logic.mp3'},
   ]
 };
 const STAGES={
   areas:[AREA_01],
   // マップ上の座標（viewBox 360×360、下から上へ。AREA_01.stages と同じ順）
-  pos:[[64,318],[152,272],[262,244],[228,158],[114,116],[200,44],[304,96]], // [6]=第7チャレンジ（BOSSの右）
+  pos:[[64,318],[152,272],[262,244],[228,158],[114,116],[200,44],[304,96],[318,26]], // [6]=第7チャレンジ（BOSSの右）[7]=第8（右上の隅）
 };
 const RULE_LABEL={normal:'ノーマル',shuffle:'シャッフル',frost:'フロスト'};
 // rule ごとのゲーム内処理の差し込み口（ギミック未確定のため中身は空。startStage から呼ぶ）
@@ -2861,6 +2872,7 @@ function areaProgress(save,area){
 }
 function isStagePlayable(save,area,i){
   const st=area.stages[i];if(!st||st.comingSoon)return false;
+  if(st.ch8)return !!save.stars[7]; // v112: 第8はルナ戦クリアで解放
   if(st.challenge){const boss=area.stages.find(x=>x.boss);return !!(boss&&save.stars[boss.no]);} // v62: ST6(boss)クリアで解放。既存セーブの stars から判定
   if(save.stars[st.no])return true;                 // クリア済みは再挑戦OK
   return i===0||!!save.stars[area.stages[i-1].no];  // 直前がクリア済みなら解放
@@ -3012,7 +3024,7 @@ function MapScreen({area,save,onSelect,onBack}){
         h('div',{className:'ic'+(selState==='clear'?' gold':selPlayable?'':' dim')},Icon(selState==='soon'||selState==='locked'?'lock':s.boss?'crown':s.icon,22)),
         h('div',{className:'tx'},
           h('div',{className:'row'},
-            h('div',{className:'no'+(s.boss?' gold':'')},s.boss?area.label+'  BOSS':s.challenge?'CHALLENGE 07':'STAGE '+String(s.no).padStart(2,'0')),
+            h('div',{className:'no'+(s.boss?' gold':'')},s.boss?area.label+'  BOSS':s.challenge?'CHALLENGE '+String(s.no).padStart(2,'0'):'STAGE '+String(s.no).padStart(2,'0')),
             h('div',{className:'stars'+(selStars?' on':'')},starStr(selStars))
           ),
           h('div',{className:'nm'},s.comingSoon&&!s.boss?'準備中':s.name),
@@ -3372,10 +3384,27 @@ function App(){
     if(!resolvePlay(val,cf,cs,'dealer',rn))scheduleAi(rn);
   }
   const eraseBusyR=useRef(false);const tapFaceR=useRef(null);
+  // v112 モルフォの技「鱗粉の幻惑」：手札2枚の見える数字が1秒ごとに変わる。押した瞬間に見えてる数字が出る
+  const[confuse,setConfuse]=useState({});const confuseR=useRef({});const confuseIv=useRef(null);
+  function confuseActive(){const so=stageOptsR.current;return !!(so&&so.ability==='confuse');}
+  function setConf(m){confuseR.current=m;setConfuse(m);}
+  function startConfuse(rn){
+    const hand=pHR.current;const cand=hand.map((v,i)=>v!==null?i:-1).filter(i=>i>=0).sort(()=>Math.random()-0.5).slice(0,2);
+    if(!cand.length)return;
+    const m={};cand.forEach(i=>{m[i]=1+Math.floor(Math.random()*5);});setConf(m);
+    showSkillCustom('鱗粉の幻惑','PHANTOM DUST','#8fd8ff');r2Say('手札2枚が幻惑',"#8fd8ff");
+    try{resumeAC();fxAir({v:0.05,a:0.05,d:0.8,hp:3500,rev:0.8});fxTone({f:700,f2:1900,type:'sine',v:0.05,a:0.02,d:0.4,rev:0.6});}catch(e){}
+    clearInterval(confuseIv.current);
+    confuseIv.current=setInterval(()=>{const cur=confuseR.current;const keys=Object.keys(cur);if(!keys.length){clearInterval(confuseIv.current);return;}
+      const nm={};keys.forEach(k=>{let v;do{v=1+Math.floor(Math.random()*5);}while(v===cur[k]);nm[k]=v;});setConf(nm);
+      try{fxTone({f:2400+Math.random()*800,type:'sine',v:0.015,a:0.002,d:0.05,rev:0.2});}catch(e){}},1000);
+  }
+  function clearConfuse(){clearInterval(confuseIv.current);setConf({});}
+  function showSkillCustom(jp,en,color){const item={k:Date.now(),jp,en,color};if(comboOnR.current||resolvingR.current){skillQ.current.push(item);return;}setSkillFx(item);setTimeout(()=>setSkillFx(s=>s&&s.k===item.k?null:s),1400);}
   const flyR=useRef(null);const[flyCard,setFlyCard]=useState(null); // v107 降りてくる相手の札
   // v109 選択カーソル：常に相手の手札のどこかにいて、出す札まで1枚ずつ移動→タップ→降下
   const[dCur,setDCur]=useState({idx:0,tap:false});const dCurR=useRef(0);const curBusyR=useRef(false);const curT=useRef([]);
-  const CUR_STEP=110,CUR_HOLD=230;
+  const CUR_STEP=(stageOptsR.current&&stageOptsR.current.speed<1)?55:110,CUR_HOLD=(stageOptsR.current&&stageOptsR.current.speed<1)?120:230;
   function cursorTo(target,onArrive,check){ // check(): 途中で中止すべきなら false
     if(curBusyR.current)return false;
     curT.current.forEach(clearTimeout);curT.current=[];curBusyR.current=true;
@@ -3672,7 +3701,7 @@ function App(){
       }
     }
     setPH(hand);pHR.current=hand;setPSp(sp);pSpR.current=sp;
-    setLocks(hand.map(()=>false));setCmd(null); // v84 配り直しでロック・指名は消える
+    setLocks(hand.map(()=>false));setCmd(null);clearConfuse(); // v84 配り直しでロック・指名は消える
   }
   function exitLink(){
     const was=linkR.current;
@@ -3700,7 +3729,7 @@ function App(){
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
   // ── ストーリー進行 ──
-  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
+  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
   function startStage(arIdx,stIdx){
     const ar=STAGES.areas[arIdx],st=ar.stages[stIdx];
     if(!st||st.comingSoon){goMap();return;} // v54: 準備中は開始しない
@@ -3715,7 +3744,7 @@ function App(){
       if(CHRONO_CONFIG.guaranteeFirstUnlock&&firstChrono&&st.no===firstChrono.no&&!saveR.current.chronoIntro){chrono=true;updSave(s=>{s.chronoIntro=true;return s;});}
       else chrono=Math.random()<CHRONO_CONFIG.appearRate;
     }
-    stageOptsR.current={chrono,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
+    stageOptsR.current={chrono,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,speed:st.speed||1,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
     if(st.challenge&&typeof SHIFT_VIDEO!=='undefined'){try{[SHIFT_VIDEO.v1,SHIFT_VIDEO.v2].forEach(u=>fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(()=>{}));}catch(e){}} // v78: 変身動画を先読み
     if(st.champion&&CHAMPIONS[st.champion]){setPendingDiff(st.diff);setPhase('champIntro');phaseR.current='champIntro';return;} // v61 登場画面を挟む
     if(st.tutorial&&!tutDoneR.current){openTutorial(st.diff);return;}
@@ -3762,7 +3791,7 @@ function App(){
     roundTokR.current++;    // 古い遷移予約を全部無効化
     clearTimers();          // 残ってるカウントダウン/タイマーも掃除
     resolvingR.current=false;exitLink(); // v54: 時間停止の残骸を必ず解除
-    rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);rStopT.current=[];setCmd(null);setEraseIdx([]);pausedR.current=false;setPaused(false);setInfoRing(null);flyR.current=null;setFlyCard(null);cancelCursor(); // v84/v91/v107/v109
+    rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);rStopT.current=[];setCmd(null);setEraseIdx([]);pausedR.current=false;setPaused(false);setInfoRing(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse(); // v84/v91/v107/v109/v112
     setPhase('playing');phaseR.current='playing';
     setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldSp([]);
     setFieldColors([]); // v46: 時間切れ後に前ラウンドの色記録が残って自分のカードがオレンジになるバグ修正
@@ -3785,6 +3814,7 @@ function App(){
           else if(starRingActive())setTimeout(()=>attachStarRing(rn),400); // v80: 毎ラウンド開始直後に1枚へ星環
           if(srPendingR.current){srPendingR.current=false;setTimeout(()=>{if(phaseR.current==='playing'&&countNumR.current<0)starRingComplete(rn);},600);}
           if(r2Active())setTimeout(()=>r2RoundStart(rn),300); // v84 第2形態：環を構える
+          if(confuseActive()&&rn%2===1)setTimeout(()=>startConfuse(rn),500); // v112 モルフォ：2ラウンドに1度
           ensureDealerRefill(); // v89 保険：環付きしか残ってなければ10枚まで補充
         },650);
         return;
@@ -3838,6 +3868,7 @@ function App(){
       else if(fl===1)d=diff==='easy'?1000+Math.random()*600:diff==='hard'?400+Math.random()*200:diff==='master'?300+Math.random()*180:1000+Math.random()*400;
       else d=diff==='easy'?1200+Math.random()*800:diff==='hard'?600+Math.random()*300:diff==='master'?450+Math.random()*250:1500+Math.random()*500;
     }
+    d=Math.round(d*((stageOptsR.current&&stageOptsR.current.speed)||1)); // v112: 速い相手
     aiRef.current=setTimeout(()=>{if(phaseR.current==='playing'&&countNumR.current<0&&!linkR.current)aiPlay(rn);},d);
   }
 
@@ -3893,7 +3924,7 @@ function App(){
     const newDH=dHand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx);
     setDealer(newDH,newRf);
     {const ci=Math.max(0,Math.min(dCurR.current,newDH.length-1));dCurR.current=ci;setDCur({idx:ci,tap:false});}
-    const FLY_MS=680;
+    const FLY_MS=(stageOptsR.current&&stageOptsR.current.speed<1)?380:680;
     flyR.current={value:chosen,face,rf:rf[idx]};setFlyCard({k:Date.now(),value:chosen,face,x0,y0,x1,y1,w:cardW,d:FLY_MS});
     try{fxAir({v:0.03,a:0.02,d:0.5,hp:4000,rev:0.5});}catch(e){}
     setTimeout(()=>{
@@ -3930,6 +3961,7 @@ function App(){
     // 判定はstateでなくrefを使う（同時タイミングで相手の直前プレイが消えるのを防ぐ）
     const cf=fieldR.current,cs=fieldSumR.current;
     let value=pH[idx];
+    if(confuseR.current[idx]!=null){value=confuseR.current[idx];} // v112: 幻惑中は見えてる数字が出る
     if(!value||!canPlay(value,cs,cf))return;
     if(rStopR.current||eraseBusyR.current||pausedR.current)return; // v84 時間停止中は出せない / v89 削除中も / v91 一時停止中も
     if(pLockR.current[idx]){fxLockHint('星環ロック');return;}   // v84 ロック中
@@ -3944,6 +3976,7 @@ function App(){
     const newSp=pSpR.current.map((f,i)=>i===idx?false:f);
     setPH(newPH);pHR.current=newPH;setPSp(newSp);pSpR.current=newSp;
     if(pLockR.current.length)r2CheckUnlock(newPH); // v84
+    if(confuseR.current[idx]!=null){const m={...confuseR.current};delete m[idx];setConf(m);} // v112
     const emptied=!newPH.filter(Boolean).length;
     if(emptied){const nd=createDeck();setTimeout(()=>{dealPlayer(nd);},100);}
     // v56 チャンピオン能力「コア・シフト」：最初に置いた4が3に変わる（得点確定より先）
@@ -4055,7 +4088,7 @@ function App(){
   const so=stageOptsR.current||{};
   const rival=(form2&&so.form2Name)||so.rivalName||'DEALER';
   // v62: 第7は「ルナ」／v70: 第2形態は「レイピア」
-  return h('div',{className:'gp-screen'+(so.challenge?' ch7':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
+  return h('div',{className:'gp-screen'+(so.challenge?' ch7':'')+(so.ch8?' ch8':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
     h(ChampionLayer,{champ:stageOptsR.current&&stageOptsR.current.champion?CHAMPIONS[stageOptsR.current.champion]:null}), // v61 チャンピオン戦は立ち絵
     so.challenge&&h('div',{className:'champ-layer'},
       form2
@@ -4197,17 +4230,17 @@ function App(){
 
     // HAND area
     h('div',{className:'gp-hand-area hand-card-area'},
-      form2&&r2Banner&&h('div',{className:'hand-hud'},
+      r2Banner&&h('div',{className:'hand-hud'},
         h('div',{className:'sr-banner',style:{borderColor:r2Banner.color,boxShadow:'0 0 16px '+r2Banner.color}},r2Banner.text)
       ),
       skillFx&&h('div',{key:skillFx.k,className:'skill-title',style:{'--sc':skillFx.color}},h('div',{className:'en'},skillFx.en),h('div',{className:'jp'},skillFx.jp)),
       h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
       h('div',{className:'gp-hand-rows'},
         h('div',{className:'gp-hand-row'},
-          pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):h(SlideCard,{key:i+'_'+v,value:v,onPlay:()=>playCard(i),disabled:countNum>=0||!canPlay(v,fieldSum,field)||rStop||!!pLock[i]||(cmdIdx!=null&&cmdIdx!==i),cardState:countNum>=0?null:handCardState(v,fieldSum,field),onLocked:()=>fxLockHint(pLock[i]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i)?'指名された札から':lockReason(v,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(v,fieldSum,field),rLock:!!pLock[i],rCmd:cmdIdx===i,rWait:cmdIdx!=null&&cmdIdx!==i}))
+          pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const dv=confuse[i]!=null?confuse[i]:v;return h(SlideCard,{key:i+'_'+v,value:dv,onPlay:()=>playCard(i),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[i]||(cmdIdx!=null&&cmdIdx!==i),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),onLocked:()=>fxLockHint(pLock[i]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[i],rCmd:cmdIdx===i,rWait:cmdIdx!=null&&cmdIdx!==i,confused:confuse[i]!=null});})())
         ),
         h('div',{className:'gp-hand-row'},
-          pH.slice(5).map((v,i)=>v===null?h('div',{key:i+5,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):h(SlideCard,{key:(i+5)+'_'+v,value:v,onPlay:()=>playCard(i+5),disabled:countNum>=0||!canPlay(v,fieldSum,field)||rStop||!!pLock[i+5]||(cmdIdx!=null&&cmdIdx!==i+5),cardState:countNum>=0?null:handCardState(v,fieldSum,field),onLocked:()=>fxLockHint(pLock[i+5]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i+5)?'指名された札から':lockReason(v,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i+5],linkPick:linkMode&&canPlay(v,fieldSum,field),rLock:!!pLock[i+5],rCmd:cmdIdx===i+5,rWait:cmdIdx!=null&&cmdIdx!==i+5}))
+          pH.slice(5).map((v,i)=>v===null?h('div',{key:i+5,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const j=i+5,dv=confuse[j]!=null?confuse[j]:v;return h(SlideCard,{key:j+'_'+v,value:dv,onPlay:()=>playCard(j),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[j]||(cmdIdx!=null&&cmdIdx!==j),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),onLocked:()=>fxLockHint(pLock[j]?'星環ロック':(cmdIdx!=null&&cmdIdx!==j)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[j],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[j],rCmd:cmdIdx===j,rWait:cmdIdx!=null&&cmdIdx!==j,confused:confuse[j]!=null});})())
         )
       )
     ),
