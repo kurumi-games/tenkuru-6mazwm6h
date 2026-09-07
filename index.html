@@ -1396,6 +1396,29 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7.ch8 .gp-dealer-card.mring .dv{color:#3a3f6a;text-shadow:0 0 3px rgba(255,255,255,.95);}
 .gp-screen.ch7.ch8 .fly-card.face-morpho{background:url('img/card-morpho-ring.webp') center/100% 100% no-repeat !important;filter:none !important;color:#3a3f6a;text-shadow:0 0 4px rgba(255,255,255,.95);}
 .gp-screen.ch7.ch8 .card-stage.face-morpho{--cardimg:url('img/card-morpho-ring.webp');--nc:#3a3f6a;}
+
+/* v119: 対戦前のギミック説明画面 */
+.bf-screen{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:calc(18 * var(--u));
+  background:radial-gradient(120% 90% at 50% 30%,#1b2246,#080b1c 70%);animation:bfIn .35s ease both;}
+@keyframes bfIn{from{opacity:0;}to{opacity:1;}}
+.bf-card{width:100%;max-width:calc(320 * var(--u));border-radius:calc(14 * var(--u));padding:calc(20 * var(--u)) calc(18 * var(--u));
+  background:linear-gradient(165deg,rgba(30,38,72,.96),rgba(14,18,40,.96));border:1px solid rgba(150,180,255,.35);
+  box-shadow:0 calc(10 * var(--u)) calc(34 * var(--u)) rgba(0,0,0,.6);animation:bfUp .4s cubic-bezier(.2,1.1,.4,1) both;}
+@keyframes bfUp{from{transform:translateY(calc(16 * var(--u)));opacity:0;}to{transform:none;opacity:1;}}
+.bf-k{font-family:'Inter',sans-serif;font-size:calc(9 * var(--u));letter-spacing:.28em;color:#7d90c8;}
+.bf-rival{font-size:calc(24 * var(--u));font-weight:800;color:#eef3ff;margin:calc(2 * var(--u)) 0 calc(12 * var(--u));letter-spacing:.04em;}
+.bf-gname{display:inline-block;font-size:calc(14 * var(--u));font-weight:800;color:#8fd8ff;
+  border-left:calc(3 * var(--u)) solid #8fd8ff;padding-left:calc(8 * var(--u));margin-bottom:calc(8 * var(--u));}
+.bf-gtext{font-size:calc(12.5 * var(--u));line-height:1.75;color:#d3dcf3;margin-bottom:calc(16 * var(--u));}
+.bf-meta{display:flex;flex-direction:column;gap:calc(6 * var(--u));border-top:1px solid rgba(150,180,255,.2);padding-top:calc(12 * var(--u));margin-bottom:calc(18 * var(--u));}
+.bf-m{display:flex;justify-content:space-between;align-items:baseline;font-size:calc(11.5 * var(--u));}
+.bf-m .l{color:#8595c4;}
+.bf-m .v{color:#eef3ff;font-weight:700;font-family:'Inter',sans-serif;}
+.bf-btn{width:100%;padding:calc(13 * var(--u)) 0;border:none;border-radius:calc(9 * var(--u));cursor:pointer;
+  font-size:calc(14 * var(--u));font-weight:800;color:#0a1024;letter-spacing:.08em;
+  background:linear-gradient(160deg,#a9dcff,#5aa8f0);box-shadow:0 calc(4 * var(--u)) calc(14 * var(--u)) rgba(90,168,240,.45);
+  transition:transform .1s ease,filter .1s ease;}
+.bf-btn:active{transform:scale(.97);filter:brightness(1.1);}
 @keyframes flyDown{0%{transform:translate(var(--x0),var(--y0)) scale(.62);opacity:.9;}25%{opacity:1;}100%{transform:translate(var(--x1),var(--y1)) scale(1);opacity:1;}}
 .fly-card.back{animation:flyBack .35s ease-in both;}
 @keyframes flyBack{0%{transform:translate(var(--x1),var(--y1)) scale(1);opacity:1;}100%{transform:translate(var(--x0),var(--y0)) scale(.6);opacity:0;}}
@@ -2457,6 +2480,41 @@ const TUT_KEY='tenkuru-tutorial-done';
 function isTutDone(){try{return localStorage.getItem(TUT_KEY)==='1';}catch(e){return false;}}
 function markTutDone(){try{localStorage.setItem(TUT_KEY,'1');}catch(e){}}
 const DIFF_LABEL={easy:'EASY',normal:'NORMAL',hard:'HARD',master:'MASTER'};
+// v119: 対戦前に相手のギミックを見せる画面。初見で対策できないという声への対応
+// description は「ギミック名：説明」形式なので最初の「：」で割る
+function stageBrief(st){
+  const d=String(st.description||'');
+  const k=d.indexOf('：');
+  const gName=k>0?d.slice(0,k):'通常ルール';
+  let gText=k>0?d.slice(k+1):d;
+  gText=gText.replace(/\s*先取\d+pt\s*$/,'').replace(/。$/,''); // 勝利条件は下の欄で別に出す
+  return{
+    rival:st.rivalName||st.name||'',
+    gName,
+    gText:gText||'特別なギミックはありません。純粋な読み合いです。',
+    winPt:st.winPt||WIN_PT,
+    sec:st.timeLimit||10,
+    diff:DIFF_LABEL[st.diff]||'NORMAL'
+  };
+}
+function BriefScreen({stage,onStart}){
+  const b=stageBrief(stage);
+  useEffect(()=>{try{resumeAC();fxBell({f:988,v:0.07,d:1.2,bright:1.0,rev:0.8});}catch(e){}},[]);
+  return h('div',{className:'bf-screen'},
+    h('div',{className:'bf-card'},
+      h('div',{className:'bf-k'},'OPPONENT'),
+      h('div',{className:'bf-rival'},b.rival),
+      h('div',{className:'bf-gname'},b.gName),
+      h('div',{className:'bf-gtext'},b.gText),
+      h('div',{className:'bf-meta'},
+        h('div',{className:'bf-m'},h('span',{className:'l'},'勝利条件'),h('span',{className:'v'},'先取 '+b.winPt+' pt')),
+        h('div',{className:'bf-m'},h('span',{className:'l'},'持ち時間'),h('span',{className:'v'},b.sec+' 秒')),
+        h('div',{className:'bf-m'},h('span',{className:'l'},'難易度'),h('span',{className:'v'},b.diff))
+      ),
+      h('button',{className:'bf-btn',onClick:onStart},'確認した')
+    )
+  );
+}
 
 // **強調** を黄色にして、\n で改行する
 function tutText(s){
@@ -2677,7 +2735,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v118'; // v118(2026/09/07): モルフォの手札が星環札1枚だけになると出せず永久にタップし続けるバグを修正。幻惑はラウンドをまたいで持続し、その札を場に出すまで解けない仕様に変更
+const APP_VER='v119'; // v119(2026/09/07): 対戦開始前に相手のギミック説明画面を追加。「確認した」を押すとカウントダウン開始
+// v118(2026/09/07): モルフォの手札が星環札1枚だけになると出せず永久にタップし続けるバグを修正。幻惑はラウンドをまたいで持続し、その札を場に出すまで解けない仕様に変更
 // v117(2026/09/07): モルフォの鱗粉の幻惑を変更。無条件発動をやめ、2ラウンドに1回モルフォの手札1枚に星環が付与され、その札が場に出た時に発動。星環札は手札にいる間から専用の絵で表示
 // v116(2026/09/07): 飛ぶ札の色ズレを修正。通常ステージ(1〜6)は白い表向きカードに統一（v108の直し忘れ）。第8も手札と同じ絵に
 // v115(2026/09/07): 場のカードを拡大 fieldW 53→64（元の値は53。DEFAULT_LAYOUT のコメント参照）
@@ -3761,7 +3820,7 @@ function App(){
   function finishTutorial(diff){
     markTutDone();tutDoneR.current=true;
     setPendingDiff(null);
-    if(diff)startGame(diff);
+    if(diff)goBrief(diff); // v119: チュートリアル後もギミック説明を挟む
     else if(stageR.current)goMap();
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
@@ -3785,8 +3844,10 @@ function App(){
     if(st.challenge&&typeof SHIFT_VIDEO!=='undefined'){try{[SHIFT_VIDEO.v1,SHIFT_VIDEO.v2].forEach(u=>fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(()=>{}));}catch(e){}} // v78: 変身動画を先読み
     if(st.champion&&CHAMPIONS[st.champion]){setPendingDiff(st.diff);setPhase('champIntro');phaseR.current='champIntro';return;} // v61 登場画面を挟む
     if(st.tutorial&&!tutDoneR.current){openTutorial(st.diff);return;}
-    startGame(st.diff);
+    goBrief(st.diff);
   }
+  // v119: カウントダウンの前にギミック説明を挟む
+  function goBrief(diff){clearTimers();roundTokR.current++;setPendingDiff(diff||null);setPhase('brief');phaseR.current='brief';}
   function stageNext(){
     const c=stageR.current;if(!c){goMap();return;}
     const ar=STAGES.areas[c.ar];
@@ -4117,7 +4178,8 @@ function App(){
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
   if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
-  if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>startGame(pendingDiff)});
+  if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goBrief(pendingDiff)});
+  if(phase==='brief'&&curStage)return h(BriefScreen,{stage:curStage,onStart:()=>startGame(pendingDiff)}); // v119
   if(phase==='map')return h(MapScreen,{area:STAGES.areas[0],save,onSelect:i=>startStage(0,i),onBack:()=>{setPhase('menu');phaseR.current='menu';}});
   if(phase==='tutorial')return h(TutorialScreen,{pendingDiff,onFinish:finishTutorial,onExit:()=>finishTutorial(pendingDiff),trackNum,toggleMusic,coachName:null,startLabel:curStage?'ステージ '+curStage.no+' をはじめる':null,bg:null,winPt:curStage?curStage.winPt:null,
     onSecret:()=>{ // v105: 隠しコマンド → 第7（ルナ／レイピア）へ直行
