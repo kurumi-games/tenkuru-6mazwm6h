@@ -2667,7 +2667,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v113'; // v113(2026/09/07): 素材の最適化。画像を表示サイズに合わせて縮小（展開RAM 244MB→103MB）／BGM 112kbps・ボイス モノラル96kbps／変身動画 720x1280。コードは未変更
+const APP_VER='v114'; // v114(2026/09/07): モルフォを強化。カーソル移動30ms・到達60ms・保持70ms・降下240ms（合計で約35%短縮）。10完成の一手だけ下限220msを維持
+// v113(2026/09/07): 素材の最適化。画像を表示サイズに合わせて縮小（展開RAM 244MB→103MB）／BGM 112kbps・ボイス モノラル96kbps／変身動画 720x1280
 // v112: 第8ステージ「モルフォ」追加（出すのが速い／2ラウンドに1度、手札2枚の数字が1秒ごとに変わる幻惑）
 // v111: 出した札の枠は完全に空（白紙を置かない）
 // v110: 相手の手札は10枠固定。出した札の位置は空いたまま（中央に詰めない）
@@ -2749,7 +2750,7 @@ const AREA_01={
     // v62: お試しチャレンジ。ST6クリアで解放。本編の進行・AREA CLEARには数えない。次のステージは解放しない
     // v70: 先取30pt。プレイヤーが shiftPt に達すると試合が止まり、ルナ→レイピア（第2形態）の演出
     {no:7,name:'ルナ',description:'星環：温存したカードで10を組み、場ごと奪う。先取30pt',icon:'card',winPt:30,diff:'normal',rule:'normal',challenge:true,rivalName:'ルナ',form2Name:'レイピア',shiftPt:15,ability:'starRing',bgm:'Iridescent_Trap.mp3'},
-    {no:8,name:'モルフォ',description:'鱗粉の幻惑：2ラウンドに1度、手札2枚の数字が1秒ごとに変わる。出すのが速い。先取30pt',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,rivalName:'モルフォ',ability:'confuse',speed:0.5,bgm:'Cold Logic.mp3'},
+    {no:8,name:'モルフォ',description:'鱗粉の幻惑：2ラウンドに1度、手札2枚の数字が1秒ごとに変わる。出すのが速い。先取30pt',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,rivalName:'モルフォ',ability:'confuse',speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,bgm:'Cold Logic.mp3'},
   ]
 };
 const STAGES={
@@ -3405,7 +3406,9 @@ function App(){
   const flyR=useRef(null);const[flyCard,setFlyCard]=useState(null); // v107 降りてくる相手の札
   // v109 選択カーソル：常に相手の手札のどこかにいて、出す札まで1枚ずつ移動→タップ→降下
   const[dCur,setDCur]=useState({idx:0,tap:false});const dCurR=useRef(0);const curBusyR=useRef(false);const curT=useRef([]);
-  const CUR_STEP=(stageOptsR.current&&stageOptsR.current.speed<1)?55:110,CUR_HOLD=(stageOptsR.current&&stageOptsR.current.speed<1)?120:230;
+  // v113: カーソルの速さはステージ側で指定できる（未指定なら従来通り）
+  const _so=stageOptsR.current||{};
+  const CUR_STEP=_so.curStep||(_so.speed<1?55:110),CUR_HOLD=_so.curHold||(_so.speed<1?120:230),CUR_ARR=_so.curArr||120;
   function cursorTo(target,onArrive,check){ // check(): 途中で中止すべきなら false
     if(curBusyR.current)return false;
     curT.current.forEach(clearTimeout);curT.current=[];curBusyR.current=true;
@@ -3413,7 +3416,7 @@ function App(){
     const steps=[];while(cur!==tgt){cur+=cur<tgt?1:-1;steps.push(cur);}
     const at=(ms,f)=>curT.current.push(setTimeout(f,ms));
     steps.forEach((ix,k)=>at((k+1)*CUR_STEP,()=>{if(check&&!check()){curBusyR.current=false;return;}dCurR.current=ix;setDCur({idx:ix,tap:false});try{fxTone({f:1500,type:'sine',v:0.012,a:0.002,d:0.03,rev:0.1});}catch(e){}}));
-    const arrive=(steps.length+1)*CUR_STEP+120;
+    const arrive=(steps.length+1)*CUR_STEP+CUR_ARR;
     at(arrive,()=>{if(check&&!check()){curBusyR.current=false;return;}setDCur({idx:tgt,tap:true});try{fxTone({f:2200,f2:1200,type:'sine',v:0.05,a:0.002,d:0.12,rev:0.3});}catch(e){}});
     at(arrive+CUR_HOLD,()=>{curBusyR.current=false;setDCur({idx:tgt,tap:false});if(check&&!check())return;onArrive&&onArrive();});
     return true;
@@ -3745,7 +3748,7 @@ function App(){
       if(CHRONO_CONFIG.guaranteeFirstUnlock&&firstChrono&&st.no===firstChrono.no&&!saveR.current.chronoIntro){chrono=true;updSave(s=>{s.chronoIntro=true;return s;});}
       else chrono=Math.random()<CHRONO_CONFIG.appearRate;
     }
-    stageOptsR.current={chrono,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,speed:st.speed||1,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
+    stageOptsR.current={chrono,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,speed:st.speed||1,curStep:st.curStep||null,curArr:st.curArr||null,curHold:st.curHold||null,flyMs:st.flyMs||null,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
     if(st.challenge&&typeof SHIFT_VIDEO!=='undefined'){try{[SHIFT_VIDEO.v1,SHIFT_VIDEO.v2].forEach(u=>fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(()=>{}));}catch(e){}} // v78: 変身動画を先読み
     if(st.champion&&CHAMPIONS[st.champion]){setPendingDiff(st.diff);setPhase('champIntro');phaseR.current='champIntro';return;} // v61 登場画面を挟む
     if(st.tutorial&&!tutDoneR.current){openTutorial(st.diff);return;}
@@ -3869,7 +3872,11 @@ function App(){
       else if(fl===1)d=diff==='easy'?1000+Math.random()*600:diff==='hard'?400+Math.random()*200:diff==='master'?300+Math.random()*180:1000+Math.random()*400;
       else d=diff==='easy'?1200+Math.random()*800:diff==='hard'?600+Math.random()*300:diff==='master'?450+Math.random()*250:1500+Math.random()*500;
     }
+    const _canWin10=dHR.current.some(v=>canPlay(v,fieldSumR.current,fieldR.current)&&fieldSumR.current+v===10);
     d=Math.round(d*((stageOptsR.current&&stageOptsR.current.speed)||1)); // v112: 速い相手
+    // v113: 10を完成させる一手だけは、速度倍率のあとでも下限220msを守る（v40の趣旨）
+    // ここを消すと人が反応できない速さになる。モルフォを更に強くしたい時もこの行は残す
+    if(delay===null&&_canWin10)d=Math.max(d,220);
     aiRef.current=setTimeout(()=>{if(phaseR.current==='playing'&&countNumR.current<0&&!linkR.current)aiPlay(rn);},d);
   }
 
@@ -3925,7 +3932,7 @@ function App(){
     const newDH=dHand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx);
     setDealer(newDH,newRf);
     {const ci=Math.max(0,Math.min(dCurR.current,newDH.length-1));dCurR.current=ci;setDCur({idx:ci,tap:false});}
-    const FLY_MS=(stageOptsR.current&&stageOptsR.current.speed<1)?380:680;
+    const FLY_MS=(stageOptsR.current&&stageOptsR.current.flyMs)||((stageOptsR.current&&stageOptsR.current.speed<1)?380:680);
     flyR.current={value:chosen,face,rf:rf[idx]};setFlyCard({k:Date.now(),value:chosen,face,x0,y0,x1,y1,w:cardW,d:FLY_MS});
     try{fxAir({v:0.03,a:0.02,d:0.5,hp:4000,rev:0.5});}catch(e){}
     setTimeout(()=>{
