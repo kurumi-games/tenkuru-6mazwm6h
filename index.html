@@ -1359,10 +1359,10 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* 場を中央へ寄せて手札を上げる */
 .gp-screen .gp-field-area + .gp-spacer{min-height:calc(14 * var(--u)) !important;}
 .gp-screen .gp-hand-area .gp-area-label{margin-bottom:calc(4 * var(--u));}
-/* 相手の手札は表向き。通常ステージは場に出た時と同じオレンジ陣営色 */
+/* 相手の手札は表向き。通常ステージは場の相手カードと同じ「白地＋下辺Lラインだけオレンジ」 */
 .gp-dealer-card{position:relative;}
-.gp-dealer-card{background:linear-gradient(170deg,#fffaf3 0%,#ffe1bd 58%,#f39a3f 100%) !important;border:1.5px solid rgba(218,100,18,.9) !important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.58),0 2px 7px rgba(154,72,15,.28) !important;}
-.gp-dealer-card .dv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:calc(11 * var(--u));color:#713507;text-shadow:0 1px 0 rgba(255,255,255,.75);pointer-events:none;}
+.gp-dealer-card{background:url('img/card-magenta.webp') center/contain no-repeat !important;border:none !important;box-shadow:none !important;}
+.gp-dealer-card .dv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:800;font-size:calc(11 * var(--u));color:#263240;text-shadow:none;pointer-events:none;}
 .gp-screen.ch7 .gp-dealer-card{background:url('img/challenge07-rival-card-front.webp') center/contain no-repeat !important;border:none !important;box-shadow:none !important;}
 .gp-screen.ch7 .gp-dealer-card{background-image:url('img/challenge07-rival-card-front.webp');}
 .gp-screen.ch7 .gp-dealer-card .dv{color:#4a1a3e;text-shadow:0 0 3px rgba(255,255,255,.9);font-size:calc(12 * var(--u));}
@@ -2841,7 +2841,7 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v122'; // v122: 冒頭3画面の説明、ボス会話の明確化、相手手札のオレンジ陣営色を追加
+const APP_VER='v124'; // v124: ルナ／レイピアの選択札を固有IDで固定し、タップ位置と実際に出る札を一致
 // v119(2026/09/07): 対戦開始前に相手のギミック説明画面を追加。「確認した」を押すとカウントダウン開始
 // v118(2026/09/07): モルフォの手札が星環札1枚だけになると出せず永久にタップし続けるバグを修正。幻惑はラウンドをまたいで持続し、その札を場に出すまで解けない仕様に変更
 // v117(2026/09/07): モルフォの鱗粉の幻惑を変更。無条件発動をやめ、2ラウンドに1回モルフォの手札1枚に星環が付与され、その札が場に出た時に発動。星環札は手札にいる間から専用の絵で表示
@@ -3630,7 +3630,8 @@ function App(){
   // ── TEST: 4色を単独で確認する一時フック。確認後はこの useEffect ごと削除でOK ──
   useEffect(()=>{window.tenkuruTestRing=(c)=>flashRing(c);return()=>{delete window.tenkuruTestRing;};},[]);
   // ── /TEST ──
-  const[tapIdx,setTapIdx]=useState(-1);   // タップ演出中の手札
+  const[tapCardId,setTapCardId]=useState(null); // タップ演出中の相手カード（並びが変わっても同じ札を指すID）
+  const r2PendingCardR=useRef(null);       // レイピアがタップしてから場へ出すまで、通常AIに取らせない札
   const colorsR=useRef([]);
   function r2Active(){const so=stageOptsR.current;return !!(so&&so.ability==='starRing'&&form2R.current);}
   function r2Say(text,color){setTimeout(()=>{setR2Banner({text,color});setTimeout(()=>setR2Banner(null),1500);},120);} // 短く1.5秒だけ
@@ -3680,20 +3681,21 @@ function App(){
     if(pick)r2Tap(pick,rn);
   }
   // 発動：手札の環が弾け、絵の星環が膨らんで光る
-  function r2Tap(type,rn){
+  function r2Tap(type,rn,lockedId){
     const flags0=dRingR.current;const i0=flags0.findIndex(f=>f===type);if(i0<0)return;
+    const cardId0=dIdsR.current[i0];if(cardId0==null)return;
     if(!r2Tap._go){ // v109: まずカーソルがその環の札まで移動してタップ
       if(curBusyR.current||flyR.current)return;
       r2R.current.tappedThisRound=true;
-      cursorTo(i0,()=>{r2Tap._go=true;try{r2Tap(type,rn);}finally{r2Tap._go=false;}},()=>phaseR.current==='playing'&&!resolvingR.current&&countNumR.current<0);
+      cursorToCard(cardId0,()=>{r2Tap._go=true;try{r2Tap(type,rn,cardId0);}finally{r2Tap._go=false;}},()=>phaseR.current==='playing'&&!resolvingR.current&&countNumR.current<0&&dIdsR.current.includes(cardId0),()=>{r2R.current.tappedThisRound=false;});
       return;
     }
-    const flags=dRingR.current.slice();const i=flags.findIndex(f=>f===type);if(i<0)return;
+    const flags=dRingR.current.slice();const i=dIdsR.current.indexOf(lockedId);if(i<0||flags[i]!==type)return;
     const st=r2R.current;st.tappedThisRound=true;
     const R=REIPIA_RINGS[type];
-    const tapVal=dHR.current[i];
-    setTapIdx(i);setTimeout(()=>{setTapIdx(-1);const f2=dRingR.current.slice();if(f2[i]===type)f2[i]='tapped-'+type;setDRing(f2);dRingR.current=f2;},700); // v106: 環は消えるが「その色の札」として覚えておく
-    setTimeout(()=>playTappedCard(tapVal,rn,type),type==='erase'?1000:780); // v89: タップした札は場に出す
+    r2PendingCardR.current=lockedId;
+    setTapCardId(lockedId);setTimeout(()=>{setTapCardId(null);const j=dIdsR.current.indexOf(lockedId);if(j<0)return;const f2=dRingR.current.slice();if(f2[j]===type)f2[j]='tapped-'+type;setDRing(f2);dRingR.current=f2;},700); // v106: 環は消えるが「その色の札」として覚えておく
+    setTimeout(()=>playTappedCard(lockedId,rn,type),type==='erase'?1000:780); // v121: タップした「同じIDの札」を場に出す
     flashRing(R.ringColor);showSkill(type); // 技の効果処理と同時に、その色の星環だけ発光＋技名
     try{resumeAC();fxTone({f:2600,f2:900,type:'square',v:0.05,a:0.001,d:0.06,rev:0.3});fxBell({f:1568,v:0.08,d:1.2,bright:1.3,rev:0.75});fxAir({v:0.04,a:0.01,d:0.5,hp:5000,rev:0.7});}catch(e){}
     if(type==='lock'){
@@ -3710,13 +3712,15 @@ function App(){
     }
   }
   // タップした札を場に出す（出せる場なら）。出せなければ手札に残す
-  function playTappedCard(val,rn,type){
+  function playTappedCard(cardId,rn,type){
+    if(r2PendingCardR.current===cardId)r2PendingCardR.current=null;
     if(phaseR.current!=='playing'||countNumR.current>=0||resolvingR.current||eraseBusyR.current)return;
     const hand=dHR.current,rf=dRingR.current,cf=fieldR.current,cs=fieldSumR.current;
-    let idx=hand.findIndex((v,i)=>v===val&&isTapped(rf[i]));if(idx<0)idx=hand.findIndex((v,i)=>v===val&&!rf[i]);if(idx<0)return;
+    const idx=dIdsR.current.indexOf(cardId);if(idx<0)return;
+    const val=hand[idx];
     if(!canPlay(val,cs,cf))return; // 今出せなければ手札に「その色の札」として残り、出せる時にAIが出す
     try{resumeAC();playPlaceSE(false);}catch(e){}
-    const newDH=hand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx);setDealer(newDH,newRf);
+    const newDH=hand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx),newIds=dIdsR.current.filter((_,i)=>i!==idx);setDealer(newDH,newRf,newIds);
     ensureDealerRefill();
     clearTimeout(aiRef.current);
     tapFaceR.current=type||null;
@@ -3756,23 +3760,30 @@ function App(){
   function showSkillCustom(jp,en,color){const item={k:Date.now(),jp,en,color};if(comboOnR.current||resolvingR.current){skillQ.current.push(item);return;}setSkillFx(item);setTimeout(()=>setSkillFx(s=>s&&s.k===item.k?null:s),1400);}
   const flyR=useRef(null);const[flyCard,setFlyCard]=useState(null); // v107 降りてくる相手の札
   // v109 選択カーソル：常に相手の手札のどこかにいて、出す札まで1枚ずつ移動→タップ→降下
-  const[dCur,setDCur]=useState({idx:0,tap:false});const dCurR=useRef(0);const curBusyR=useRef(false);const curT=useRef([]);
+  const[dCur,setDCur]=useState({id:null,tap:false});const dCurR=useRef(null);const curBusyR=useRef(false);const curT=useRef([]);const curTokR=useRef(0);
   // v113: カーソルの速さはステージ側で指定できる（未指定なら従来通り）
   const _so=stageOptsR.current||{};
   const CUR_STEP=_so.curStep||(_so.speed<1?55:110),CUR_HOLD=_so.curHold||(_so.speed<1?120:230),CUR_ARR=_so.curArr||120;
-  function cursorTo(target,onArrive,check){ // check(): 途中で中止すべきなら false
-    if(curBusyR.current)return false;
+  function cursorToCard(targetId,onArrive,check,onCancel){ // v121: 手札番号ではなくカード固有IDを追う
+    if(curBusyR.current||targetId==null)return false;
+    const order=dSlotsR.current.filter(id=>id!=null&&dIdsR.current.includes(id));
+    const tgt=order.indexOf(targetId);if(tgt<0)return false;
     curT.current.forEach(clearTimeout);curT.current=[];curBusyR.current=true;
-    const n=dHR.current.length;let cur=Math.max(0,Math.min(dCurR.current,Math.max(0,n-1)));const tgt=Math.max(0,Math.min(target,n-1));
-    const steps=[];while(cur!==tgt){cur+=cur<tgt?1:-1;steps.push(cur);}
-    const at=(ms,f)=>curT.current.push(setTimeout(f,ms));
-    steps.forEach((ix,k)=>at((k+1)*CUR_STEP,()=>{if(check&&!check()){curBusyR.current=false;return;}dCurR.current=ix;setDCur({idx:ix,tap:false});try{fxTone({f:1500,type:'sine',v:0.012,a:0.002,d:0.03,rev:0.1});}catch(e){}}));
+    const tok=++curTokR.current;
+    let cur=order.indexOf(dCurR.current);if(cur<0)cur=0;
+    const steps=[];while(cur!==tgt){cur+=cur<tgt?1:-1;steps.push(order[cur]);}
+    const valid=()=>tok===curTokR.current&&dIdsR.current.includes(targetId)&&(!check||check());
+    let cancelled=false;
+    const abort=()=>{if(tok!==curTokR.current)return;curTokR.current++;curT.current.forEach(clearTimeout);curT.current=[];curBusyR.current=false;setDCur(c=>({id:c.id,tap:false}));if(!cancelled){cancelled=true;onCancel&&onCancel();}};
+    const at=(ms,f)=>curT.current.push(setTimeout(()=>{if(!valid()){abort();return;}f();},ms));
+    steps.forEach((id,k)=>at((k+1)*CUR_STEP,()=>{dCurR.current=id;setDCur({id,tap:false});try{fxTone({f:1500,type:'sine',v:0.012,a:0.002,d:0.03,rev:0.1});}catch(e){}}));
     const arrive=(steps.length+1)*CUR_STEP+CUR_ARR;
-    at(arrive,()=>{if(check&&!check()){curBusyR.current=false;return;}setDCur({idx:tgt,tap:true});try{fxTone({f:2200,f2:1200,type:'sine',v:0.05,a:0.002,d:0.12,rev:0.3});}catch(e){}});
-    at(arrive+CUR_HOLD,()=>{curBusyR.current=false;setDCur({idx:tgt,tap:false});if(check&&!check())return;onArrive&&onArrive();});
+    at(arrive,()=>{dCurR.current=targetId;setDCur({id:targetId,tap:true});try{fxTone({f:2200,f2:1200,type:'sine',v:0.05,a:0.002,d:0.12,rev:0.3});}catch(e){}});
+    at(arrive+CUR_HOLD,()=>{curBusyR.current=false;setDCur({id:targetId,tap:false});onArrive&&onArrive();});
     return true;
   }
-  function cancelCursor(){curT.current.forEach(clearTimeout);curT.current=[];curBusyR.current=false;setDCur(c=>({idx:c.idx,tap:false}));}
+  function cursorTo(target,onArrive,check){const id=dIdsR.current[target];return cursorToCard(id,onArrive,check);}
+  function cancelCursor(){curTokR.current++;curT.current.forEach(clearTimeout);curT.current=[];curBusyR.current=false;setDCur(c=>({id:c.id,tap:false}));}
   function r2CheckUnlock(newPH){
     const fl=pLockR.current;if(!fl.some(Boolean))return;
     if(!newPH.filter((v,i)=>v!==null&&!fl[i]).length){setLocks(newPH.map(()=>false));r2Say('ロック解除',REIPIA_RINGS.lock.color);}
@@ -3818,19 +3829,25 @@ function App(){
   function starRingActive(){const so=stageOptsR.current;return !!(so&&so.ability==='starRing'&&!form2R.current);}
   // v110: 相手の手札に固定の枠（10スロット）。札ごとにIDを持たせて、出した札の枠は空のまま
   const dIdsR=useRef([]);const dSlotsR=useRef(Array(10).fill(null));const[dSlots,setDSlots]=useState(Array(10).fill(null));const dSeqR=useRef(1);
-  function setDealer(hand,ring){
-    const old=dHR.current||[],oldIds=dIdsR.current||[];
-    // 旧手札と新手札を前から突き合わせて、残った札のIDを引き継ぐ。無くなった札の枠は空に、増えた札は空いてる枠へ
-    const ids=[];let j=0;const removed=new Set(oldIds);
-    for(let i=0;i<hand.length;i++){let found=-1;for(let k=j;k<old.length;k++){if(old[k]===hand[i]&&k-j<=3){found=k;break;}}
-      if(found>=0){ids.push(oldIds[found]);removed.delete(oldIds[found]);j=found+1;}else ids.push(null);}
+  function setDealer(hand,ring,idHint){
+    const oldIds=dIdsR.current||[];
+    // v121: 同じ数字の札が何枚あっても取り違えないよう、呼び出し元から残存IDをそのまま渡す。
+    // idHintなしは「全て新しく配った札」とみなし、新IDにする。
+    const ids=(Array.isArray(idHint)&&idHint.length===hand.length?idHint.slice():hand.map(()=>null));
+    const used=new Set();
+    for(let i=0;i<ids.length;i++){
+      if(ids[i]==null||used.has(ids[i]))ids[i]=dSeqR.current++;
+      used.add(ids[i]);
+    }
+    const removed=new Set(oldIds.filter(id=>!used.has(id)));
     const slots=dSlotsR.current.slice();slots.forEach((id,s)=>{if(id!=null&&removed.has(id))slots[s]=null;});
-    for(let i=0;i<ids.length;i++){if(ids[i]==null){const nid=dSeqR.current++;ids[i]=nid;let s=slots.indexOf(null);if(s<0){slots.push(nid);}else slots[s]=nid;}}
+    for(let i=0;i<ids.length;i++){const id=ids[i];if(!slots.includes(id)){let s=slots.indexOf(null);if(s<0){slots.push(id);}else slots[s]=id;}}
     // 枠にあるが手札に無いIDは掃除
     const alive=new Set(ids);for(let s=0;s<slots.length;s++)if(slots[s]!=null&&!alive.has(slots[s]))slots[s]=null;
     while(slots.length>10&&slots[slots.length-1]==null)slots.pop();
     dIdsR.current=ids;dSlotsR.current=slots;setDSlots(slots);
     setDH(hand);dHR.current=hand;const r=ring||hand.map(()=>false);setDRing(r);dRingR.current=r;
+    if(!ids.includes(dCurR.current)){dCurR.current=ids[0]||null;setDCur({id:dCurR.current,tap:false});}
   }
   function ringSum(){return dHR.current.reduce((s,v,i)=>s+(dRingR.current[i]&&!isTapped(dRingR.current[i])?v:0),0);}
   function isTapped(f){return typeof f==='string'&&f.indexOf('tapped-')===0;}
@@ -3843,7 +3860,7 @@ function App(){
     if(hand.length>=10)return;
     if(hand.filter((v,i)=>!isHoldRing(rf[i])).length)return; // 環なしが1枚でもあれば不要（v117: モルフォの環は出せるので在庫に数える）
     const nd=createDeck().slice(0,10-hand.length);
-    setDealer([...hand,...nd],[...rf.slice(0,hand.length),...nd.map(()=>false)]);
+    setDealer([...hand,...nd],[...rf.slice(0,hand.length),...nd.map(()=>false)],[...dIdsR.current,...nd.map(()=>null)]);
   }
   // 手札1枚に星環を付ける。合計が10ちょうどになったら完成処理へ
   function attachStarRing(rn){
@@ -3880,7 +3897,8 @@ function App(){
     clearTimers();exitLink();lockR.current=true;resolvingR.current=true;
     const hand=dHR.current,flags=dRingR.current;
     const ringed=hand.filter((v,i)=>flags[i]),rest=hand.filter((v,i)=>!flags[i]);
-    setDealer(rest,rest.map(()=>false));
+    const restIds=dIdsR.current.filter((id,i)=>!flags[i]);
+    setDealer(rest,rest.map(()=>false),restIds);
     const u=window.innerHeight/640,vw=window.innerWidth;
     const R=sel=>{const e=document.querySelector(sel);return e?e.getBoundingClientRect():null;};
     const pr=R('.boss-img')||{left:vw/2-50*u,top:70*u,width:100*u,height:150*u};
@@ -4153,7 +4171,7 @@ function App(){
     chronoR.current={armed:!!opts.chrono,count:0,pending:false,deals:0};
     roundSecR.current=opts.timeLimit||10;
     coreShiftR.current={active:opts.ability==='coreShift',used:false};setCoreShiftUsed(false);
-    form2R.current=false;setForm2(false);shiftPendingR.current=false;setShiftScene(null);sceneOnR.current=false;setScreenPop(false);setPtBurst(false);srPendingR.current=false;setFieldRing([]);setSrBanner(false);setLkFx(null);dIdsR.current=[];dSlotsR.current=Array(10).fill(null);setDSlots(Array(10).fill(null));r2R.current={rounds:0,timeLeft:0,cmdNext:null,tappedThisRound:false};setTimeRounds(0);setTapIdx(-1);setLocks([]);setCmd(null);rStopR.current=false;setRStop(false);setEraseIdx([]);colorsR.current=[]; // v70/v75/v79/v85
+    form2R.current=false;setForm2(false);shiftPendingR.current=false;setShiftScene(null);sceneOnR.current=false;setScreenPop(false);setPtBurst(false);srPendingR.current=false;setFieldRing([]);setSrBanner(false);setLkFx(null);dIdsR.current=[];dSlotsR.current=Array(10).fill(null);setDSlots(Array(10).fill(null));dCurR.current=null;setDCur({id:null,tap:false});r2R.current={rounds:0,timeLeft:0,cmdNext:null,tappedThisRound:false};r2PendingCardR.current=null;setTimeRounds(0);setTapCardId(null);setLocks([]);setCmd(null);rStopR.current=false;setRStop(false);setEraseIdx([]);colorsR.current=[]; // v70/v75/v79/v85/v121
     dealPlayer(p);setDealer(d);exitLink();
     setPPt(0);setDPt(0);pPtR.current=0;dPtR.current=0;
     setRNum(1);setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;
@@ -4231,8 +4249,8 @@ function App(){
     const newP=createDeck(),newD=createDeck();
     dealPlayer(newP);
     { // v79: 時間切れでも環付きカードは残す
-      const keep=dHR.current.filter((v,i)=>dRingR.current[i]),keepRf=dRingR.current.filter(f=>f); // 環の種類も保つ
-      const fill=newD.slice(0,10-keep.length);setDealer([...keep,...fill],[...keepRf,...fill.map(()=>false)]);
+      const keep=dHR.current.filter((v,i)=>dRingR.current[i]),keepRf=dRingR.current.filter(f=>f),keepIds=dIdsR.current.filter((id,i)=>dRingR.current[i]); // 環の種類と固有IDも保つ
+      const fill=newD.slice(0,10-keep.length);setDealer([...keep,...fill],[...keepRf,...fill.map(()=>false)],[...keepIds,...fill.map(()=>null)]);
     }
     const tok=roundTokR.current;
     setTimeout(()=>{
@@ -4270,9 +4288,12 @@ function App(){
     // 場が完成した直後にAIの出す動作が間に合ってしまった場合 → カード返却（出さない）
     // ※lockRは見ない：あれはラウンド開始時のプレイヤー用ハンデロックと共用のため
     if(resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current||eraseBusyR.current||pausedR.current)return; // v54/v75/v84/v89/v91
+    if(flyR.current||curBusyR.current){if(!rStopR.current)scheduleAi(rn,120);return;}
     const dHand=dHR.current,cf=fieldR.current,cs=fieldSumR.current;
     if(!dHand.length)return;
-    const rf=dRingR.current;const avail=dHand.filter((v,i)=>!isHoldRing(rf[i])); // v79: 星環付きは温存（タップ済みは出せる）／v117: モルフォの環は出せる
+    const rf=dRingR.current;
+    const eligible=i=>!isHoldRing(rf[i])&&dIdsR.current[i]!==r2PendingCardR.current;
+    const avail=dHand.filter((v,i)=>eligible(i)); // v79: 星環付きは温存。v121: レイピアが今タップした札は専用処理に任せる
     const playable=avail.filter(v=>canPlay(v,cs,cf));
     if(!playable.length){scheduleAi(rn);return;}
     const wins=playable.filter(v=>cs+v===10);
@@ -4294,36 +4315,38 @@ function App(){
     else if(cs>=1){if(Math.random()<Math.min(safeBase+cf.length*0.08,safeCap)&&safe.length)chosen=safe[Math.floor(Math.random()*safe.length)];}
     else{if(Math.random()<firstRate&&safe.length)chosen=safe.sort((a,b)=>a-b)[0];}
     if(!chosen){scheduleAi(rn);return;}
+    let idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&isTapped(rf[i]));
+    if(idx<0)idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&rf[i]==='morpho'); // v117: 同じ数字なら環付きを優先して出す
+    if(idx<0)idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&!rf[i]);
+    if(idx<0){scheduleAi(rn);return;}
+    const cardId=dIdsR.current[idx];if(cardId==null){scheduleAi(rn);return;}
+    // v121: この時点で選んだ固有IDを、カーソル→タップ→飛行→着地まで選び直さない。
+    const ok=cursorToCard(cardId,()=>commitDealerPlay({id:cardId,value:chosen},rn),()=>{
+      const j=dIdsR.current.indexOf(cardId);
+      return phaseR.current==='playing'&&!resolvingR.current&&countNumR.current<0&&!pausedR.current&&j>=0&&!isHoldRing(dRingR.current[j])&&dIdsR.current[j]!==r2PendingCardR.current&&canPlay(dHR.current[j],fieldSumR.current,fieldR.current);
+    },()=>{if(phaseR.current==='playing'&&!resolvingR.current)scheduleAi(rn);});
+    if(!ok)scheduleAi(rn);
+  }
+
+  function commitDealerPlay(pick,rn){
+    if(flyR.current||resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current||eraseBusyR.current||pausedR.current){if(phaseR.current==='playing'&&!resolvingR.current)scheduleAi(rn);return;}
+    const idx=dIdsR.current.indexOf(pick.id);
+    const dHand=dHR.current,rf=dRingR.current,cf=fieldR.current,cs=fieldSumR.current;
+    if(idx<0||dHand[idx]!==pick.value||isHoldRing(rf[idx])||pick.id===r2PendingCardR.current||!canPlay(dHand[idx],cs,cf)||countNumR.current>=0){scheduleAi(rn);return;}
+    const chosen=dHand[idx],pickedRf=rf[idx];
+    const face=isTapped(pickedRf)?pickedRf.slice(7):(pickedRf==='morpho'?'morpho':null);
     resumeAC();setTimeout(()=>playPlaceSE(false),100);
-    let idx=dHand.findIndex((v,i)=>v===chosen&&isTapped(rf[i]));
-    if(idx<0)idx=dHand.findIndex((v,i)=>v===chosen&&rf[i]==='morpho'); // v117: 同じ数字なら環付きを優先して出す
-    if(idx<0)idx=dHand.findIndex((v,i)=>v===chosen&&!rf[i]); // タップ済みの札を優先して出す
-    const face=isTapped(rf[idx])?rf[idx].slice(7):(rf[idx]==='morpho'?'morpho':null);
-    if(flyR.current||curBusyR.current)return;
-    // v109: まずカーソルが出す札まで1枚ずつ移動して止まり、タップ。その後で降りてくる
-    if(!aiPlay._fromCursor){
-      const ok=cursorTo(idx,()=>{ // 到着・タップ後：まだ出せるなら降下開始
-        const h=dHR.current,r=dRingR.current;let j=h.findIndex((v,i)=>v===chosen&&isTapped(r[i]));
-        if(j<0)j=h.findIndex((v,i)=>v===chosen&&r[i]==='morpho'); // v118: ここで星環札を見落とすと永久にタップし続ける
-        if(j<0)j=h.findIndex((v,i)=>v===chosen&&!r[i]);
-        if(j<0||!canPlay(chosen,fieldSumR.current,fieldR.current)||resolvingR.current||countNumR.current>=0){scheduleAi(rn);return;}
-        aiPlay._fromCursor=true;try{aiPlay(rn);}finally{aiPlay._fromCursor=false;}
-      },()=>phaseR.current==='playing'&&!resolvingR.current&&countNumR.current<0&&!pausedR.current&&canPlay(chosen,fieldSumR.current,fieldR.current));
-      if(!ok)scheduleAi(rn);
-      return;
-    }
     // v107: すぐ置かず、相手の手札から場へスーッと降りてくる。着地時にまだ出せる札なら置く（プレイヤーが先に動いて出せなくなったら戻す）
     const u=window.innerHeight/640;
-    const cardEl=document.querySelector('.gp-dealer-cards .gp-dealer-card[data-idx="'+idx+'"]');const fc=document.querySelector('.gp-field-cards');
+    const cardEl=document.querySelector('.gp-dealer-cards .gp-dealer-card[data-card-id="'+pick.id+'"]');const fc=document.querySelector('.gp-field-cards');
     const cr=cardEl?cardEl.getBoundingClientRect():{left:window.innerWidth/2,top:150*u,width:20*u,height:30*u};
     const fr=fc?fc.getBoundingClientRect():{left:0,top:300*u,width:window.innerWidth,height:80*u};
     const gap=5*u,cardW=(fr.width-3*gap)/4,n=fieldR.current.length;
     const x0=cr.left+cr.width/2,y0=cr.top+cr.height/2,x1=fr.left+n*(cardW+gap)+cardW/2,y1=fr.top+fr.height/2;
-    const newDH=dHand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx);
-    setDealer(newDH,newRf);
-    {const ci=Math.max(0,Math.min(dCurR.current,newDH.length-1));dCurR.current=ci;setDCur({idx:ci,tap:false});}
+    const newDH=dHand.filter((_,i)=>i!==idx),newRf=rf.filter((_,i)=>i!==idx),newIds=dIdsR.current.filter((_,i)=>i!==idx);
+    setDealer(newDH,newRf,newIds);
     const FLY_MS=(stageOptsR.current&&stageOptsR.current.flyMs)||((stageOptsR.current&&stageOptsR.current.speed<1)?380:680);
-    flyR.current={value:chosen,face,rf:rf[idx]};setFlyCard({k:Date.now(),value:chosen,face,x0,y0,x1,y1,w:cardW,d:FLY_MS});
+    flyR.current={id:pick.id,value:chosen,face,rf:pickedRf};setFlyCard({k:Date.now(),value:chosen,face,x0,y0,x1,y1,w:cardW,d:FLY_MS});
     try{fxAir({v:0.03,a:0.02,d:0.5,hp:4000,rev:0.5});}catch(e){}
     setTimeout(()=>{
       const f=flyR.current;flyR.current=null;if(!f)return;
@@ -4331,7 +4354,7 @@ function App(){
       const ok=phaseR.current==='playing'&&countNumR.current<0&&!resolvingR.current&&!eraseBusyR.current&&!pausedR.current&&canPlay(f.value,cs2,cf2);
       if(!ok){ // 戻す
         setFlyCard(c=>c?{...c,back:true}:c);setTimeout(()=>setFlyCard(null),380);
-        const h2=[...dHR.current,f.value],r2=[...dRingR.current,f.rf||false];setDealer(h2,r2);
+        const h2=[...dHR.current,f.value],r2=[...dRingR.current,f.rf||false],ids2=[...dIdsR.current,f.id];setDealer(h2,r2,ids2);
         if(phaseR.current==='playing'&&!resolvingR.current)scheduleAi(rn);
         return;
       }
@@ -4340,7 +4363,7 @@ function App(){
       if(f.rf==='morpho')startConfuse(rn); // v117: 環の札が場に出た瞬間に鱗粉の幻惑が発動
       if(!dHR.current.filter((v,i)=>!isHoldRing(dRingR.current[i])).length){ // 環付きだけ残った → 補充
         const keep=dHR.current,keepRf=dRingR.current;const nd=createDeck().slice(0,10-keep.length);
-        setDealer([...keep,...nd],[...keepRf,...nd.map(()=>false)]);
+        setDealer([...keep,...nd],[...keepRf,...nd.map(()=>false)],[...dIdsR.current,...nd.map(()=>null)]);
       }
       if(!resolvePlay(f.value,cf2,cs2,'dealer',rn))scheduleAi(rn);
     },FLY_MS);
@@ -4511,7 +4534,7 @@ function App(){
     ),
     loadingVeil&&h('div',{key:'ld',className:'pause-veil loading'},h('div',{className:'t'},'LOADING'),h('div',{className:'s'},'星環を準備中…')),
     shiftScene&&h(ShiftScene,{key:'shift',name:shiftScene.name,form2Name:shiftScene.form2Name,
-      onForm2:()=>{if(shiftScene.tok===roundTokR.current){form2R.current=true;setForm2(true);setDealer(dHR.current);}}, // v79: 第2形態では星環なし
+      onForm2:()=>{if(shiftScene.tok===roundTokR.current){form2R.current=true;setForm2(true);setDealer(dHR.current,dHR.current.map(()=>false),dIdsR.current.slice());}}, // v121: 第2形態でも札IDは維持し、星環だけ外す
       onLeave:()=>{if(shiftScene.tok===roundTokR.current){setScreenPop(true);setTimeout(()=>setScreenPop(false),700);setBgmVolume(0.45);}},
       onDone:()=>{
         const sc=shiftScene;setShiftScene(null);sceneOnR.current=false;
@@ -4601,8 +4624,8 @@ function App(){
       h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
       h('div',{className:'gp-dealer-cards'},
         dSlots.map((id,s)=>{const i=id==null?-1:dIdsR.current.indexOf(id);if(i<0||i>=dH.length)return h('div',{key:'e'+s,className:'gp-dealer-card empty'});const v=dH[i];
-          return h('div',{key:'c'+id,'data-idx':i,className:'gp-dealer-card'+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dCur.idx===i?' dsel':'')},h('span',{className:'dv'},v),
-          dCur.idx===i&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.idx===i&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapIdx===i?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined}));})
+          return h('div',{key:'c'+id,'data-card-id':id,className:'gp-dealer-card'+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dCur.id===id?' dsel':'')},h('span',{className:'dv'},v),
+          dCur.id===id&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.id===id&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapCardId===id?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined}));})
       )
     ),
     srBanner&&h('div',{className:'sr-banner'},h('b',null,'STAR RING'),'星環 ── 完成'),
