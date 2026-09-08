@@ -1119,7 +1119,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .a1-map{position:relative;z-index:2;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;}
 .a1-mapbox{position:relative;width:calc(360 * var(--u));height:calc(360 * var(--u));max-height:100%;}
 .a1-core{position:absolute;left:50%;top:52%;width:calc(276 * var(--u));height:calc(276 * var(--u));margin:calc(-138 * var(--u)) 0 0 calc(-138 * var(--u));pointer-events:none;z-index:0;
-  background:url('img/area01-core.webp') center/contain no-repeat;
+  background:url('img/area01-core.webp') center/contain no-repeat,radial-gradient(circle,rgba(100,205,255,.34) 0 14%,rgba(95,120,255,.12) 32%,transparent 66%);
   animation:a1Float 5.2s ease-in-out infinite, a1Breath 4.4s ease-in-out infinite;will-change:transform,opacity;}
 .a1-core::before{ /* 外側の光輪（画像とは別・ごくゆっくり回る） */
   content:'';position:absolute;inset:-6%;border-radius:50%;pointer-events:none;
@@ -1137,21 +1137,25 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .a1-nd{cursor:default;}
 .a1-nd.cur,.a1-nd.clear{cursor:pointer;}
 .a1-nd .glow{fill:url(#a1GlowCyan);opacity:0;}
+.a1-nd .node-base{fill:#172653;stroke:rgba(184,222,255,.5);stroke-width:2;}
 .a1-nd .shell{filter:brightness(.9);}
 .a1-nd .lbl{font-size:8.5px;font-weight:800;letter-spacing:1px;fill:rgba(210,230,255,.85);text-anchor:middle;dominant-baseline:central;font-family:'Inter',sans-serif;}
 .a1-nd .ico{color:rgba(220,235,255,.9);}
 .a1-nd .star{fill:rgba(255,255,255,.18);}
 .a1-nd .star.on{fill:#ffe08a;filter:drop-shadow(0 0 3px rgba(255,224,138,.9));}
 .a1-nd.clear .shell{filter:sepia(1) saturate(2.6) hue-rotate(-8deg) brightness(1.1) drop-shadow(0 0 6px rgba(255,214,120,.8));}
+.a1-nd.clear .node-base{fill:#7b5b1f;stroke:#ffe08a;}
 .a1-nd.clear .glow{fill:url(#a1GlowGold);opacity:.55;}
 .a1-nd.clear .lbl{fill:#ffe9b0;}
 .a1-nd.clear .ico{color:#ffe08a;}
 .a1-nd.cur .shell{filter:brightness(1.25) saturate(1.15) drop-shadow(0 0 8px rgba(160,235,255,.95));}
+.a1-nd.cur .node-base{fill:#1b4770;stroke:#a7edff;stroke-width:2.5;filter:drop-shadow(0 0 6px rgba(120,225,255,.8));}
 .a1-nd.cur .glow{opacity:.9;animation:a1NdPulse 1.8s ease-in-out infinite;}
 .a1-nd.cur .lbl{fill:#fff;}
 .a1-nd.cur .ico{color:#fff;filter:drop-shadow(0 0 4px rgba(150,235,255,1));}
 @keyframes a1NdPulse{0%,100%{opacity:.45;}50%{opacity:1;}}
 .a1-nd.locked .shell,.a1-nd.soon .shell{filter:grayscale(.75) brightness(.5);}
+.a1-nd.locked .node-base,.a1-nd.soon .node-base{fill:#111a3b;stroke:rgba(180,205,235,.22);}
 .a1-nd.locked .lbl,.a1-nd.soon .lbl{fill:rgba(200,215,240,.4);}
 .a1-nd.locked .ico,.a1-nd.soon .ico{color:rgba(200,215,240,.55);}
 .a1-nd .sel-ring{fill:none;stroke:#fff;stroke-width:2;opacity:0;}
@@ -1719,6 +1723,64 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.dark .champ-bubble::after{border-left-color:rgba(20,30,70,.94);}
 .sg-end-card .champ-say{font-family:'Noto Serif JP','Hiragino Mincho ProN',serif;font-weight:600;font-size:calc(13 * var(--u));color:#cfe2ff;line-height:1.6;margin:calc(2 * var(--u)) 0 calc(4 * var(--u));}
 .sg-end-card .champ-say b{color:#9fd6ff;font-weight:700;margin-right:calc(6 * var(--u));}
+
+/* ===== v121: 遺跡ストーリーの短い進行（結果→魂解放→次の扉） ===== */
+.sg-top-actions{display:flex;align-items:center;gap:calc(7 * var(--u));}
+.sg-pill.flow-check{color:#9feaff;border-color:rgba(120,225,255,.38);background:rgba(8,30,58,.72);}
+.sg-end-card .flow-note{font-size:calc(10.5 * var(--u));color:rgba(210,224,248,.68);letter-spacing:.06em;margin-top:calc(2 * var(--u));}
+.sg-end-card .unlock-next{display:flex;align-items:center;justify-content:center;gap:calc(7 * var(--u));font-size:calc(12 * var(--u));font-weight:700;color:#8ee9ff;margin:calc(4 * var(--u)) 0;}
+.sg-end-card .unlock-next::before{content:'';width:calc(7 * var(--u));height:calc(7 * var(--u));border-radius:50%;background:#80e6ff;box-shadow:0 0 calc(10 * var(--u)) rgba(105,225,255,.9);}
+.sg-btn.ad{border-color:rgba(140,225,255,.45);color:#bcefff;background:rgba(25,65,100,.32);}
+.sg-btn.ad:disabled{opacity:.72;cursor:default;color:#ffe08a;border-color:rgba(255,224,138,.38);}
+
+.flow-preview{display:flex;align-items:center;justify-content:center;padding:calc(20 * var(--u));background:radial-gradient(circle at 50% 20%,#1b3560 0%,#0a1030 48%,#06091e 100%);}
+.flow-menu{width:100%;max-width:calc(330 * var(--u));padding:calc(22 * var(--u)) calc(18 * var(--u));background:linear-gradient(180deg,rgba(24,37,80,.98),rgba(8,13,40,.98));border:1px solid rgba(150,210,255,.28);border-radius:calc(24 * var(--u));box-shadow:0 calc(20 * var(--u)) calc(60 * var(--u)) rgba(0,0,0,.55);text-align:center;}
+.flow-menu .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));font-weight:700;letter-spacing:.28em;color:#8ee9ff;}
+.flow-menu .t{font-family:'Noto Serif JP',serif;font-size:calc(26 * var(--u));font-weight:800;letter-spacing:.06em;margin-top:calc(5 * var(--u));}
+.flow-menu .d{font-size:calc(12 * var(--u));line-height:1.65;color:#b8c8e2;margin:calc(8 * var(--u)) 0 calc(14 * var(--u));}
+.flow-choice{width:100%;min-height:calc(64 * var(--u));margin-top:calc(9 * var(--u));padding:calc(10 * var(--u)) calc(14 * var(--u));border-radius:calc(15 * var(--u));border:1px solid rgba(150,210,255,.25);background:linear-gradient(135deg,rgba(45,79,135,.72),rgba(21,35,82,.86));color:#f4f8ff;text-align:left;cursor:pointer;font-family:inherit;}
+.flow-choice b{display:block;font-family:'Noto Serif JP',serif;font-size:calc(16 * var(--u));font-weight:700;letter-spacing:.05em;}
+.flow-choice span{display:block;margin-top:calc(3 * var(--u));font-size:calc(10.5 * var(--u));color:#aec5e7;}
+.flow-back{width:100%;min-height:calc(44 * var(--u));margin-top:calc(13 * var(--u));border:0;background:transparent;color:#afbdd7;font-family:inherit;font-size:calc(12 * var(--u));cursor:pointer;}
+
+.soul-screen,.gate-screen{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;width:100vw;height:100dvh;overflow:hidden;color:#f4f7ff;font-family:'Noto Sans JP',sans-serif;background:radial-gradient(circle at 50% 33%,#24366f 0%,#10163e 36%,#070a1d 78%);}
+.soul-screen::before,.gate-screen::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle at 12% 17%,rgba(255,255,255,.8) 0 1px,transparent 1.5px),radial-gradient(circle at 84% 12%,rgba(255,255,255,.7) 0 1px,transparent 1.5px),radial-gradient(circle at 73% 46%,rgba(160,225,255,.8) 0 1px,transparent 1.7px),radial-gradient(circle at 20% 63%,rgba(255,230,170,.7) 0 1px,transparent 1.7px),radial-gradient(circle at 91% 78%,rgba(255,255,255,.6) 0 1px,transparent 1.5px);opacity:.8;}
+.soul-head,.gate-head{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:max(calc(env(safe-area-inset-top,0px) + calc(14 * var(--u))),calc(20 * var(--u))) calc(16 * var(--u)) 0;}
+.soul-head .k,.gate-head .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));font-weight:700;letter-spacing:.28em;color:#91e9ff;}
+.soul-head .t,.gate-head .t{font-family:'Noto Serif JP',serif;font-size:calc(21 * var(--u));font-weight:800;letter-spacing:.06em;margin-top:calc(2 * var(--u));}
+.soul-skip{min-width:calc(64 * var(--u));min-height:calc(38 * var(--u));border-radius:999px;border:1px solid rgba(220,230,255,.26);background:rgba(8,13,40,.58);color:#b9c5dc;font-family:inherit;font-size:calc(10.5 * var(--u));cursor:pointer;}
+.soul-stage{position:relative;z-index:1;height:calc(282 * var(--u));display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.soul-ring{position:relative;width:calc(142 * var(--u));height:calc(142 * var(--u));border-radius:50%;border:calc(5 * var(--u)) dotted #b79aff;box-shadow:0 0 calc(28 * var(--u)) rgba(115,220,255,.55),inset 0 0 calc(28 * var(--u)) rgba(115,220,255,.28);animation:soulRing 9s linear infinite;}
+.soul-ring::after{content:'';position:absolute;right:calc(-9 * var(--u));top:calc(5 * var(--u));width:calc(45 * var(--u));height:calc(20 * var(--u));background:#192553;transform:rotate(-35deg);box-shadow:0 0 calc(12 * var(--u)) rgba(150,225,255,.65);}
+.soul-person{position:absolute;left:50%;top:50%;width:calc(66 * var(--u));height:calc(90 * var(--u));transform:translate(-50%,-45%);border-radius:48% 48% 38% 38%;background:radial-gradient(circle at 50% 24%,#fff 0 18%,#9aeaff 20% 34%,transparent 36%),linear-gradient(180deg,transparent 28%,rgba(126,226,255,.92) 29%,rgba(156,185,255,.16) 90%,transparent);filter:drop-shadow(0 0 calc(16 * var(--u)) rgba(126,226,255,.9));animation:soulFloat 3.2s ease-in-out infinite;}
+.soul-release{margin-top:calc(18 * var(--u));font-family:'Noto Serif JP',serif;font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.16em;color:#9ceeff;text-shadow:0 0 calc(14 * var(--u)) rgba(100,220,255,.8);}
+.soul-dialog{position:absolute;z-index:4;left:calc(15 * var(--u));right:calc(15 * var(--u));bottom:max(env(safe-area-inset-bottom,0px),calc(14 * var(--u)));min-height:calc(236 * var(--u));padding:calc(15 * var(--u));border-radius:calc(19 * var(--u));border:1px solid rgba(150,210,255,.28);background:linear-gradient(180deg,rgba(18,29,70,.94),rgba(7,12,39,.97));box-shadow:0 calc(14 * var(--u)) calc(40 * var(--u)) rgba(0,0,0,.5);}
+.soul-dialog .meter{display:flex;align-items:center;justify-content:space-between;font-size:calc(9.5 * var(--u));font-weight:700;letter-spacing:.14em;color:#8ee9ff;}
+.soul-dialog .speaker{font-family:'Noto Serif JP',serif;font-size:calc(12 * var(--u));font-weight:700;color:#c7b5ff;margin-top:calc(10 * var(--u));}
+.soul-dialog .speaker.hero{color:#8ee9ff;}
+.soul-dialog .line{font-family:'Noto Serif JP',serif;font-size:calc(14 * var(--u));font-weight:600;line-height:1.65;color:#f5f8ff;margin-top:calc(3 * var(--u));animation:fadeUp .25s ease both;}
+.soul-dialog .foot{position:absolute;left:calc(15 * var(--u));right:calc(15 * var(--u));bottom:calc(14 * var(--u));display:flex;align-items:center;justify-content:space-between;}
+.soul-dots{display:flex;gap:calc(6 * var(--u));}
+.soul-dots i{width:calc(7 * var(--u));height:calc(7 * var(--u));border-radius:50%;background:rgba(210,225,255,.25);}
+.soul-dots i.on{background:#8ee9ff;box-shadow:0 0 calc(8 * var(--u)) rgba(100,225,255,.8);}
+.soul-next{min-width:calc(108 * var(--u));min-height:calc(44 * var(--u));border:0;border-radius:calc(12 * var(--u));background:linear-gradient(135deg,#91efff,#66cfee);color:#09233a;font-family:inherit;font-size:calc(13 * var(--u));font-weight:800;cursor:pointer;}
+@keyframes soulRing{to{transform:rotate(360deg);}}
+@keyframes soulFloat{0%,100%{transform:translate(-50%,-45%)}50%{transform:translate(-50%,-51%)}}
+
+.gate-screen{background:radial-gradient(circle at 50% 38%,#2c467d 0%,#11183d 42%,#070a1d 82%);}
+.gate-head{justify-content:center;text-align:center;}
+.gate-stage{position:relative;height:calc(326 * var(--u));display:grid;place-items:center;overflow:hidden;}
+.gate-beam{position:absolute;width:calc(150 * var(--u));height:calc(330 * var(--u));background:linear-gradient(180deg,transparent,rgba(125,225,255,.52),transparent);filter:blur(calc(10 * var(--u)));}
+.gate-door{position:relative;width:calc(148 * var(--u));height:calc(206 * var(--u));border:calc(8 * var(--u)) solid #ffd974;border-bottom-width:calc(13 * var(--u));border-radius:calc(74 * var(--u)) calc(74 * var(--u)) calc(8 * var(--u)) calc(8 * var(--u));background:rgba(33,48,96,.85);box-shadow:0 0 calc(34 * var(--u)) rgba(103,222,255,.58),inset 0 0 calc(34 * var(--u)) rgba(103,222,255,.35);}
+.gate-door::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:calc(12 * var(--u));transform:translateX(-50%);background:#f7ffff;box-shadow:0 0 calc(18 * var(--u)) #8cecff,0 0 calc(42 * var(--u)) #8cecff;animation:gateOpen 2.2s ease-in-out infinite alternate;}
+.gate-door span{position:absolute;left:0;right:0;bottom:calc(13 * var(--u));text-align:center;font-family:'Cinzel',serif;font-size:calc(9 * var(--u));font-weight:700;letter-spacing:.22em;color:#ffdf85;}
+@keyframes gateOpen{from{width:calc(5 * var(--u));opacity:.72}to{width:calc(22 * var(--u));opacity:1}}
+.gate-card{position:absolute;z-index:3;left:calc(15 * var(--u));right:calc(15 * var(--u));bottom:max(env(safe-area-inset-bottom,0px),calc(14 * var(--u)));padding:calc(17 * var(--u));border-radius:calc(20 * var(--u));border:1px solid rgba(150,210,255,.28);background:linear-gradient(180deg,rgba(20,33,76,.96),rgba(8,13,40,.98));text-align:center;box-shadow:0 calc(14 * var(--u)) calc(40 * var(--u)) rgba(0,0,0,.5);}
+.gate-card .done{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));font-weight:700;letter-spacing:.26em;color:#ffe08a;}
+.gate-card .next{font-family:'Noto Serif JP',serif;font-size:calc(22 * var(--u));font-weight:800;letter-spacing:.06em;margin-top:calc(5 * var(--u));}
+.gate-card .desc{font-size:calc(11.5 * var(--u));line-height:1.65;color:#b9c7df;margin:calc(7 * var(--u)) 0 calc(12 * var(--u));}
+.gate-card .pending{font-size:calc(10 * var(--u));color:#8ee9ff;margin-bottom:calc(10 * var(--u));}
+.gate-card .sg-btn{margin-top:calc(8 * var(--u));}
 
 /* ===== v54: 選手・チャンピオン画像の受け皿（画像未配置なら何も出ない） ===== */
 .gp-screen > .champ-layer{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
@@ -2761,7 +2823,7 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v120'; // v120(2026/09/07): モルフォのイントロ動画を追加。対戦ボタン→動画(タップでスキップ可)→ギミック説明→カウントダウンの流れ
+const APP_VER='v121'; // v121: 遺跡マップ→短い結果→ボスの魂解放→次の扉、のストーリー進行を追加
 // v119(2026/09/07): 対戦開始前に相手のギミック説明画面を追加。「確認した」を押すとカウントダウン開始
 // v118(2026/09/07): モルフォの手札が星環札1枚だけになると出せず永久にタップし続けるバグを修正。幻惑はラウンドをまたいで持続し、その札を場に出すまで解けない仕様に変更
 // v117(2026/09/07): モルフォの鱗粉の幻惑を変更。無条件発動をやめ、2ラウンドに1回モルフォの手札1枚に星環が付与され、その札が場に出た時に発動。星環札は手札にいる間から専用の絵で表示
@@ -2827,7 +2889,7 @@ const APP_VER='v120'; // v120(2026/09/07): モルフォのイントロ動画を�
 // v55: ステージ選択画面の文字・ボタンを書体設計で高品質化（Cinzel/Noto Serif JP/Noto Sans JP）
 // v54: AREA01本格マップ（背景/コア/マス外装）・LINK CARD（渦＋時間停止）・選手画像の受け皿
 // ═══════════════════════════════════════════════════════════
-//  ステージモード (v54)  ── AREA 01 星環アリーナ
+//  ステージモード (v121)  ── AREA 01 魂の回廊
 //  ゲーム本体（calcPts, canPlay, createDeck, getComboLevel, カードCSS）は触らない
 // ═══════════════════════════════════════════════════════════
 
@@ -2837,26 +2899,29 @@ const APP_VER='v120'; // v120(2026/09/07): モルフォのイントロ動画を�
 const AREA_01={
   id:1,
   label:'AREA 01',
-  name:'星環アリーナ',
-  tagline:'コアを10に結び、頂上を目指せ',
+  name:'魂の回廊',
+  tagline:'星環をほどき、眠る魂を天へ送れ',
   stages:[
-    {no:1,name:'ファースト・リンク',description:'基本ルールで10を目指す',icon:'check',winPt:10,diff:'easy',rule:'normal',tutorial:true},
-    {no:2,name:'シャッフル・ライン',description:'手札の流れが変化するステージ',icon:'shuffle',winPt:10,diff:'easy',rule:'shuffle'},
-    {no:3,name:'フロスト・ロック',description:'一部の手札が一時的に凍結',icon:'snow',winPt:10,diff:'easy',rule:'frost'},
-    // v56: ST4以降は仮名。chrono:true=クロノリンク登場 / timeLimit=ラウンド秒 / ability=チャンピオン能力
-    {no:4,name:'クロノ・アウェイク',description:'クロノリンク解放。時間を止め、もう1枚つなぐ',icon:'clock',winPt:10,diff:'normal',rule:'normal',chrono:true},
-    {no:5,name:'シックス・セカンド',description:'制限時間6秒。クロノリンクを実戦で使え',icon:'card',winPt:10,diff:'normal',rule:'normal',chrono:true,timeLimit:6},
-    {no:6,name:'チャンピオン',description:'コア・シフト：最初に置いた4が3に変わる',icon:'crown',winPt:15,diff:'hard',rule:'normal',boss:true,chrono:true,ability:'coreShift',champion:'lux'},
-    // v62: お試しチャレンジ。ST6クリアで解放。本編の進行・AREA CLEARには数えない。次のステージは解放しない
+    {no:1,name:'目覚めの間',description:'基本ルールで、最初の星環をほどく',icon:'check',winPt:10,diff:'easy',rule:'normal',tutorial:true},
+    {no:2,name:'記憶の廊下',description:'手札の流れが揺らぐ回廊',icon:'shuffle',winPt:10,diff:'easy',rule:'shuffle'},
+    {no:3,name:'凍れる祈り',description:'一部の手札が一時的に凍結する',icon:'snow',winPt:10,diff:'easy',rule:'frost'},
+    {no:4,name:'止まった時計',description:'クロノリンクを解放し、もう1枚つなぐ',icon:'clock',winPt:10,diff:'normal',rule:'normal',chrono:true},
+    {no:5,name:'崩れた祭壇',description:'制限時間6秒。判断の速さが試される',icon:'card',winPt:10,diff:'normal',rule:'normal',chrono:true,timeLimit:6},
+    {no:6,name:'残響の間',description:'消えない声が、カードの選択を惑わせる',icon:'card',winPt:10,diff:'normal',rule:'normal',chrono:true},
+    {no:7,name:'影写しの間',description:'相手の速さが一段上がる深層区画',icon:'card',winPt:10,diff:'normal',rule:'normal',chrono:true,speed:.82},
+    {no:8,name:'深層回廊',description:'短い時間で正確に10を結ぶ',icon:'clock',winPt:10,diff:'hard',rule:'normal',chrono:true,timeLimit:7,speed:.72},
+    {no:9,name:'天蓋前室',description:'開かずの扉を守る最後の試練',icon:'card',winPt:15,diff:'hard',rule:'normal',chrono:true,speed:.68},
+    {no:10,name:'開かずの扉',description:'封印の番人ルクスを倒し、魂を解放する',icon:'crown',winPt:15,diff:'hard',rule:'normal',boss:true,chrono:true,ability:'coreShift',champion:'lux'},
+    // チャレンジは本編10マスの外側へ分岐。本編の進行・AREA CLEARには数えない
     // v70: 先取30pt。プレイヤーが shiftPt に達すると試合が止まり、ルナ→レイピア（第2形態）の演出
-    {no:7,name:'ルナ',description:'星環：温存したカードで10を組み、場ごと奪う。先取30pt',icon:'card',winPt:30,diff:'normal',rule:'normal',challenge:true,rivalName:'ルナ',form2Name:'レイピア',shiftPt:15,ability:'starRing',bgm:'Iridescent_Trap.mp3'},
-    {no:8,name:'モルフォ',description:'鱗粉の幻惑：2ラウンドに1回、相手の手札1枚に星環が付く。その札が場に出ると自分の手札2枚の数字が変わり続け、その2枚を場に出すまで解けない。出すのが速い。先取30pt',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,rivalName:'モルフォ',ability:'confuse',speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,intro:'video/intro-8-morpho.mp4',bgm:'Cold Logic.mp3'},
+    {no:11,challengeNo:1,name:'ルナ',description:'異界から流れ着いた強い魂。ルナからレイピアへ変身する',icon:'card',winPt:30,diff:'normal',rule:'normal',challenge:true,rivalName:'ルナ',form2Name:'レイピア',shiftPt:15,ability:'starRing',bgm:'Iridescent_Trap.mp3'},
+    {no:12,challengeNo:2,name:'モルフォ',description:'鱗粉の幻惑で手札の数字を変え続ける強敵',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,unlockAfter:11,rivalName:'モルフォ',ability:'confuse',speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,intro:'video/intro-8-morpho.mp4',bgm:'Cold Logic.mp3'},
   ]
 };
 const STAGES={
   areas:[AREA_01],
   // マップ上の座標（viewBox 360×360、下から上へ。AREA_01.stages と同じ順）
-  pos:[[64,318],[152,272],[262,244],[228,158],[114,116],[200,44],[304,96],[318,26]], // [6]=第7チャレンジ（BOSSの右）[7]=第8（右上の隅）
+  pos:[[56,322],[132,294],[224,318],[298,270],[246,218],[148,240],[66,188],[126,132],[230,154],[190,58],[300,112],[318,38]],
 };
 const RULE_LABEL={normal:'ノーマル',shuffle:'シャッフル',frost:'フロスト'};
 // rule ごとのゲーム内処理の差し込み口（ギミック未確定のため中身は空。startStage から呼ぶ）
@@ -2886,12 +2951,11 @@ const CHRONO_TEXT={name:'クロノリンク',en:'CHRONO LINK',hint:'もう1枚�
 const CHAMPIONS={
   lux:{
     name:'ルクス',
-    title:'星環のチャンピオン',
+    title:'開かずの扉に縛られた番人',
     img:'img/champion-lux.webp',
     intro:[
-      'ここまで来たんだ。',
-      '僕はルクス。この星環を守るチャンピオン。',
-      '先に言っておく。君が最初に置く「4」は、僕がもらう。',
+      '……また、扉に触れる者が来た。',
+      '星環の試練に勝て。そうすれば、僕もここを去れる。',
     ],
     lines:{
       start:'始めよう。',
@@ -2902,10 +2966,21 @@ const CHAMPIONS={
       burstYou:'焦ったね。',
       burstSelf:'……しまった。',
     },
-    win:'また挑んでおいで。星環は逃げない。',
-    lose:'……完敗だ。星環は、君のものだ。',
+    win:'まだ扉は開かない。もう一度、立ち向かえ。',
+    lose:'……星環が、ほどけていく。',
   }
 };
+const BOSS_RELEASE_PAGES=[
+  [
+    {speaker:'ルクス',text:'……静かだ。星環の声が、消えた。'},
+    {speaker:'ルクス',text:'長い間、僕はこの扉に縛られていた。'},
+  ],
+  [
+    {speaker:'主人公',hero:true,text:'もう戦わなくていい。扉の先へ行ける。'},
+    {speaker:'ルクス',text:'ありがとう。残った光を、機械の核へ。'},
+    {speaker:'ルクス',text:'次の扉にも……まだ、誰かがいる。'},
+  ],
+];
 // ── 選手・チャンピオン画像の受け皿（画像は未生成。enabled:false なら何も描かない）──
 const CHARACTER_ASSETS={
   enabled:false,
@@ -2956,8 +3031,18 @@ const DIFF_STARS={easy:'★☆☆',normal:'★★☆',hard:'★★★',master:'�
 // ── セーブ ──
 const SAVE_KEY='tenkuru-save';
 function loadSave(){
-  const base={stars:{}};
-  try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}');return {...base,stars:{...(s.stars||{})},chronoIntro:!!s.chronoIntro};}
+  const base={stars:{},storyMapV2:true};
+  try{
+    const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}');
+    const stars={...(s.stars||{})};
+    // v121より前は7=ルナ、8=モルフォ。新しい本編7〜10と衝突しないよう初回だけ移す。
+    if(!s.storyMapV2){
+      if(stars[7])stars[11]=Math.max(stars[11]||0,stars[7]);
+      if(stars[8])stars[12]=Math.max(stars[12]||0,stars[8]);
+      delete stars[7];delete stars[8];
+    }
+    return {...base,...s,stars,chronoIntro:!!s.chronoIntro,storyMapV2:true};
+  }
   catch(e){return base;}
 }
 function writeSave(s){try{localStorage.setItem(SAVE_KEY,JSON.stringify(s));}catch(e){}}
@@ -2974,7 +3059,7 @@ function areaProgress(save,area){
 }
 function isStagePlayable(save,area,i){
   const st=area.stages[i];if(!st||st.comingSoon)return false;
-  if(st.ch8)return !!save.stars[7]; // v112: 第8はルナ戦クリアで解放
+  if(st.unlockAfter!=null)return !!save.stars[st.unlockAfter];
   if(st.challenge){const boss=area.stages.find(x=>x.boss);return !!(boss&&save.stars[boss.no]);} // v62: ST6(boss)クリアで解放。既存セーブの stars から判定
   if(save.stars[st.no])return true;                 // クリア済みは再挑戦OK
   return i===0||!!save.stars[area.stages[i-1].no];  // 直前がクリア済みなら解放
@@ -3028,9 +3113,10 @@ function StageNode({st,x,y,state,stars,selected,onTap}){
   const cls='a1-nd '+state+(st.boss?' boss':'')+(selected?' sel':'');
   return h('g',{className:cls,transform:'translate('+x+','+y+')',onClick:onTap},
     h('circle',{className:'glow',r:r*1.25}),
+    h('circle',{className:'node-base',r:r*.86}),
     h('image',{className:'shell',href:'img/stage-node-shell.webp',x:-r,y:-r,width:r*2,height:r*2,preserveAspectRatio:'xMidYMid meet'}),
     h('circle',{className:'sel-ring',r:r*0.98}),
-    h('text',{className:'lbl',y:-inner*0.55},st.boss?'BOSS':String(st.no).padStart(2,'0')),
+    h('text',{className:'lbl',y:-inner*0.55},st.boss?'BOSS':String(st.challenge?st.challengeNo:st.no).padStart(2,'0')),
     Icon(iconName,isz,{className:'ico',x:-isz/2,y:-isz/2+inner*0.22}),
     st.challenge&&h('text',{className:'lbl chal',y:r+10},'CHALLENGE'), // v62
     state==='clear'&&h('g',{transform:'translate(0,'+(r+(st.challenge?21:11))+')'},
@@ -3039,7 +3125,7 @@ function StageNode({st,x,y,state,stars,selected,onTap}){
     h('circle',{r:r*1.15,fill:'transparent'})
   );
 }
-function MapScreen({area,save,onSelect,onBack}){
+function MapScreen({area,save,onSelect,onBack,onPreview}){
   const prog=areaProgress(save,area);
   const pos=STAGES.pos;
   const n=area.stages.length;
@@ -3056,8 +3142,8 @@ function MapScreen({area,save,onSelect,onBack}){
     for(let k=1;k<mainN;k++){const a=pos[k-1],b=pos[k];const my=(a[1]+b[1])/2;d+=' C '+a[0]+' '+my+', '+b[0]+' '+my+', '+b[0]+' '+b[1];}
     return d;
   },[]);
-  const chIdx=area.stages.findIndex(s=>s.challenge);
-  const chPathD=chIdx>=0?('M'+pos[mainN-1][0]+' '+pos[mainN-1][1]+' L '+pos[chIdx][0]+' '+pos[chIdx][1]):null;
+  const chIndices=area.stages.map((s,i)=>s.challenge?i:-1).filter(i=>i>=0);
+  const chPathD=chIndices.length?chIndices.reduce((d,i)=>d+' L '+pos[i][0]+' '+pos[i][1],'M'+pos[mainN-1][0]+' '+pos[mainN-1][1]):null;
   // 道の光：最後にクリアしたマスの次（＝現在地）まで
   React.useLayoutEffect(()=>{
     const el=litRef.current;if(!el)return;
@@ -3090,14 +3176,17 @@ function MapScreen({area,save,onSelect,onBack}){
     h(StarField),
     h('div',{className:'sg-topbar'},
       h('button',{className:'sg-pill',onClick:onBack},'‹ タイトル'),
-      h('div',{className:'sg-pill gold'},'★ '+totalStars)
+      h('div',{className:'sg-top-actions'},
+        onPreview&&h('button',{className:'sg-pill flow-check',onClick:onPreview},'画面確認'),
+        h('div',{className:'sg-pill gold'},'★ '+totalStars)
+      )
     ),
     // エリア見出し（文言は AREA_01 から）
     h('div',{className:'a1-head'},
       h('div',{className:'k'},area.label),
       h('div',{className:'n'},area.name),
       h('div',{className:'s'},area.tagline),
-      h('div',{className:'p'+(prog.allClear?' clear':'')},prog.allClear?'AREA CLEAR':prog.clearedCount+' / '+prog.n+' CLEAR')
+      h('div',{className:'p'+(prog.allClear?' clear':'')},prog.allClear?'扉の修復 完了':'扉の修復 '+prog.clearedCount+' / '+prog.n)
     ),
     // マップ本体
     h('div',{className:'a1-map'},
@@ -3126,7 +3215,7 @@ function MapScreen({area,save,onSelect,onBack}){
         h('div',{className:'ic'+(selState==='clear'?' gold':selPlayable?'':' dim')},Icon(selState==='soon'||selState==='locked'?'lock':s.boss?'crown':s.icon,22)),
         h('div',{className:'tx'},
           h('div',{className:'row'},
-            h('div',{className:'no'+(s.boss?' gold':'')},s.boss?area.label+'  BOSS':s.challenge?'CHALLENGE '+String(s.no).padStart(2,'0'):'STAGE '+String(s.no).padStart(2,'0')),
+            h('div',{className:'no'+(s.boss?' gold':'')},s.boss?area.label+'  BOSS':s.challenge?'CHALLENGE '+String(s.challengeNo).padStart(2,'0'):'STAGE '+String(s.no).padStart(2,'0')),
             h('div',{className:'stars'+(selStars?' on':'')},starStr(selStars))
           ),
           h('div',{className:'nm'},s.comingSoon&&!s.boss?'準備中':s.name),
@@ -3143,6 +3232,30 @@ function MapScreen({area,save,onSelect,onBack}){
         h('span',{className:'l'},selPlayable?(selStars?'REPLAY':'CHALLENGE'):s.comingSoon?'COMING SOON':'LOCKED'),
         h('span',{className:'v'},selPlayable?(selStars?'もう一度':'対戦開始'):s.comingSoon?'準備中':'未解放')
       )
+    )
+  );
+}
+
+// 企画確認用。実際の結果・魂解放・扉画面と同じコンポーネントへ入る。
+function FlowPreviewScreen({onNormal,onBoss,onGate,onBack}){
+  return h('div',{className:'sg-screen flow-preview'},
+    h('div',{className:'flow-menu'},
+      h('div',{className:'k'},'FLOW PREVIEW'),
+      h('div',{className:'t'},'画面の流れを確認'),
+      h('div',{className:'d'},'長い対戦をしなくても、勝利後の画面をそのまま確認できます。'),
+      h('button',{className:'flow-choice',onClick:onNormal},
+        h('b',null,'通常ステージに勝った後'),
+        h('span',null,'会話なし → 報酬 → 次ステージ解放')
+      ),
+      h('button',{className:'flow-choice',onClick:onBoss},
+        h('b',null,'ボスに勝った後'),
+        h('span',null,'勝利結果 → 魂の会話2画面 → 扉が開く')
+      ),
+      h('button',{className:'flow-choice',onClick:onGate},
+        h('b',null,'次の扉が開く画面'),
+        h('span',null,'AREA CLEARと次の惑星への接続地点')
+      ),
+      h('button',{className:'flow-back',onClick:onBack},'マップへ戻る')
     )
   );
 }
@@ -3267,6 +3380,8 @@ function ShiftScene({name,form2Name,onDone,onForm2,onLeave}){
 function StageEndScreen({data,stage,stars,onNext,onRetry,onMap,isLast}){
   const win=data.winner==='player';
   const champ=stage.champion&&CHAMPIONS[stage.champion];
+  const[adRewarded,setAdRewarded]=useState(false);
+  const nextNo=stage.no+1;
   return h('div',{className:'sg-screen sg-end'},
     h('div',{className:'sg-end-card'},
       h('div',{className:'ttl'},stage.boss?'CHAMPION':stage.challenge?'CHALLENGE':'ステージ '+stage.no),
@@ -3278,11 +3393,63 @@ function StageEndScreen({data,stage,stars,onNext,onRetry,onMap,isLast}){
         h('div',{className:'vs'},'vs'),
         h('div',null,h('div',{className:'l'},data.rivalName||stage.rivalName||'DEALER'),h('div',{className:'v'},data.dPt))
       ),
+      win&&!stage.boss&&!stage.challenge&&h('div',{className:'flow-note'},'通常ステージは会話なし'),
+      win&&!stage.boss&&!stage.challenge&&h('div',{className:'unlock-next'},'STAGE '+String(nextNo).padStart(2,'0')+' 解放'),
+      win&&!stage.boss&&!stage.challenge&&h('div',{className:'flow-note'},adRewarded?'コイン +60（仮）':'クリア報酬　コイン +30（仮）'),
+      win&&stage.boss&&h('div',{className:'flow-note'},'このあと：魂の会話 2画面・合計5行'),
       win
-        ?h('button',{className:'sg-btn',onClick:onNext},isLast?'マップへ':'つぎへ')
+        ?h('button',{className:'sg-btn',onClick:onNext},stage.boss?'魂を解放する':isLast?'マップへ':'次のステージへ')
         :h('button',{className:'sg-btn',onClick:onRetry},'もう一度'),
-      win&&stars<3&&h('button',{className:'sg-btn ghost',onClick:onRetry},'もう一度（★をふやす）'),
-      h('button',{className:'sg-btn ghost',onClick:onMap},'マップへ')
+      win&&!stage.boss&&!stage.challenge&&h('button',{className:'sg-btn ghost ad',disabled:adRewarded,onClick:()=>setAdRewarded(true)},adRewarded?'報酬×2を受け取りました（仮）':'広告を見て報酬×2（仮）'),
+      win&&!stage.boss&&stars<3&&h('button',{className:'sg-btn ghost',onClick:onRetry},'もう一度（★をふやす）'),
+      (!win||!stage.boss)&&h('button',{className:'sg-btn ghost',onClick:onMap},'マップへ')
+    )
+  );
+}
+
+function SoulReleaseScreen({onDone}){
+  const[page,setPage]=useState(0);
+  const lines=BOSS_RELEASE_PAGES[page]||[];
+  const last=page>=BOSS_RELEASE_PAGES.length-1;
+  function next(){if(last)onDone();else setPage(page+1);}
+  return h('div',{className:'soul-screen'},
+    h('div',{className:'soul-head'},
+      h('div',null,h('div',{className:'k'},'BOSS CLEAR'),h('div',{className:'t'},'魂の解放')),
+      h('button',{className:'soul-skip',onClick:onDone},'SKIP')
+    ),
+    h('div',{className:'soul-stage'},
+      h('div',{className:'soul-ring'},h('div',{className:'soul-person'})),
+      h('div',{className:'soul-release'},'星環、解除')
+    ),
+    h('div',{className:'soul-dialog'},
+      h('div',{className:'meter'},h('span',null,'短い会話'),h('span',null,(page+1)+' / '+BOSS_RELEASE_PAGES.length)),
+      lines.map((line,i)=>h('div',{key:page+'-'+i},
+        h('div',{className:'speaker'+(line.hero?' hero':'')},line.speaker),
+        h('div',{className:'line'},'「'+line.text+'」')
+      )),
+      h('div',{className:'foot'},
+        h('div',{className:'soul-dots'},BOSS_RELEASE_PAGES.map((_,i)=>h('i',{key:i,className:i===page?'on':''}))),
+        h('button',{className:'soul-next',onClick:next},last?'扉を開く':'次へ')
+      )
+    )
+  );
+}
+
+function AreaGateScreen({onMap}){
+  return h('div',{className:'gate-screen'},
+    h('div',{className:'gate-head'},
+      h('div',null,h('div',{className:'k'},'AREA 01 COMPLETE'),h('div',{className:'t'},'魂の回廊・修復完了'))
+    ),
+    h('div',{className:'gate-stage'},
+      h('div',{className:'gate-beam'}),
+      h('div',{className:'gate-door'},h('span',null,'OPEN'))
+    ),
+    h('div',{className:'gate-card'},
+      h('div',{className:'done'},'NEXT GATE'),
+      h('div',{className:'next'},'AREA 02　灰の惑星（仮）'),
+      h('div',{className:'desc'},'新しい魂と、新しい星環ギミックへ。ここが追加ストーリーの接続地点になります。'),
+      h('div',{className:'pending'},'AREA 02のステージ本体は、まだ未実装です'),
+      h('button',{className:'sg-btn',onClick:onMap},'AREA 01のマップへ戻る')
     )
   );
 }
@@ -3313,6 +3480,7 @@ const DEFAULT_LAYOUT={handW:53,handY:0,fieldW:64,sumSize:30,sumX:1,sumY:-8,gapDF
 // ── App ──
 function App(){
   const[phase,setPhase]=useState('menu');
+  const[demoMode,setDemoMode]=useState(false);
   const[pH,setPH]=useState([]);
   const[dH,setDH]=useState([]);
   const[field,setField]=useState([]);
@@ -3852,7 +4020,16 @@ function App(){
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
   // ── ストーリー進行 ──
-  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
+  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
+  function openFlowSample(kind){
+    const ar=STAGES.areas[0];
+    const stIdx=kind==='normal'?0:ar.stages.findIndex(st=>st.boss);
+    const st=ar.stages[stIdx];
+    setDemoMode(true);stageR.current={ar:0,st:stIdx};setStageCtx({ar:0,st:stIdx});
+    if(kind==='gate'){setPhase('areaGate');phaseR.current='areaGate';return;}
+    setGameEndData({pPt:st.winPt,dPt:Math.max(0,st.winPt-4),winner:'player',diff:st.diff,stars:2,rivalName:st.rivalName||(st.champion&&CHAMPIONS[st.champion]?CHAMPIONS[st.champion].name:'DEALER')});
+    setPhase('gameEnd');phaseR.current='gameEnd';
+  }
   function startStage(arIdx,stIdx){
     const ar=STAGES.areas[arIdx],st=ar.stages[stIdx];
     if(!st||st.comingSoon){goMap();return;} // v54: 準備中は開始しない
@@ -3885,9 +4062,13 @@ function App(){
   function stageNext(){
     const c=stageR.current;if(!c){goMap();return;}
     const ar=STAGES.areas[c.ar];
+    const st=ar.stages[c.st];
+    if(st&&st.boss){setPhase('soulRelease');phaseR.current='soulRelease';return;}
+    if(demoMode){goMap();return;}
     const nx=ar.stages[c.st+1];
     if(nx&&!nx.comingSoon&&!nx.challenge)startStage(c.ar,c.st+1);else goMap(); // v62: チャレンジへは自動で進まない
   }
+  function finishSoulRelease(){setPhase('areaGate');phaseR.current='areaGate';}
   function startGame(diff){
     if(diff){setDifficulty(diff);diffRef.current=diff;}
     clearTimers();lockR.current=false;
@@ -4215,7 +4396,10 @@ function App(){
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
   if(phase==='brief'&&curStage)return h(BriefScreen,{stage:curStage,onStart:()=>startGame(pendingDiff)}); // v119
-  if(phase==='map')return h(MapScreen,{area:STAGES.areas[0],save,onSelect:i=>startStage(0,i),onBack:()=>{setPhase('menu');phaseR.current='menu';}});
+  if(phase==='map')return h(MapScreen,{area:STAGES.areas[0],save,onSelect:i=>startStage(0,i),onBack:()=>{setPhase('menu');phaseR.current='menu';},onPreview:()=>{setPhase('flowPreview');phaseR.current='flowPreview';}});
+  if(phase==='flowPreview')return h(FlowPreviewScreen,{onNormal:()=>openFlowSample('normal'),onBoss:()=>openFlowSample('boss'),onGate:()=>openFlowSample('gate'),onBack:goMap});
+  if(phase==='soulRelease')return h(SoulReleaseScreen,{onDone:finishSoulRelease});
+  if(phase==='areaGate')return h(AreaGateScreen,{onMap:goMap});
   if(phase==='tutorial')return h(TutorialScreen,{pendingDiff,onFinish:finishTutorial,onExit:()=>finishTutorial(pendingDiff),trackNum,toggleMusic,coachName:null,startLabel:curStage?'ステージ '+curStage.no+' をはじめる':null,bg:null,winPt:curStage?curStage.winPt:null,
     onSecret:()=>{ // v105: 隠しコマンド → 第7（ルナ／レイピア）へ直行
       markTutDone();tutDoneR.current=true;setPendingDiff(null);
