@@ -2570,11 +2570,24 @@ const DIFF_LABEL={easy:'EASY',normal:'NORMAL',hard:'HARD',master:'MASTER'};
 // v119: 対戦前に相手のギミックを見せる画面。初見で対策できないという声への対応
 // description は「ギミック名：説明」形式なので最初の「：」で割る
 function stageBrief(st){
+  // v126: ギミック名は説明文からではなくステージの設定値から組み立てる。
+  // description の書式が変わっても壊れないようにするため（以前は「：」で分割していた）
   const d=String(st.description||'');
-  const k=d.indexOf('：');
-  const gName=k>0?d.slice(0,k):'通常ルール';
-  let gText=k>0?d.slice(k+1):d;
-  gText=gText.replace(/\s*先取\d+pt\s*$/,'').replace(/。$/,''); // 勝利条件は下の欄で別に出す
+  let gName;
+  if(st.ability==='confuse')gName='鱗粉の幻惑';
+  else if(st.ability==='starRing')gName='星環';
+  else if(st.ability==='coreShift')gName='コア・シフト';
+  else if(st.rule==='shuffle')gName='シャッフル';
+  else if(st.rule==='frost')gName='フロスト・ロック';
+  else if(st.tutorial)gName='チュートリアル';
+  else if(st.chrono)gName='クロノリンク';
+  else gName='通常ルール';
+  // 補足（速い相手・短い持ち時間）は説明の頭に足す
+  const ex=[];
+  if(st.speed&&st.speed<1)ex.push('相手の手が速い');
+  if(st.timeLimit&&st.timeLimit<10)ex.push('持ち時間が短い');
+  let gText=d.replace(/\s*先取\d+pt\s*$/,'').replace(/。$/,'');
+  if(ex.length)gText=gText+'。'+ex.join('。');
   return{
     rival:st.rivalName||st.name||'',
     gName,
@@ -2749,7 +2762,7 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
     // TOP BAR（本番と同じ）
     h('div',{className:'gp-top-bar'},
-      h('div',{className:'gp-time-box'+(timeLeft<=5?' urgent':'')},
+      h('div',{className:'gp-time-box'+(timeLeft<=5?' urgent':''),onClick:tapSecret,style:{cursor:'pointer'}}, // v126: TIMEを7回タップでルナ戦（隠し）
         h('div',{className:'lbl'},'TIME'),
         h('div',{className:'val'},timeLeft)
       ),
@@ -2758,7 +2771,7 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
         h('div',{className:'val'},pPt),
         h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,WP-pPt)),'pt')
       ),
-      h('div',{className:'gp-round-pill',onClick:tapSecret,style:{cursor:'pointer'}}, // v105: 7回タップでルナ戦（隠し）
+      h('div',{className:'gp-round-pill'},
         h('span',{className:'lvl',style:{color:'#c98f00',fontWeight:900}},'TUTORIAL')
       ),
       h('div',{className:'gp-score dealer'},
@@ -2840,7 +2853,9 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v125'; // v125: 相手カードの移動中もオレンジLライン入りの表面を維持
+const APP_VER='v126'; // v126(2026/09/08): チュートリアルの隠しコマンドをTIMEの7回タップに変更。ギミック説明のギミック名を設定値から自動生成する方式に修正（説明文の書式変更で全ステージ「通常ルール」表示になっていた）
+// v125: 相手カードの移動中もオレンジLライン入りの表面を維持
+// v120(2026/09/07): モルフォのイントロ動画を追加。対戦ボタン→動画(タップでスキップ可)→ギミック説明→カウントダウンの流れ
 // v119(2026/09/07): 対戦開始前に相手のギミック説明画面を追加。「確認した」を押すとカウントダウン開始
 // v118(2026/09/07): モルフォの手札が星環札1枚だけになると出せず永久にタップし続けるバグを修正。幻惑はラウンドをまたいで持続し、その札を場に出すまで解けない仕様に変更
 // v117(2026/09/07): モルフォの鱗粉の幻惑を変更。無条件発動をやめ、2ラウンドに1回モルフォの手札1枚に星環が付与され、その札が場に出た時に発動。星環札は手札にいる間から専用の絵で表示
