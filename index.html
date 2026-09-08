@@ -1386,10 +1386,9 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .dcur-ripple{position:absolute;left:50%;top:50%;width:calc(50 * var(--u));height:calc(50 * var(--u));margin:calc(-25 * var(--u)) 0 0 calc(-25 * var(--u));border-radius:50%;border:2px solid rgba(255,255,255,.9);pointer-events:none;z-index:9;animation:dcurRip .4s ease-out both;}
 @keyframes dcurRip{0%{transform:scale(.3);opacity:1;}100%{transform:scale(1.4);opacity:0;}}
 /* 相手の札がスーッと降りてくる */
-/* v116: 通常ステージ(1〜6)の飛ぶ札を、手札や場と同じ白い表向きカードに統一。
-   以前はv108以前のオレンジ配色が残っていて、移動中だけ色と数字色が変わっていた */
+/* v125: 通常ステージの飛ぶ札も、手札・場と同じオレンジLライン入りカード画像に統一 */
 .fly-card{position:fixed;z-index:120;pointer-events:none;width:var(--fw);height:calc(var(--fw) * 1.4);margin:calc(var(--fw) * -0.7) 0 0 calc(var(--fw) * -0.5);
-  border-radius:calc(4 * var(--u));background:linear-gradient(170deg,#ffffff,#e9edf6);border:1px solid rgba(120,130,170,.5);box-shadow:0 8px 22px rgba(0,0,0,.35),0 2px 6px rgba(0,0,0,.25);
+  border-radius:calc(4 * var(--u));background:url('img/card-magenta.webp') center/100% 100% no-repeat;border:none;box-shadow:none;
   display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:900;font-size:calc(var(--fw) * 0.5);color:#2b2f45;text-shadow:none;
   transform:translate(var(--x0),var(--y0)) scale(.6);animation:flyDown var(--d) cubic-bezier(.35,.05,.4,1) both;}
 .gp-screen.ch7 .fly-card{background:url('img/challenge07-rival-card-front.webp') center/100% 100% no-repeat;border:none;color:#4a1a3e;text-shadow:0 0 4px rgba(255,255,255,.9);box-shadow:none;}
@@ -2841,7 +2840,7 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v124'; // v124: ルナ／レイピアの選択札を固有IDで固定し、タップ位置と実際に出る札を一致
+const APP_VER='v125'; // v125: 相手カードの移動中もオレンジLライン入りの表面を維持
 // v119(2026/09/07): 対戦開始前に相手のギミック説明画面を追加。「確認した」を押すとカウントダウン開始
 // v118(2026/09/07): モルフォの手札が星環札1枚だけになると出せず永久にタップし続けるバグを修正。幻惑はラウンドをまたいで持続し、その札を場に出すまで解けない仕様に変更
 // v117(2026/09/07): モルフォの鱗粉の幻惑を変更。無条件発動をやめ、2ラウンドに1回モルフォの手札1枚に星環が付与され、その札が場に出た時に発動。星環札は手札にいる間から専用の絵で表示
