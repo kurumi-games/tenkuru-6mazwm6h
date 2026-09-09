@@ -2030,6 +2030,33 @@ function fxTone({f=440,f2=0,type='sine',v=0.15,a=0.005,d=0.3,t=0,det=0,rev=0.5})
     o.start(t0);o.stop(t0+a+d+0.05);
   }catch(e){}
 }
+// ── v130 セトラの氷の音 ──
+// 氷は「高い倍音のきしみ」＋「細かいノイズ」でできている。
+// 単音のサイン波だとぴよぴよした電子音になるので、必ずノイズを重ねる。
+function fxIceFreeze(){ // 札が凍る瞬間：上から降りてきて固まる
+  try{
+    fxAir({v:0.10,a:0.005,d:0.55,hp:5200,rev:0.75});           // 吹きつける冷気
+    fxTone({f:2400,f2:520,type:'triangle',v:0.05,a:0.004,d:0.5,rev:0.7}); // 急降下＝凍りつき
+    fxBell({f:2093,v:0.07,d:0.9,bright:1.4,rev:0.8});           // 表面が張る高い響き
+    fxBell({f:1568,t:0.06,v:0.05,d:1.1,bright:1.3,rev:0.85});
+    fxTone({f:132,f2:88,type:'sine',v:0.06,a:0.01,d:0.7,t:0.02,rev:0.5}); // 芯の重み
+  }catch(e){}
+}
+function fxIceTap(){ // 凍った札を触った：硬くて動かない。コツッときしむ
+  try{
+    fxAir({v:0.07,a:0.001,d:0.06,hp:9000,rev:0.25});            // コツッという接触
+    fxTone({f:3200,f2:2600,type:'triangle',v:0.035,a:0.001,d:0.09,rev:0.3});
+    fxTone({f:180,f2:150,type:'sine',v:0.05,a:0.002,d:0.13,rev:0.2}); // 動かない重さ
+    fxAir({v:0.03,a:0.004,d:0.16,t:0.05,hp:6500,rev:0.4});      // 細かいきしみ
+  }catch(e){}
+}
+function fxIceThaw(){ // 解凍：ひび割れて砕ける
+  try{
+    fxBell({f:2637,v:0.06,d:0.7,bright:1.5,rev:0.8});
+    fxAir({v:0.05,a:0.002,d:0.3,t:0.04,hp:7500,rev:0.6});
+    fxTone({f:1200,f2:2400,type:'sine',v:0.04,a:0.004,d:0.35,t:0.02,rev:0.7}); // 解ける＝上昇
+  }catch(e){}
+}
 function fxAir({v=0.06,a=0.01,d=0.2,t=0,hp=7000,rev=0.6}){
   try{
     const t0=AC.currentTime+t;
@@ -2905,7 +2932,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v129'; // v129(2026/09/09): セトラ戦の専用素材を導入（対戦背景・セトラの通常カード・プレイヤーの手札カード・手札マット）。8.0MB→0.48MBに圧縮。立ち絵は不透明度62%＋下端ぼかし＋ゆっくり漂わせて静止画感を消した
+const APP_VER='v130'; // v130(2026/09/09): セトラ戦の専用BGM（Frozen Judgment 3.6MB→2.3MB）。凍結まわりのSEを氷の音に作り直し。凍った札を誤タップした時は硬い氷を触る手応えの音
+// v129(2026/09/09): セトラ戦の専用素材を導入（対戦背景・セトラの通常カード・プレイヤーの手札カード・手札マット）。8.0MB→0.48MBに圧縮。立ち絵は不透明度62%＋下端ぼかし＋ゆっくり漂わせて静止画感を消した
 // v128(2026/09/09): マップ座標が12個のままで13番目のセトラを追加したため、pos[12]がundefinedになり「遊ぶ」で画面が真っ白になるバグを修正
 // v127(2026/09/08): チャレンジ③「セトラ」追加。氷結の星環で手札3枚を5秒凍結（解凍カウントはラウンドタイマー稼働中のみ進む）。盤面を読むAI(smart)を新設
 // v126(2026/09/08): チュートリアルの隠しコマンドをTIMEの7回タップに変更。ギミック説明のギミック名を設定値から自動生成する方式に修正（説明文の書式変更で全ステージ「通常ルール」表示になっていた）
@@ -3004,7 +3032,7 @@ const AREA_01={
     {no:11,challengeNo:1,name:'ルナ',description:'異界から流れ着いた強い魂。ルナからレイピアへ変身する',icon:'card',winPt:30,diff:'normal',rule:'normal',challenge:true,rivalName:'ルナ',form2Name:'レイピア',shiftPt:15,ability:'starRing',bgm:'Iridescent_Trap.mp3'},
     {no:12,challengeNo:2,name:'モルフォ',description:'鱗粉の幻惑で手札の数字を変え続ける強敵',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,unlockAfter:11,rivalName:'モルフォ',ability:'confuse',speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,intro:'video/intro-8-morpho.mp4',bgm:'Cold Logic.mp3'},
     // v127 チャレンジ③ セトラ。モルフォ撃破で解放。氷結の環＋盤面を読む思考
-    {no:13,challengeNo:3,name:'セトラ',description:'氷結の星環で手札を凍らせ、盤面を読んで退路を断つ',icon:'snow',winPt:30,diff:'master',rule:'normal',challenge:true,ch9:true,unlockAfter:12,rivalName:'セトラ',ability:'freeze',smart:true,speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,bgm:'Cold Logic.mp3'},
+    {no:13,challengeNo:3,name:'セトラ',description:'氷結の星環で手札を凍らせ、盤面を読んで退路を断つ',icon:'snow',winPt:30,diff:'master',rule:'normal',challenge:true,ch9:true,unlockAfter:12,rivalName:'セトラ',ability:'freeze',smart:true,speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,bgm:'Frozen%20Judgment.mp3'},
   ]
 };
 const STAGES={
@@ -3835,7 +3863,7 @@ function App(){
     const k=cand[Math.floor(Math.random()*cand.length)];
     flags[k]='setra';setDRing(flags);dRingR.current=flags;
     showSkillCustom('氷結の環','FROST RING','#8fe0ff');r2Say('星環を構えた',"#8fe0ff");
-    try{resumeAC();fxTone({f:1046,f2:1568,type:'sine',v:0.045,a:0.015,d:0.6,rev:0.7});}catch(e){}
+    try{resumeAC();fxBell({f:1568,v:0.06,d:1.1,bright:1.4,rev:0.85});fxAir({v:0.04,a:0.02,d:0.5,hp:6000,rev:0.7});}catch(e){} // v130
   }
   function attachMorphoRing(rn){
     const hand=dHR.current,flags=dRingR.current.slice();
@@ -4330,7 +4358,7 @@ function App(){
     const m={};let thawed=false;
     keys.forEach(k=>{const v=cur[k]-1;if(v>0)m[k]=v;else thawed=true;});
     setFrz(m);
-    if(thawed){try{resumeAC();fxTone({f:1400,f2:2200,type:'sine',v:0.05,a:0.005,d:0.35,rev:0.5});}catch(e){}}
+    if(thawed){try{resumeAC();fxIceThaw();}catch(e){}} // v130
   }
   // 相手の手札にある札のうち、まだ凍っていない札を最大n枚凍らせる
   function freezeHand(n,sec){
@@ -4339,7 +4367,7 @@ function App(){
     if(!cand.length)return 0;
     const pick=cand.sort(()=>Math.random()-0.5).slice(0,n);
     const m={...cur};pick.forEach(i=>{m[i]=sec;});setFrz(m);
-    try{resumeAC();fxTone({f:520,f2:180,type:'sine',v:0.07,a:0.01,d:0.9,rev:0.7});}catch(e){}
+    try{resumeAC();fxIceFreeze();}catch(e){} // v130
     return pick.length;
   }
   function startTimer(rn,from){
@@ -4518,7 +4546,7 @@ function App(){
   function playCard(idx){
     if(phaseR.current!=='playing'||countNumR.current>=0||sceneOnR.current)return; // v75: 変身演出中は操作不可
     if(pFrzR.current[idx]!=null){ // v127: 凍っている札は出せない
-      try{resumeAC();fxTone({f:300,type:'sine',v:0.05,a:0.005,d:0.18,rev:0.2});}catch(e){}
+      try{resumeAC();fxIceTap();}catch(e){} // v130: 氷を触った手応え
       return;
     }
     if(lockR.current){
