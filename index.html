@@ -1450,15 +1450,24 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
   100%{opacity:1;transform:scale(1);}
 }
 .card-stage.just-frz .frz-sec{animation:justFrzSec .9s cubic-bezier(.2,1.4,.4,1) both;}
-@keyframes justFrzSec{0%{opacity:0;transform:translate(-50%,-50%) scale(2.2);}45%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+@keyframes justFrzSec{0%{opacity:0;transform:translateX(-50%) scale(2.2);}45%{opacity:1;transform:translateX(-50%) scale(1);}100%{opacity:1;transform:translateX(-50%) scale(1);}}
 
 /* v132: 残り秒はカード中央に大きく出す（右下だと見づらいため） */
 /* v134: 絵の中央にある濃紺の円の上に置くので、背景なしの白抜き文字にする */
-.frz-sec{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:8;pointer-events:none;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Inter',sans-serif;font-weight:900;font-size:calc(20 * var(--u));
-  color:#eaf8ff;letter-spacing:-0.02em;
-  text-shadow:0 0 calc(4 * var(--u)) rgba(120,210,255,.95),0 0 calc(9 * var(--u)) rgba(60,150,230,.8),0 calc(1 * var(--u)) calc(2 * var(--u)) rgba(0,20,50,.9);}
+/* v137: 凍っていても何の数字かは分かるようにする。
+   カード本来の数字を氷の上に出し、残り秒はその下に小さく添える */
+.card-stage.frozen .n-big{opacity:1;z-index:9;position:relative;
+  color:#e8f6ff;
+  text-shadow:0 0 calc(3 * var(--u)) rgba(90,190,255,.95),0 0 calc(8 * var(--u)) rgba(40,120,210,.85),0 calc(1 * var(--u)) calc(2 * var(--u)) rgba(0,20,50,.95);}
+.frz-sec{position:absolute;left:50%;bottom:calc(9 * var(--u));transform:translateX(-50%);z-index:10;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;gap:calc(1 * var(--u));
+  min-width:calc(17 * var(--u));height:calc(13 * var(--u));padding:0 calc(3 * var(--u));
+  border-radius:calc(6.5 * var(--u));
+  font-family:'Inter',sans-serif;font-weight:900;font-size:calc(9 * var(--u));
+  color:#06304d;letter-spacing:-0.02em;
+  background:linear-gradient(160deg,rgba(240,252,255,.97),rgba(150,210,245,.95));
+  border:calc(0.8 * var(--u)) solid rgba(255,255,255,.95);
+  box-shadow:0 calc(1 * var(--u)) calc(3 * var(--u)) rgba(0,40,80,.6);}
 
 /* v120: イントロ動画。画面いっぱいに出し、タップでスキップ */
 .iv-screen{position:fixed;inset:0;z-index:210;background:#05070f;display:flex;align-items:center;justify-content:center;cursor:pointer;animation:bfIn .3s ease both;}
@@ -2617,7 +2626,7 @@ function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,
       rLock&&h('div',{className:'rl-badge',style:{backgroundImage:'url('+REIPIA_RINGS.lock.image+')'}}), // v84 星環ロック
       rCmd&&h('img',{className:'rl-frame',src:'img/card-gold-designation-frame.webp',alt:'',draggable:false}), // v87 指名：金の外枠
       frozen!=null&&h('div',{className:'frz-ice'}), // v127 セトラ：凍結の氷
-      frozen!=null&&h('div',{className:'frz-sec'},frozen), // v127 右下に残り秒
+      frozen!=null&&h('div',{className:'frz-sec'},frozen+'s'), // v137 数字と混同しないよう s を付ける
       h('span',{className:'n-tl'},value),
       h('span',{className:'n-big'},value),
       h('span',{className:'n-br'},value)
@@ -2657,7 +2666,7 @@ function FieldCard({value,by,isComplete,isSpecial,shifted,ringed}){
 const TUT_KEY='tenkuru-tutorial-done';
 // ── v136 プレイヤーの技（星環）──
 // ホーム画面で各技のON/OFFを切り替えられる。数値の調整もここだけで済む
-const PLAYER_TIMESTOP_MS=2000; // 時間停止の長さ
+const PLAYER_TIMESTOP_MS=3000; // v137: 時間停止の長さ（2秒→3秒）
 const PLAYER_SKILLS=[
   {id:'timeStop',name:'時間停止',en:'TIME STOP',cond:'自分の場の合計が6',
    effect:'2秒間、相手が動けなくなる',img:'img/card-player-ring-time.webp',color:'#ffd98a'},
@@ -2971,7 +2980,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v136'; // v136(2026/09/09): セトラ20pt勝利・星環は5ラウンドに1回。凍った札だけ残る詰みを救済。プレイヤーの星環「時間停止」を実装（合計6で相手が2秒停止、3ラウンド持続）。ホームに技のON/OFF一覧を追加
+const APP_VER='v137'; // v137(2026/09/09): セトラが自滅バーストするバグを修正。時間停止3秒＋クロノリンク演出、飛行中の敵札を返却。凍ったカードの数字を表示
+// v136(2026/09/09): セトラ20pt勝利・星環は5ラウンドに1回。凍った札だけ残る詰みを救済。プレイヤーの星環「時間停止」を実装（合計6で相手が2秒停止、3ラウンド持続）。ホームに技のON/OFF一覧を追加
 // v135(2026/09/09): セトラのカード2種を新デザインに差し替え。初手のみ人のタップより速く(約250ms)、決定打は遅く(約1100ms)して連打での稼ぎを封じつつ理不尽さを解消
 // v134(2026/09/09): 凍結カードを専用の絵に差し替え。中央の濃紺の円に残り秒を白抜きで大きく表示（CSSで描いていた氷は廃止）
 // v133(2026/09/09): 星環カードを軽量化 140KB→89KB（512x753→440x647、展開RAM 1.5MB→1.1MB）
@@ -4019,13 +4029,24 @@ function App(){
     pStopUsedR.current=rn;
     clearTimeout(aiRef.current);cancelCursor(); // 敵の動きを止める
     pStopR.current=true;setPStop(true);
+    // v137: 6になった瞬間に飛んできていた札は場に着かせず、その場で手札へ返す
+    if(flyR.current){
+      const f=flyR.current;flyR.current=null;
+      setFlyCard(c=>c?{...c,back:true}:c);setTimeout(()=>setFlyCard(null),380);
+      setDealer([...dHR.current,f.value],[...dRingR.current,f.rf||false],[...dIdsR.current,f.id]);
+    }
     showSkillCustom('時間停止','TIME STOP','#ffd98a');
-    try{resumeAC();fxBell({f:1760,v:0.10,d:1.2,bright:1.4,rev:0.8});fxTone({f:2400,f2:600,type:'sine',v:0.07,a:0.01,d:0.5,rev:0.6});}catch(e){}
+    // v137: クロノリンクと同じ「時が止まる」演出を流用する
+    try{const r=fieldAreaRef.current&&fieldAreaRef.current.getBoundingClientRect();if(r)setBurstPos({x:(r.left+r.width/2)+'px',y:(r.top+r.height/2)+'px'});}catch(e){}
+    setChronoFx('in');playChronoStopSE();
+    setTimeout(()=>{if(pStopR.current)startChronoHum();},350);
+    try{resumeAC();fxBell({f:1760,v:0.10,d:1.2,bright:1.4,rev:0.8});}catch(e){}
     duckBGM(true);
     pStopT.current.forEach(clearTimeout);pStopT.current=[];
     pStopT.current.push(setTimeout(()=>{
       pStopR.current=false;setPStop(false);duckBGM(false);
-      try{resumeAC();fxTone({f:600,f2:1800,type:'sine',v:0.05,a:0.01,d:0.35,rev:0.5});}catch(e){}
+      setChronoFx('out');stopChronoHum();setTimeout(()=>setChronoFx(null),420); // v137
+      try{resumeAC();playChronoReleaseSE();fxTone({f:600,f2:1800,type:'sine',v:0.05,a:0.01,d:0.35,rev:0.5});}catch(e){}
       if(phaseR.current==='playing'&&!resolvingR.current){clearTimeout(aiRef.current);scheduleAi(rn);}
     },PLAYER_TIMESTOP_MS));
   }
@@ -4587,6 +4608,7 @@ function App(){
     const scoreOf=v=>{
       const ns=cs+v,nf=[...cf,v];
       if(ns===10)return 10000+calcPts(nf).total*10; // 自分で完成：最優先。役が高い方をさらに優先
+      if(ns>10)return -100000; // v137: バーストは絶対に選ばない（canPlayが10超えを許すため明示的に弾く）
       // この一手のあと、プレイヤーが即10を完成できてしまうか
       const gift=pUsable.some(w=>canPlay(w,ns,nf)&&ns+w===10);
       // プレイヤーが1枚も出せなくなるか（詰ませ）
@@ -4602,6 +4624,7 @@ function App(){
     };
     let best=null,bs=-1e9;
     playable.forEach(v=>{const s=scoreOf(v);if(s>bs){bs=s;best=v;}});
+    if(bs<=-100000)return null; // v137: バーストしかできないなら出さずに待つ
     // どの手も相手に10を渡すだけなら、出さずに待つ（無駄打ちの防止）
     if(bs<0&&bs<=-800&&cs>0)return null;
     return best;
@@ -4680,7 +4703,7 @@ function App(){
     setTimeout(()=>{
       const f=flyR.current;flyR.current=null;if(!f)return;
       const cf2=fieldR.current,cs2=fieldSumR.current;
-      const ok=phaseR.current==='playing'&&countNumR.current<0&&!resolvingR.current&&!eraseBusyR.current&&!pausedR.current&&canPlay(f.value,cs2,cf2);
+      const ok=phaseR.current==='playing'&&countNumR.current<0&&!resolvingR.current&&!eraseBusyR.current&&!pausedR.current&&!pStopR.current&&canPlay(f.value,cs2,cf2); // v137: 時間停止中は着地させず手札へ返す
       if(!ok){ // 戻す
         setFlyCard(c=>c?{...c,back:true}:c);setTimeout(()=>setFlyCard(null),380);
         const h2=[...dHR.current,f.value],r2=[...dRingR.current,f.rf||false],ids2=[...dIdsR.current,f.id];setDealer(h2,r2,ids2);
@@ -4748,9 +4771,9 @@ function App(){
     }
     if(wasLink){playChronoReleaseSE();}
     if(pRingR.current===idx)activatePlayerRing(); // v136: 星環の札を出した → 効果が3ラウンド続く
-    else if(pRingR.current>idx); // 位置は固定枠なのでずれない
     const ended=resolvePlay(value,cf,cs,'player',rNum,isSp,shifted);
-    // v136: 自分が場の合計をちょうど6にしたら、相手を2秒止める（効果が生きている間だけ）
+    // v137: 自分が場の合計をちょうど6にしたら相手を3秒止める。
+    // activatePlayerRing が先に走るので、環を出したそのターンに6になった場合も発動する
     if(!ended&&tsLeftR.current>0&&fieldSumR.current===PLAYER_RING_SUM)pTimeStop(rNum);
     if(ended){exitLink();return;} // 10完成/バースト/4枚 → 既存の終了処理が優先
     if(r2Active())setTimeout(()=>r2Think(rNum,'field'),450); // v85 レイピアの判断（削除など）
