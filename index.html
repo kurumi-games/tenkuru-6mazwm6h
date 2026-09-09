@@ -1401,12 +1401,24 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7.ch8 .fly-card.face-morpho{background:url('img/card-morpho-ring.webp') center/100% 100% no-repeat !important;filter:none !important;color:#3a3f6a;text-shadow:0 0 4px rgba(255,255,255,.95);}
 .gp-screen.ch7.ch8 .card-stage.face-morpho{--cardimg:url('img/card-morpho-ring.webp');--nc:#3a3f6a;}
 
-/* v127 セトラ（チャレンジ③）。背景・通常カード・手札マットは素材が届き次第ここを差し替える */
-.gp-screen.ch7.ch9{background-color:#10294f;background-blend-mode:luminosity;}
-.gp-screen.ch7.ch9 .boss-img{background-image:url('img/challenge09-setra.webp');top:calc(10 * var(--u));height:calc(182 * var(--u));width:calc(220 * var(--u));margin-left:calc(-110 * var(--u));}
-.gp-screen.ch7.ch9 .gp-dealer-card{background:url('img/challenge07-player-card.webp') center/contain no-repeat !important;filter:hue-rotate(188deg) saturate(.9);}
+/* v129 セトラ（チャレンジ③）専用の見た目 */
+.gp-screen.ch7.ch9{background-image:url('img/challenge09-bg.webp');background-color:#0b1c3d;}
+/* 立ち絵は貼り付けた静止画に見えないよう、薄めて・下端をぼかして・ゆっくり漂わせる */
+.gp-screen.ch7.ch9 .boss-img{background-image:url('img/challenge09-setra.webp');top:calc(8 * var(--u));height:calc(186 * var(--u));width:calc(224 * var(--u));margin-left:calc(-112 * var(--u));
+  opacity:.62;filter:drop-shadow(0 0 14px rgba(120,200,255,.4)) saturate(1.05);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 58%,rgba(0,0,0,.45) 82%,transparent 99%);mask-image:linear-gradient(180deg,#000 0%,#000 58%,rgba(0,0,0,.45) 82%,transparent 99%);
+  animation:champIn .6s cubic-bezier(.2,1,.3,1) both, setraDrift 7.2s ease-in-out .6s infinite;}
+@keyframes setraDrift{0%,100%{transform:translateY(0) scale(1);opacity:.62;}50%{transform:translateY(calc(-5 * var(--u))) scale(1.015);opacity:.72;}}
+/* 手札マット */
+.gp-screen.ch7.ch9 .gp-hand-rows::before{background-image:url('img/challenge09-hand-mat.webp');aspect-ratio:1500/1000;}
+/* セトラの通常カード（星環以外の全ての手札） */
+.gp-screen.ch7.ch9 .gp-dealer-card{background:url('img/card-setra-normal.webp') center/contain no-repeat !important;filter:none;}
+.gp-screen.ch7.ch9 .gp-dealer-card .dv{color:#0b3f63;text-shadow:0 0 3px rgba(255,255,255,.95);}
 .gp-screen.ch7.ch9 .gp-dealer-card .dcur{border-color:rgba(150,220,255,.95);box-shadow:0 0 10px rgba(130,205,255,.9),inset 0 0 8px rgba(130,205,255,.4);}
-.gp-screen.ch7.ch9 .fly-card{background:url('img/challenge07-player-card.webp') center/100% 100% no-repeat;filter:hue-rotate(188deg) saturate(.9);border:none;box-shadow:none;}
+.gp-screen.ch7.ch9 .fly-card{background:url('img/card-setra-normal.webp') center/100% 100% no-repeat;filter:none;border:none;box-shadow:none;color:#0b3f63;text-shadow:0 0 4px rgba(255,255,255,.95);}
+.gp-screen.ch7.ch9 .card-stage.magenta{--cardimg:url('img/card-setra-normal.webp');--nc:#0b3f63;}
+/* プレイヤーの手札カード */
+.gp-screen.ch7.ch9 .card-stage.cyan{--cardimg:url('img/card-player-setra.webp');--nc:#7a5a17;}
 /* 氷結の環：手札にいる間からこの絵。飛行中も場に出た後も同じ */
 .gp-screen.ch7.ch9 .gp-dealer-card.sring{background:url('img/card-setra-ring.webp') center/contain no-repeat !important;filter:none !important;}
 .gp-screen.ch7.ch9 .gp-dealer-card.sring .dv{color:#0b4a6e;text-shadow:0 0 3px rgba(255,255,255,.95);}
@@ -2893,7 +2905,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v128'; // v128(2026/09/09): マップ座標が12個のままで13番目のセトラを追加したため、pos[12]がundefinedになり「遊ぶ」で画面が真っ白になるバグを修正
+const APP_VER='v129'; // v129(2026/09/09): セトラ戦の専用素材を導入（対戦背景・セトラの通常カード・プレイヤーの手札カード・手札マット）。8.0MB→0.48MBに圧縮。立ち絵は不透明度62%＋下端ぼかし＋ゆっくり漂わせて静止画感を消した
+// v128(2026/09/09): マップ座標が12個のままで13番目のセトラを追加したため、pos[12]がundefinedになり「遊ぶ」で画面が真っ白になるバグを修正
 // v127(2026/09/08): チャレンジ③「セトラ」追加。氷結の星環で手札3枚を5秒凍結（解凍カウントはラウンドタイマー稼働中のみ進む）。盤面を読むAI(smart)を新設
 // v126(2026/09/08): チュートリアルの隠しコマンドをTIMEの7回タップに変更。ギミック説明のギミック名を設定値から自動生成する方式に修正（説明文の書式変更で全ステージ「通常ルール」表示になっていた）
 // v125: 相手カードの移動中もオレンジLライン入りの表面を維持
@@ -4256,7 +4269,7 @@ function App(){
     if(trackNumR.current>0)startBGM(trackNumR.current,stageBgm());
     if(opts.challenge){ // v95: 第7は画像を読み込んでからカウントダウン（最大4秒待ち）
       setLoadingVeil(true);const tok=roundTokR.current;
-      preloadImages(['img/challenge07-bg.webp','img/challenge07-hand-mat.webp','img/challenge07-player-card.webp','img/challenge07-rival-card.webp','img/challenge07-rival-card-front.webp','img/challenge07-luna-battle.webp','img/challenge07-star-ring.webp','img/luna-action-body.webp','img/luna-action-back.webp','img/luna-sigil.webp','img/luna-pin-1.webp','img/luna-pin-2.webp','img/luna-pin-3.webp','img/luna-pin-4.webp','img/reipia-base.webp','img/ring-purple-active.webp','img/ring-blue-active.webp','img/ring-red-active.webp','img/ring-gold-active.webp','img/card-gold-designation-frame.webp'],4000)
+      preloadImages(['img/challenge07-bg.webp','img/challenge07-hand-mat.webp','img/challenge07-player-card.webp','img/challenge07-rival-card.webp','img/challenge07-rival-card-front.webp','img/challenge07-luna-battle.webp','img/challenge07-star-ring.webp','img/luna-action-body.webp','img/luna-action-back.webp','img/luna-sigil.webp','img/luna-pin-1.webp','img/luna-pin-2.webp','img/luna-pin-3.webp','img/luna-pin-4.webp','img/reipia-base.webp','img/ring-purple-active.webp','img/ring-blue-active.webp','img/ring-red-active.webp','img/ring-gold-active.webp','img/card-gold-designation-frame.webp','img/challenge09-bg.webp','img/challenge09-hand-mat.webp','img/card-setra-normal.webp','img/card-player-setra.webp','img/card-setra-ring.webp','img/challenge09-setra.webp'],4000)
         .then(()=>{setLoadingVeil(false);if(tok===roundTokR.current)doCountdown(p,d,0,0,1);});
     }else doCountdown(p,d,0,0,1);
   }
