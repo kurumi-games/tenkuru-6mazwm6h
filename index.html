@@ -1421,9 +1421,10 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7.ch9 .card-stage.cyan{--cardimg:url('img/card-player-setra.webp');--nc:#7a5a17;}
 /* 氷結の環：手札にいる間からこの絵。飛行中も場に出た後も同じ */
 .gp-screen.ch7.ch9 .gp-dealer-card.sring{background:url('img/card-setra-ring.webp') center/contain no-repeat !important;filter:none !important;}
-.gp-screen.ch7.ch9 .gp-dealer-card.sring .dv{color:#0b4a6e;text-shadow:0 0 3px rgba(255,255,255,.95);}
-.gp-screen.ch7.ch9 .fly-card.face-setra{background:url('img/card-setra-ring.webp') center/100% 100% no-repeat !important;filter:none !important;color:#0b4a6e;text-shadow:0 0 4px rgba(255,255,255,.95);}
-.gp-screen.ch7.ch9 .card-stage.face-setra{--cardimg:url('img/card-setra-ring.webp');--nc:#0b4a6e;}
+/* v139: 新しい星環カードは背景が濃紺なので数字を白抜きにする */
+.gp-screen.ch7.ch9 .gp-dealer-card.sring .dv{color:#ffffff;text-shadow:0 0 calc(2 * var(--u)) rgba(120,200,255,.95),0 calc(0.6 * var(--u)) calc(1.6 * var(--u)) rgba(0,15,40,.95);}
+.gp-screen.ch7.ch9 .fly-card.face-setra{background:url('img/card-setra-ring.webp') center/100% 100% no-repeat !important;filter:none !important;color:#ffffff;text-shadow:0 0 4px rgba(120,200,255,.95),0 2px 4px rgba(0,15,40,.95);}
+.gp-screen.ch7.ch9 .card-stage.face-setra{--cardimg:url('img/card-setra-ring.webp');--nc:#ffffff;}
 
 /* v136: プレイヤーの星環（時の砂）。手札にいる間からこの絵で見える */
 .card-stage.p-ring .card{background-image:url('img/card-player-ring-time.webp')!important;background-size:100% 100%!important;}
@@ -2980,7 +2981,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v138'; // v138(2026/09/09): セトラのAIが弱かった原因を修正。場を低く保つ評価が逆効果で1ばかり出していた。場を高くして相手の選択肢を削る方針に変更（勝率28%→59%）
+const APP_VER='v139'; // v139(2026/09/09): セトラの星環カードを砂時計デザインに変更。背景が濃紺なので数字を白抜きに（手札・飛行中・場の3箇所）
+// v138(2026/09/09): セトラのAIが弱かった原因を修正。場を低く保つ評価が逆効果で1ばかり出していた。場を高くして相手の選択肢を削る方針に変更（勝率28%→59%）
 // v137(2026/09/09): セトラが自滅バーストするバグを修正。時間停止3秒＋クロノリンク演出、飛行中の敵札を返却。凍ったカードの数字を表示
 // v136(2026/09/09): セトラ20pt勝利・星環は5ラウンドに1回。凍った札だけ残る詰みを救済。プレイヤーの星環「時間停止」を実装（合計6で相手が2秒停止、3ラウンド持続）。ホームに技のON/OFF一覧を追加
 // v135(2026/09/09): セトラのカード2種を新デザインに差し替え。初手のみ人のタップより速く(約250ms)、決定打は遅く(約1100ms)して連打での稼ぎを封じつつ理不尽さを解消
