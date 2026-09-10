@@ -2980,7 +2980,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v137'; // v137(2026/09/09): セトラが自滅バーストするバグを修正。時間停止3秒＋クロノリンク演出、飛行中の敵札を返却。凍ったカードの数字を表示
+const APP_VER='v138'; // v138(2026/09/09): セトラのAIが弱かった原因を修正。場を低く保つ評価が逆効果で1ばかり出していた。場を高くして相手の選択肢を削る方針に変更（勝率28%→59%）
+// v137(2026/09/09): セトラが自滅バーストするバグを修正。時間停止3秒＋クロノリンク演出、飛行中の敵札を返却。凍ったカードの数字を表示
 // v136(2026/09/09): セトラ20pt勝利・星環は5ラウンドに1回。凍った札だけ残る詰みを救済。プレイヤーの星環「時間停止」を実装（合計6で相手が2秒停止、3ラウンド持続）。ホームに技のON/OFF一覧を追加
 // v135(2026/09/09): セトラのカード2種を新デザインに差し替え。初手のみ人のタップより速く(約250ms)、決定打は遅く(約1100ms)して連打での稼ぎを封じつつ理不尽さを解消
 // v134(2026/09/09): 凍結カードを専用の絵に差し替え。中央の濃紺の円に残り秒を白抜きで大きく表示（CSSで描いていた氷は廃止）
@@ -4609,24 +4610,31 @@ function App(){
       const ns=cs+v,nf=[...cf,v];
       if(ns===10)return 10000+calcPts(nf).total*10; // 自分で完成：最優先。役が高い方をさらに優先
       if(ns>10)return -100000; // v137: バーストは絶対に選ばない（canPlayが10超えを許すため明示的に弾く）
+      const need=10-ns;
       // この一手のあと、プレイヤーが即10を完成できてしまうか
       const gift=pUsable.some(w=>canPlay(w,ns,nf)&&ns+w===10);
       // プレイヤーが1枚も出せなくなるか（詰ませ）
       const stuck=!pUsable.some(w=>canPlay(w,ns,nf));
       // 自分が次に10を作れる札を持っているか
       const keep=(dHR.current||[]).some(w=>canPlay(w,ns,nf)&&ns+w===10);
+      // v138: 決着札(need)を自分と相手のどちらが多く持っているか
+      const mine=(dHR.current||[]).filter(w=>w===need).length-(v===need?1:0);
+      const theirs=pUsable.filter(w=>w===need).length;
       let sc=0;
       if(gift)sc-=800;   // 塩を送らない
       if(stuck)sc+=400;  // 相手を動けなくする
-      if(keep)sc+=250;   // 次の手で刈り取れる形を残す
-      sc-=ns*4;          // 場を無駄に高くしない
+      if(keep)sc+=600;   // 次の手で刈り取れる形を残す
+      sc+=120*(mine-theirs); // 決着札を自分が握っている形を選ぶ
+      // v138: ここが逆だった。場を低く保つと相手の選択肢が広がり、
+      // 1ばかり出して自滅していた。場は高くして相手の手を狭める
+      sc+=6*ns;
       return sc;
     };
     let best=null,bs=-1e9;
     playable.forEach(v=>{const s=scoreOf(v);if(s>bs){bs=s;best=v;}});
     if(bs<=-100000)return null; // v137: バーストしかできないなら出さずに待つ
-    // どの手も相手に10を渡すだけなら、出さずに待つ（無駄打ちの防止）
-    if(bs<0&&bs<=-800&&cs>0)return null;
+    // v138: 以前は「どれも塩を送るなら待つ」としていたが、待っている間に
+    // プレイヤーが自由に場を組めてしまうため、待つのはバースト時だけにした
     return best;
   }
   function smartActive(){const so=stageOptsR.current;return !!(so&&so.smart);}
