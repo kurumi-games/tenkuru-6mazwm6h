@@ -1460,6 +1460,27 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .tugv.tugv-hit .tugv-frame{animation:tugvHit .5s ease-out;}
 @keyframes tugvHit{0%{transform:scale(1);}40%{transform:scale(1.12);}100%{transform:scale(1);}}
 
+/* v160: ルール上出せない札は場まで飛んで弾き返される。
+   出せないことを黙って無反応にせず、動きで理由を伝える */
+.bounce-card{position:fixed;left:0;top:0;z-index:150;pointer-events:none;
+  width:var(--bw);height:calc(var(--bw) * 1.4);margin-left:calc(var(--bw) * -0.5);margin-top:calc(var(--bw) * -0.7);
+  border-radius:calc(4 * var(--u));display:flex;align-items:center;justify-content:center;
+  font-family:'Inter',sans-serif;font-weight:900;font-size:calc(var(--bw) * 0.42);color:#2a4a6a;
+  background:linear-gradient(170deg,#ffffff,#dfe8f6);border:1px solid rgba(120,130,170,.6);
+  box-shadow:0 calc(4 * var(--u)) calc(12 * var(--u)) rgba(0,0,0,.5);
+  transform:translate(var(--tx),var(--ty));
+  transition:transform .26s cubic-bezier(.3,.9,.5,1);}
+/* 弾かれて元の位置へ戻る */
+.bounce-card.back{
+  transform:translate(var(--bx),var(--by)) rotate(-6deg);
+  transition:transform .42s cubic-bezier(.5,-0.35,.6,1);
+  animation:bounceHit .42s ease-out;}
+@keyframes bounceHit{
+  0%{filter:brightness(2.4) saturate(.4);}
+  25%{filter:brightness(1.5);}
+  100%{filter:none;}
+}
+
 /* v150: 不可観測が続いている間ずっと出しておくバッジ */
 .hide-badge{position:fixed;left:50%;top:calc(92 * var(--u));transform:translateX(-50%);z-index:120;pointer-events:none;
   white-space:nowrap;padding:calc(4 * var(--u)) calc(10 * var(--u));border-radius:calc(7 * var(--u));
@@ -2695,7 +2716,7 @@ function renderCardOverlay(){
   ];
 }
 
-function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,linkPick,rLock,rCmd,rWait,confused,frozen,justFrozen,pRing,shuffling,marked}){
+function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,linkPick,rLock,rCmd,rWait,confused,frozen,justFrozen,pRing,shuffling,marked,pIdx}){
   const[pressed,setPressed]=useState(false);
   const[shaking,setShaking]=useState(false);
   const isBlue=cardRole==='player'||cardRole==='host';
@@ -2703,6 +2724,7 @@ function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,
   const locked=cardState==='locked';
   const stateClass=cardState?' cs-'+cardState:'';
   return h('div',{
+    'data-p-idx':pIdx,
     className:'card-stage '+colorClass+' n'+value+stateClass+(frozen!=null?' frozen':'')+(justFrozen?' just-frz':'')+(pRing?' p-ring':'')+(shuffling?' shuf-fx':'')+(marked?' mark-fx':'')+(shaking?' cs-shake':'')+(isSpecial?' sv-card sv-born':'')+(linkPick?' link-pick':'')+(rLock?' rl-locked':'')+(rCmd?' rl-cmd':'')+(rWait?' rl-wait':'')+(confused?' confused':''),
     style:{
       opacity:(disabled&&!locked)?0.3:undefined, // lockedの見た目はCSSに任せる(カウントダウン中等の無効はここで薄く)
@@ -3088,7 +3110,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v159'; // v159(2026/09/11): 縦ゲージに画像の枠を導入。溝の位置を実測（横18.8〜80.1% / 縦11.0〜88.4%）して光をぴったり収めた
+const APP_VER='v160'; // v160(2026/09/11): バーストを廃止。ルール上出せない札は場まで飛んで弾き返され、元の位置に戻る。減点なし
+// v159(2026/09/11): 縦ゲージに画像の枠を導入。溝の位置を実測（横18.8〜80.1% / 縦11.0〜88.4%）して光をぴったり収めた
 // v158(2026/09/11): 縦ゲージが下寄りに見えていたのを修正。上下の数字の高さが揃っておらず中心がずれていた
 // v157(2026/09/11): 縦ゲージを左端から右端へ移動（カードが左から右へ流れる終着点に合わせた）。場エリアの中に入れ、相手の手札の下〜手札マットの上に自動で収まるようにした
 // v156(2026/09/11): 縦ゲージが画面を縦断して長すぎたので短縮。手札マットに掛からない長さにし、太さを少し上げた
@@ -3903,6 +3926,7 @@ function App(){
   // v140 オルビィ: 手札が裏返っている残りラウンド数
   const[hideLeft,setHideLeft]=useState(0);const hideLeftR=useRef(0);
   const[justStolen,setJustStolen]=useState([]); // v141 奪った直後の強調
+  const[bounceFx,setBounceFx]=useState(null);const bounceBusyR=useRef(false); // v160 弾き返し
   const[shufOne,setShufOne]=useState(-1);       // v150 再観測：今 書き換え中の1枚
   const[marked,setMarked]=useState([]);         // v148 捕獲軌道：奪われる札の印
   const[fxNote,setFxNote]=useState(null);       // v148 技の内容を文で出す
@@ -5068,6 +5092,29 @@ function App(){
     },FLY_MS);
   }
 
+  // v160: 出せない札を場まで飛ばして弾き返す。減点はなし。元の位置に戻る
+  function bounceCard(idx,value,cs,cf){
+    if(bounceBusyR.current)return; // 連打で何枚も飛ばない
+    bounceBusyR.current=true;
+    let from=null,to=null;
+    try{
+      const el=document.querySelector('.gp-hand-rows [data-p-idx="'+idx+'"]');
+      const fa=fieldAreaRef.current;
+      if(el&&fa){
+        const r=el.getBoundingClientRect(),f=fa.getBoundingClientRect();
+        from={x:r.left+r.width/2,y:r.top+r.height/2,w:r.width};
+        to={x:f.left+f.width/2,y:f.top+f.height/2};
+      }
+    }catch(e){}
+    setBounceFx({idx,value,from,to,phase:0});
+    try{resumeAC();fxTone({f:520,f2:300,type:'triangle',v:0.05,a:0.004,d:0.18,rev:0.3});}catch(e){}
+    setTimeout(()=>{ // 場に着いた瞬間に弾かれる
+      setBounceFx(b=>b?{...b,phase:1}:b);
+      fxRejectStamp();
+      try{resumeAC();fxTone({f:900,f2:220,type:'square',v:0.06,a:0.002,d:0.22,rev:0.35});fxAir({v:0.05,a:0.002,d:0.14,hp:5000,rev:0.3});}catch(e){}
+    },260);
+    setTimeout(()=>{bounceBusyR.current=false;setBounceFx(null);},760);
+  }
   function playCard(idx){
     if(phaseR.current!=='playing'||countNumR.current>=0||sceneOnR.current)return; // v75: 変身演出中は操作不可
     if(pFrzR.current[idx]!=null){ // v127: 凍っている札は出せない
@@ -5087,7 +5134,11 @@ function App(){
     const cf=fieldR.current,cs=fieldSumR.current;
     let value=pH[idx];
     if(confuseR.current[idx]!=null){value=confuseR.current[idx];} // v112: 幻惑中は見えてる数字が出る
-    if(!value||!canPlay(value,cs,cf))return;
+    if(!value)return;
+    // v160: ルール上出せない札は、黙って無反応にせず「場まで飛んで弾き返される」
+    // 3枚目で合計5未満 / 4枚目で10ちょうどでない / 合計が10を超える の3つが対象
+    // canPlay は10超えを許す仕様なので、10超えもここで弾き返す
+    if(cs+value>10||!canPlay(value,cs,cf)){bounceCard(idx,value,cs,cf);return;}
     if(rStopR.current||eraseBusyR.current||pausedR.current)return; // v84 時間停止中は出せない / v89 削除中も / v91 一時停止中も
     if(pLockR.current[idx]){fxLockHint('星環ロック');return;}   // v84 ロック中
     if(cmdIdxR.current!=null&&cmdIdxR.current!==idx){fxLockHint('指名された札から');return;} // v84 指名
@@ -5382,14 +5433,17 @@ function App(){
       ),
       skillFx&&h('div',{key:skillFx.k,className:'skill-title',style:{'--sc':skillFx.color}},h('div',{className:'en'},skillFx.en),h('div',{className:'jp'},skillFx.jp)),
       fxNote&&h('div',{className:'fx-note',style:{'--nc2':fxNote.c}},fxNote.t), // v148 技の内容を文で説明
+      bounceFx&&bounceFx.from&&h('div',{className:'bounce-card'+(bounceFx.phase?' back':''),
+        style:{'--bx':bounceFx.from.x+'px','--by':bounceFx.from.y+'px','--tx':(bounceFx.to?bounceFx.to.x:bounceFx.from.x)+'px','--ty':(bounceFx.to?bounceFx.to.y:bounceFx.from.y)+'px','--bw':bounceFx.from.w+'px'}},
+        h('span',null,bounceFx.value)), // v160 弾き返されるカード
       hideLeft>0&&h('div',{className:'hide-badge'},'不可観測  あと '+hideLeft+' ラウンド'), // v150 効果が続いている間ずっと出す
       h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
       h('div',{className:'gp-hand-rows'},
         h('div',{className:'gp-hand-row'},
-          pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const dv=confuse[i]!=null?confuse[i]:v;return h(SlideCard,{key:i+'_'+v,value:dv,onPlay:()=>playCard(i),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[i]||pFrz[i]!=null||(cmdIdx!=null&&cmdIdx!==i),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[i],justFrozen:justFrz.includes(i),pRing:pRing===i,shuffling:shufOne===i,marked:marked.includes(i),onLocked:()=>fxLockHint(pFrz[i]!=null?'凍結中 あと'+pFrz[i]+'秒':pLock[i]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[i],rCmd:cmdIdx===i,rWait:cmdIdx!=null&&cmdIdx!==i,confused:confuse[i]!=null});})())
+          pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const dv=confuse[i]!=null?confuse[i]:v;return h(SlideCard,{key:i+'_'+v,value:dv,onPlay:()=>playCard(i),disabled:countNum>=0||rStop||!!pLock[i]||pFrz[i]!=null||(cmdIdx!=null&&cmdIdx!==i),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),pIdx:i,frozen:pFrz[i],justFrozen:justFrz.includes(i),pRing:pRing===i,shuffling:shufOne===i,marked:marked.includes(i),onLocked:()=>fxLockHint(pFrz[i]!=null?'凍結中 あと'+pFrz[i]+'秒':pLock[i]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[i],rCmd:cmdIdx===i,rWait:cmdIdx!=null&&cmdIdx!==i,confused:confuse[i]!=null});})())
         ),
         h('div',{className:'gp-hand-row'},
-          pH.slice(5).map((v,i)=>v===null?h('div',{key:i+5,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const j=i+5,dv=confuse[j]!=null?confuse[j]:v;return h(SlideCard,{key:j+'_'+v,value:dv,onPlay:()=>playCard(j),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[j]||pFrz[j]!=null||(cmdIdx!=null&&cmdIdx!==j),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[j],justFrozen:justFrz.includes(j),pRing:pRing===j,shuffling:shufOne===j,marked:marked.includes(j),onLocked:()=>fxLockHint(pFrz[j]!=null?'凍結中 あと'+pFrz[j]+'秒':pLock[j]?'星環ロック':(cmdIdx!=null&&cmdIdx!==j)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[j],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[j],rCmd:cmdIdx===j,rWait:cmdIdx!=null&&cmdIdx!==j,confused:confuse[j]!=null});})())
+          pH.slice(5).map((v,i)=>v===null?h('div',{key:i+5,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const j=i+5,dv=confuse[j]!=null?confuse[j]:v;return h(SlideCard,{key:j+'_'+v,value:dv,onPlay:()=>playCard(j),disabled:countNum>=0||rStop||!!pLock[j]||pFrz[j]!=null||(cmdIdx!=null&&cmdIdx!==j),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),pIdx:j,frozen:pFrz[j],justFrozen:justFrz.includes(j),pRing:pRing===j,shuffling:shufOne===j,marked:marked.includes(j),onLocked:()=>fxLockHint(pFrz[j]!=null?'凍結中 あと'+pFrz[j]+'秒':pLock[j]?'星環ロック':(cmdIdx!=null&&cmdIdx!==j)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[j],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[j],rCmd:cmdIdx===j,rWait:cmdIdx!=null&&cmdIdx!==j,confused:confuse[j]!=null});})())
         )
       )
     ),
