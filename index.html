@@ -3017,7 +3017,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v141'; // v141(2026/09/09): 奪われた札がオルビィの手札に加わった瞬間を光らせる演出を追加（絵は要素側で決まるため自動でオルビィのデザインになる）
+const APP_VER='v142'; // v142(2026/09/09): オルビィ戦の専用BGM「Clockwork Waltz」を追加（3.3MB→2.0MB、既存曲と同じ112kbps）
+// v141(2026/09/09): 奪われた札がオルビィの手札に加わった瞬間を光らせる演出を追加（絵は要素側で決まるため自動でオルビィのデザインになる）
 // v140(2026/09/09): チャレンジ④「オルビィ」追加。相手に10を作らせない封殺思考＋星環3種（手札シャッフル／3枚強奪／5ラウンド裏返し）
 // v139(2026/09/09): セトラの星環カードを砂時計デザインに変更。背景が濃紺なので数字を白抜きに（手札・飛行中・場の3箇所）
 // v138(2026/09/09): セトラのAIが弱かった原因を修正。場を低く保つ評価が逆効果で1ばかり出していた。場を高くして相手の選択肢を削る方針に変更（勝率28%→59%）
@@ -3130,7 +3131,7 @@ const AREA_01={
     // v127 チャレンジ③ セトラ。モルフォ撃破で解放。氷結の環＋盤面を読む思考
     {no:13,challengeNo:3,name:'セトラ',description:'氷結の星環で手札を凍らせ、盤面を読んで退路を断つ',icon:'snow',winPt:20,diff:'master',rule:'normal',challenge:true,ch9:true,unlockAfter:12,rivalName:'セトラ',ability:'freeze',smart:true,playerRing:true,speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,firstMs:20,firstJit:40,curStepFirst:10,curArrFirst:20,curHoldFirst:25,flyMsFirst:120,winMs:520,winJit:220,bgm:'Frozen%20Judgment.mp3'},
     // v140 チャレンジ4 オルビィ。セトラ撃破で解放。相手に10を作らせない「封殺」思考＋星環3種
-    {no:14,challengeNo:4,name:'オルビィ',description:'星の観測者。10を作らせない立ち回りと三種の星環',icon:'card',winPt:20,diff:'master',rule:'normal',challenge:true,ch10:true,unlockAfter:13,rivalName:'オルビィ',ability:'orbit',smart:true,deny:true,playerRing:true,speed:0.36,curStep:24,curArr:48,curHold:56,flyMs:200,firstMs:15,firstJit:30,curStepFirst:8,curArrFirst:16,curHoldFirst:20,flyMsFirst:100,winMs:480,winJit:200,bgm:'Iridescent_Trap.mp3'},
+    {no:14,challengeNo:4,name:'オルビィ',description:'星の観測者。10を作らせない立ち回りと三種の星環',icon:'card',winPt:20,diff:'master',rule:'normal',challenge:true,ch10:true,unlockAfter:13,rivalName:'オルビィ',ability:'orbit',smart:true,deny:true,playerRing:true,speed:0.36,curStep:24,curArr:48,curHold:56,flyMs:200,firstMs:15,firstJit:30,curStepFirst:8,curArrFirst:16,curHoldFirst:20,flyMsFirst:100,winMs:480,winJit:200,bgm:'Clockwork%20Waltz.mp3'},
   ]
 };
 const STAGES={
