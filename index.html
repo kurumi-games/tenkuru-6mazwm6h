@@ -1426,6 +1426,32 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7.ch9 .fly-card.face-setra{background:url('img/card-setra-ring.webp') center/100% 100% no-repeat !important;filter:none !important;color:#ffffff;text-shadow:0 0 4px rgba(120,200,255,.95),0 2px 4px rgba(0,15,40,.95);}
 .gp-screen.ch7.ch9 .card-stage.face-setra{--cardimg:url('img/card-setra-ring.webp');--nc:#ffffff;}
 
+/* v151: 綱引きゲージ。中央から始まり、点を取った側が相手陣を押し込む。
+   スコア箱2つを置き換えたもの。全ステージ共通 */
+.tug-wrap{position:absolute;left:calc(6 * var(--u));right:calc(6 * var(--u));top:calc(40 * var(--u));
+  height:calc(20 * var(--u));z-index:60;pointer-events:none;}
+.tug-bar{position:absolute;inset:0;display:flex;border-radius:calc(10 * var(--u));overflow:hidden;
+  background:rgba(8,10,24,.55);border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 calc(2 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,.5),inset 0 0 calc(6 * var(--u)) rgba(0,0,0,.5);}
+.tug-fill{height:100%;transition:width .55s cubic-bezier(.3,1.2,.4,1);}
+.tug-fill.you{background:linear-gradient(90deg,rgba(44,202,223,.95),rgba(44,202,223,.55));}
+.tug-fill.dealer{background:linear-gradient(90deg,rgba(240,107,168,.55),rgba(240,107,168,.95));}
+/* 境界線。今どちらが押しているかが一目で分かる */
+.tug-edge{position:absolute;top:calc(-3 * var(--u));bottom:calc(-3 * var(--u));width:calc(2.5 * var(--u));
+  margin-left:calc(-1.25 * var(--u));border-radius:calc(2 * var(--u));background:#fff;
+  box-shadow:0 0 calc(7 * var(--u)) rgba(255,255,255,.95),0 0 calc(14 * var(--u)) rgba(180,220,255,.7);
+  transition:left .55s cubic-bezier(.3,1.2,.4,1);}
+.tug-num{position:absolute;top:calc(-13 * var(--u));font-family:'Inter',sans-serif;font-weight:800;
+  font-size:calc(15 * var(--u));line-height:1;}
+.tug-num.you{left:calc(2 * var(--u));color:#2ccadf;text-shadow:0 0 calc(8 * var(--u)) rgba(44,202,223,.6),0 calc(1 * var(--u)) calc(3 * var(--u)) rgba(0,0,0,.9);}
+.tug-num.dealer{right:calc(2 * var(--u));color:#f06ba8;text-shadow:0 0 calc(8 * var(--u)) rgba(240,107,168,.6),0 calc(1 * var(--u)) calc(3 * var(--u)) rgba(0,0,0,.9);}
+.tug-goal{position:absolute;left:0;right:0;top:calc(-11 * var(--u));text-align:center;
+  font-size:calc(8.5 * var(--u));font-weight:700;letter-spacing:.08em;color:rgba(235,240,255,.8);
+  text-shadow:0 calc(1 * var(--u)) calc(3 * var(--u)) rgba(0,0,0,.95);}
+/* 得点した瞬間に脈打つ */
+.tug-wrap.tug-hit .tug-bar{animation:tugHit .5s ease-out;}
+@keyframes tugHit{0%{transform:scaleY(1);}40%{transform:scaleY(1.35);}100%{transform:scaleY(1);}}
+
 /* v150: 不可観測が続いている間ずっと出しておくバッジ */
 .hide-badge{position:fixed;left:50%;top:calc(92 * var(--u));transform:translateX(-50%);z-index:120;pointer-events:none;
   white-space:nowrap;padding:calc(4 * var(--u)) calc(10 * var(--u));border-radius:calc(7 * var(--u));
@@ -3054,7 +3080,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v150'; // v150(2026/09/11): 奪われて手札が空になると補充されないバグを修正。補充中は時間を止める。捕獲軌道は3枚に枠が付いてから一斉に引き抜く。再観測は1枚ずつゆっくり。不可観測に説明と残りラウンド表示を追加
+const APP_VER='v151'; // v151(2026/09/11): スコア箱2つを廃止し、中央から押し合う綱引きゲージに変更（全ステージ共通）
+// v150(2026/09/11): 奪われて手札が空になると補充されないバグを修正。補充中は時間を止める。捕獲軌道は3枚に枠が付いてから一斉に引き抜く。再観測は1枚ずつゆっくり。不可観測に説明と残りラウンド表示を追加
 // v149(2026/09/11): オルビィが弱い真因は1枚出すのに465〜616msかかっていたこと（プレイヤーは150〜200ms）。全体を約250〜330msに短縮。denyPickが温存中の札まで当てにしていたのも修正
 // v148(2026/09/11): 時間停止中にAIが出そうとして弾かれる動作を停止。再観測と捕獲軌道を段階表示にして何が起きているか分かるようにした
 // v147(2026/09/11): オルビィが勝てる場面で固まるバグを修正（相手も10にできる場面を絶対拒否していた）。強い役を狙う評価を追加。星環を2ラウンドおきに。立ち絵の白い枠を除去
@@ -5235,25 +5262,31 @@ function App(){
         h('div',{className:'lbl'},'TIME'),
         h('div',{className:'val'},timeLeft)
       ),
-      h('div',{className:'gp-score you'+(ptBurst?' pt-burst':'')},
-        h('div',{className:'lbl'},'YOU'),
-        h('div',{className:'val'},pPt),
-        h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-pPt)),'pt')
-      ),
       h('div',{className:'gp-round-pill '+difficulty},
         h('span',{className:'r'},'R'+rNum),
         h('span',{className:'lvl'},curStage?(curStage.boss?'BOSS':'ST '+curStage.no):(difficulty==='easy'?'EASY':difficulty==='hard'?'HARD':difficulty==='master'?'MASTER':'NORMAL'))
-      ),
-      h('div',{className:'gp-score dealer'},
-        h('div',{className:'lbl'},rival),
-        h('div',{className:'val'},dPt),
-        h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-dPt)),'pt')
       ),
       h('div',{className:'gp-icon-btn',onClick:goHome,title:'ホームに戻る'},h('span',null,'⌂')),
       h('div',{className:'gp-track-btn',onClick:toggleMusic,title:'曲を変更（1→2→ミュート）'},
         h('span',{className:'num'},trackNum===0?'OFF':String(trackNum).padStart(2,'0'))
       )
     ),
+
+    // v151: 綱引きゲージ。中央から始まり、点を取った側が相手陣を押し込む
+    (()=>{
+      const lead=pPt-dPt;
+      const pos=Math.max(4,Math.min(96,50+(lead/Math.max(1,winPt))*50));
+      return h('div',{className:'tug-wrap'+(ptBurst?' tug-hit':'')},
+        h('div',{className:'tug-bar'},
+          h('div',{className:'tug-fill you',style:{width:pos+'%'}}),
+          h('div',{className:'tug-fill dealer',style:{width:(100-pos)+'%'}}),
+          h('div',{className:'tug-edge',style:{left:pos+'%'}})
+        ),
+        h('div',{className:'tug-num you'},pPt),
+        h('div',{className:'tug-num dealer'},dPt),
+        h('div',{className:'tug-goal'},'先取 '+winPt+'pt')
+      );
+    })(),
 
     // v56 チャンピオン能力の表示（使用後は暗くなる）
     coreShiftR.current.active&&h('div',{className:'ability-pill'+(coreShiftUsed?' used':'')},h('span',{className:'en'},'CORE SHIFT'),h('span',null,coreShiftUsed?'使用済み':'最初に置く 4 → 3')),
