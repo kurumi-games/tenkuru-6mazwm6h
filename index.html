@@ -1432,9 +1432,10 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* v155: 縦の綱引きゲージ。左端に通す。
    画面は「上＝オルビィ / 下＝くるみ」なので、境界が上に行くほど自分が押している。
    カードを見ている間も視界の隅に入り続けるのが狙い */
-/* v156: 画面を縦断すると長すぎたので、上部の帯だけの短い長さにした */
-.tugv{position:fixed;left:calc(5 * var(--u));top:calc(66 * var(--u));
-  height:calc(96 * var(--u));width:calc(14 * var(--u));z-index:58;pointer-events:none;
+/* v157: 右端に置く。カードが左から右へ流れるので、その終着点に合わせた。
+   場エリアの中に入れているため、相手の手札の下〜手札マットの上に自動で収まる */
+.tugv{position:absolute;right:calc(4 * var(--u));top:calc(10 * var(--u));bottom:calc(10 * var(--u));
+  width:calc(14 * var(--u));z-index:58;pointer-events:none;
   display:flex;flex-direction:column;align-items:center;}
 .tugv-bar{position:relative;flex:1;width:calc(11 * var(--u));margin:calc(3 * var(--u)) 0;
   display:flex;flex-direction:column;border-radius:calc(5 * var(--u));overflow:hidden;
@@ -1444,7 +1445,8 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .tugv-fill.dealer{background:linear-gradient(180deg,rgba(240,107,168,.95),rgba(240,107,168,.5));}
 .tugv-fill.you{background:linear-gradient(180deg,rgba(44,202,223,.5),rgba(44,202,223,.95));}
 /* 境界。ここが上下する */
-.tugv-edge{position:absolute;left:calc(-3 * var(--u));right:calc(-3 * var(--u));height:calc(2 * var(--u));
+/* v157: 場エリアに overflow:hidden があるため、左右へのはみ出しは控えめにする */
+.tugv-edge{position:absolute;left:calc(-1.5 * var(--u));right:calc(-1.5 * var(--u));height:calc(2 * var(--u));
   margin-bottom:calc(-1 * var(--u));border-radius:calc(2 * var(--u));background:#fff;
   box-shadow:0 0 calc(7 * var(--u)) rgba(255,255,255,.95),0 0 calc(14 * var(--u)) rgba(190,225,255,.7);
   transition:bottom .6s cubic-bezier(.3,1.15,.4,1);}
@@ -3084,7 +3086,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v156'; // v156(2026/09/11): 縦ゲージが画面を縦断して長すぎたので短縮。手札マットに掛からない長さにし、太さを少し上げた
+const APP_VER='v157'; // v157(2026/09/11): 縦ゲージを左端から右端へ移動（カードが左から右へ流れる終着点に合わせた）。場エリアの中に入れ、相手の手札の下〜手札マットの上に自動で収まるようにした
+// v156(2026/09/11): 縦ゲージが画面を縦断して長すぎたので短縮。手札マットに掛からない長さにし、太さを少し上げた
 // v155(2026/09/11): 綱引きゲージを左端の縦に変更。上=オルビィ・下=くるみで、画面の配置とそのまま対応させた
 // v154(2026/09/11): 毎ラウンド中央に出るゲージを廃止（画面を塞ぐため）。常設表示のみに戻した
 // v153(2026/09/11): 常設ゲージをTIME直下に小さく配置。役が完成した時とバースト時だけ中央に大きなゲージを出し、境界が動くのを見せる
@@ -5281,22 +5284,7 @@ function App(){
       )
     ),
 
-    // v155: 縦の綱引きゲージ（左端）。上=オルビィ / 下=くるみ。
-    // 画面の配置（敵が上・自分が下）とそのまま対応させる
-    (()=>{
-      const lead=pPt-dPt;
-      // 上へ行くほどくるみが押している
-      const pos=Math.max(4,Math.min(96,50+(lead/Math.max(1,winPt))*50));
-      return h('div',{className:'tugv'+(ptBurst?' tugv-hit':'')},
-        h('div',{className:'tugv-num dealer'},dPt),
-        h('div',{className:'tugv-bar'},
-          h('div',{className:'tugv-fill dealer',style:{height:(100-pos)+'%'}}),
-          h('div',{className:'tugv-fill you',style:{height:pos+'%'}}),
-          h('div',{className:'tugv-edge',style:{bottom:pos+'%'}})
-        ),
-        h('div',{className:'tugv-num you'},pPt)
-      );
-    })(),
+
 
     // v56 チャンピオン能力の表示（使用後は暗くなる）
     coreShiftR.current.active&&h('div',{className:'ability-pill'+(coreShiftUsed?' used':'')},h('span',{className:'en'},'CORE SHIFT'),h('span',null,coreShiftUsed?'使用済み':'最初に置く 4 → 3')),
@@ -5351,6 +5339,21 @@ function App(){
       style:{animation:resetFA?'resetAnim 0.5s ease':burstAnim?'burst 0.5s ease':'none'}
     },
       h('div',{className:'field-planet'}),
+      // v157: 縦の綱引きゲージ（右端）。カードが左から右へ流れる終着点に置く。
+      // 場エリアの中に入れているので、相手の手札の下〜手札マットの上に自動で収まる
+      (()=>{
+        const lead=pPt-dPt;
+        const pos=Math.max(4,Math.min(96,50+(lead/Math.max(1,winPt))*50));
+        return h('div',{className:'tugv'+(ptBurst?' tugv-hit':'')},
+          h('div',{className:'tugv-num dealer'},dPt),
+          h('div',{className:'tugv-bar'},
+            h('div',{className:'tugv-fill dealer',style:{height:(100-pos)+'%'}}),
+            h('div',{className:'tugv-fill you',style:{height:pos+'%'}}),
+            h('div',{className:'tugv-edge',style:{bottom:pos+'%'}})
+          ),
+          h('div',{className:'tugv-num you'},pPt)
+        );
+      })(),
       h('div',{className:'gp-field-cards'},
         field.map((v,i)=>h('div',{key:i,className:eraseIdx.includes(i)?'fx-erase':undefined,style:{display:'contents'}},h(FieldCard,{value:v,by:fieldColors[i],isComplete:fieldSum===10&&i===field.length-1,isSpecial:!!fieldSp[i],shifted:!!fieldShift[i],ringed:fieldRing[i]||false})))
       ),
