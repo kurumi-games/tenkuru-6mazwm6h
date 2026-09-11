@@ -1432,35 +1432,33 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* v155: 縦の綱引きゲージ。左端に通す。
    画面は「上＝オルビィ / 下＝くるみ」なので、境界が上に行くほど自分が押している。
    カードを見ている間も視界の隅に入り続けるのが狙い */
-/* v157: 右端に置く。カードが左から右へ流れるので、その終着点に合わせた。
-   場エリアの中に入れているため、相手の手札の下〜手札マットの上に自動で収まる */
-.tugv{position:absolute;right:calc(4 * var(--u));top:calc(10 * var(--u));bottom:calc(10 * var(--u));
-  width:calc(14 * var(--u));z-index:58;pointer-events:none;
-  display:flex;flex-direction:column;align-items:center;}
-.tugv-bar{position:relative;flex:1;width:calc(11 * var(--u));margin:calc(3 * var(--u)) 0;min-height:0;
-  display:flex;flex-direction:column;border-radius:calc(5 * var(--u));overflow:hidden;
-  background:rgba(8,10,24,.5);border:1px solid rgba(255,255,255,.22);
-  box-shadow:0 calc(2 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,.55),inset 0 0 calc(6 * var(--u)) rgba(0,0,0,.6);}
+/* v159: 画像の枠を使う縦ゲージ。右端、場エリアの中に収める。
+   枠の絵は 120x1197（比1:9.97）。溝の位置は実測値：
+   横 18.8%〜80.1% / 縦 11.0%〜88.4%。ここに光を収める */
+.tugv{position:absolute;right:calc(2 * var(--u));top:calc(4 * var(--u));bottom:calc(4 * var(--u));
+  width:calc(20 * var(--u));z-index:58;pointer-events:none;}
+.tugv-frame{position:absolute;inset:0;
+  background:url('img/gauge-frame.webp') center/100% 100% no-repeat;
+  filter:drop-shadow(0 calc(2 * var(--u)) calc(5 * var(--u)) rgba(0,0,0,.7));z-index:2;}
+/* 光が入る溝。枠の絵の穴にぴったり重ねる */
+.tugv-bar{position:absolute;left:18.8%;right:19.9%;top:11%;bottom:11.6%;
+  display:flex;flex-direction:column;overflow:hidden;z-index:1;
+  background:rgba(6,8,20,.7);}
 .tugv-fill{width:100%;transition:height .6s cubic-bezier(.3,1.15,.4,1);}
-.tugv-fill.dealer{background:linear-gradient(180deg,rgba(240,107,168,.95),rgba(240,107,168,.5));}
-.tugv-fill.you{background:linear-gradient(180deg,rgba(44,202,223,.5),rgba(44,202,223,.95));}
-/* 境界。ここが上下する */
-/* v157: 場エリアに overflow:hidden があるため、左右へのはみ出しは控えめにする */
-.tugv-edge{position:absolute;left:calc(-1.5 * var(--u));right:calc(-1.5 * var(--u));height:calc(2 * var(--u));
-  margin-bottom:calc(-1 * var(--u));border-radius:calc(2 * var(--u));background:#fff;
-  box-shadow:0 0 calc(7 * var(--u)) rgba(255,255,255,.95),0 0 calc(14 * var(--u)) rgba(190,225,255,.7);
+.tugv-fill.dealer{background:linear-gradient(180deg,rgba(255,130,185,1),rgba(240,107,168,.55));}
+.tugv-fill.you{background:linear-gradient(180deg,rgba(44,202,223,.55),rgba(120,235,250,1));}
+.tugv-edge{position:absolute;left:0;right:0;height:calc(1.6 * var(--u));
+  margin-bottom:calc(-0.8 * var(--u));background:#fff;z-index:3;
+  box-shadow:0 0 calc(5 * var(--u)) rgba(255,255,255,.95),0 0 calc(10 * var(--u)) rgba(200,230,255,.8);
   transition:bottom .6s cubic-bezier(.3,1.15,.4,1);}
-/* v158: 上下の数字の占める高さを固定して、バーが上下の中央に来るようにする
-   （高さが揃っていないと、わずかに下へ寄って見える） */
-.tugv-num{font-family:'Inter',sans-serif;font-weight:800;font-size:calc(10 * var(--u));
-  height:calc(12 * var(--u));line-height:calc(12 * var(--u));flex:0 0 auto;
-  display:flex;align-items:center;justify-content:center;
-  text-shadow:0 calc(1 * var(--u)) calc(3 * var(--u)) rgba(0,0,0,.95);}
-.tugv-num.you{color:#2ccadf;}
-.tugv-num.dealer{color:#f06ba8;}
-/* 得点した瞬間に脈打つ */
-.tugv.tugv-hit .tugv-bar{animation:tugvHit .5s ease-out;}
-@keyframes tugvHit{0%{transform:scaleX(1);}40%{transform:scaleX(1.5);}100%{transform:scaleX(1);}}
+/* 点数は枠の外、上下に添える */
+.tugv-num{position:absolute;left:0;right:0;text-align:center;
+  font-family:'Inter',sans-serif;font-weight:800;font-size:calc(9 * var(--u));line-height:1;z-index:4;
+  text-shadow:0 0 calc(4 * var(--u)) rgba(0,0,0,1),0 calc(1 * var(--u)) calc(2 * var(--u)) rgba(0,0,0,1);}
+.tugv-num.dealer{top:calc(4.5 * var(--u));color:#ffd0e4;}
+.tugv-num.you{bottom:calc(4.5 * var(--u));color:#c8f4ff;}
+.tugv.tugv-hit .tugv-frame{animation:tugvHit .5s ease-out;}
+@keyframes tugvHit{0%{transform:scale(1);}40%{transform:scale(1.12);}100%{transform:scale(1);}}
 
 /* v150: 不可観測が続いている間ずっと出しておくバッジ */
 .hide-badge{position:fixed;left:50%;top:calc(92 * var(--u));transform:translateX(-50%);z-index:120;pointer-events:none;
@@ -3090,7 +3088,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v158'; // v158(2026/09/11): 縦ゲージが下寄りに見えていたのを修正。上下の数字の高さが揃っておらず中心がずれていた
+const APP_VER='v159'; // v159(2026/09/11): 縦ゲージに画像の枠を導入。溝の位置を実測（横18.8〜80.1% / 縦11.0〜88.4%）して光をぴったり収めた
+// v158(2026/09/11): 縦ゲージが下寄りに見えていたのを修正。上下の数字の高さが揃っておらず中心がずれていた
 // v157(2026/09/11): 縦ゲージを左端から右端へ移動（カードが左から右へ流れる終着点に合わせた）。場エリアの中に入れ、相手の手札の下〜手札マットの上に自動で収まるようにした
 // v156(2026/09/11): 縦ゲージが画面を縦断して長すぎたので短縮。手札マットに掛からない長さにし、太さを少し上げた
 // v155(2026/09/11): 綱引きゲージを左端の縦に変更。上=オルビィ・下=くるみで、画面の配置とそのまま対応させた
@@ -5350,6 +5349,7 @@ function App(){
         const lead=pPt-dPt;
         const pos=Math.max(4,Math.min(96,50+(lead/Math.max(1,winPt))*50));
         return h('div',{className:'tugv'+(ptBurst?' tugv-hit':'')},
+          h('div',{className:'tugv-frame'}),
           h('div',{className:'tugv-num dealer'},dPt),
           h('div',{className:'tugv-bar'},
             h('div',{className:'tugv-fill dealer',style:{height:(100-pos)+'%'}}),
