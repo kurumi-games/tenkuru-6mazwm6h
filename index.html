@@ -1426,6 +1426,16 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7.ch9 .fly-card.face-setra{background:url('img/card-setra-ring.webp') center/100% 100% no-repeat !important;filter:none !important;color:#ffffff;text-shadow:0 0 4px rgba(120,200,255,.95),0 2px 4px rgba(0,15,40,.95);}
 .gp-screen.ch7.ch9 .card-stage.face-setra{--cardimg:url('img/card-setra-ring.webp');--nc:#ffffff;}
 
+/* v150: 不可観測が続いている間ずっと出しておくバッジ */
+.hide-badge{position:fixed;left:50%;top:calc(92 * var(--u));transform:translateX(-50%);z-index:120;pointer-events:none;
+  white-space:nowrap;padding:calc(4 * var(--u)) calc(10 * var(--u));border-radius:calc(7 * var(--u));
+  font-size:calc(9.5 * var(--u));font-weight:800;color:#ffd36e;letter-spacing:.06em;
+  background:rgba(24,16,44,.88);border:1px solid rgba(255,211,110,.7);
+  box-shadow:0 0 calc(7 * var(--u)) rgba(255,211,110,.45);}
+/* 伏せられた札が裏返る動き */
+.gp-dealer-card.hidden-card{animation:hideFlip .5s ease-out both;}
+@keyframes hideFlip{0%{transform:rotateY(0deg);}50%{transform:rotateY(90deg);}100%{transform:rotateY(0deg);}}
+
 /* v148: 技の内容を文で出す帯。何が起きているか分からない問題への対応 */
 .fx-note{position:fixed;left:50%;top:46%;transform:translateX(-50%);z-index:190;pointer-events:none;
   white-space:nowrap;padding:calc(7 * var(--u)) calc(14 * var(--u));border-radius:calc(8 * var(--u));
@@ -3044,7 +3054,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v149'; // v149(2026/09/11): オルビィが弱い真因は1枚出すのに465〜616msかかっていたこと（プレイヤーは150〜200ms）。全体を約250〜330msに短縮。denyPickが温存中の札まで当てにしていたのも修正
+const APP_VER='v150'; // v150(2026/09/11): 奪われて手札が空になると補充されないバグを修正。補充中は時間を止める。捕獲軌道は3枚に枠が付いてから一斉に引き抜く。再観測は1枚ずつゆっくり。不可観測に説明と残りラウンド表示を追加
+// v149(2026/09/11): オルビィが弱い真因は1枚出すのに465〜616msかかっていたこと（プレイヤーは150〜200ms）。全体を約250〜330msに短縮。denyPickが温存中の札まで当てにしていたのも修正
 // v148(2026/09/11): 時間停止中にAIが出そうとして弾かれる動作を停止。再観測と捕獲軌道を段階表示にして何が起きているか分かるようにした
 // v147(2026/09/11): オルビィが勝てる場面で固まるバグを修正（相手も10にできる場面を絶対拒否していた）。強い役を狙う評価を追加。星環を2ラウンドおきに。立ち絵の白い枠を除去
 // v146(2026/09/11): オルビィの顔が透けるバグを修正。白い顔が市松と誤判定されていた。市松のマス目(10px)に合わせた模様検出に変更
@@ -3849,7 +3860,7 @@ function App(){
   // v140 オルビィ: 手札が裏返っている残りラウンド数
   const[hideLeft,setHideLeft]=useState(0);const hideLeftR=useRef(0);
   const[justStolen,setJustStolen]=useState([]); // v141 奪った直後の強調
-  const[shufFx,setShufFx]=useState(false);      // v148 再観測：手札が回っている状態
+  const[shufOne,setShufOne]=useState(-1);       // v150 再観測：今 書き換え中の1枚
   const[marked,setMarked]=useState([]);         // v148 捕獲軌道：奪われる札の印
   const[fxNote,setFxNote]=useState(null);       // v148 技の内容を文で出す
   function setHideLeft2(n){hideLeftR.current=n;setHideLeft(n);}
@@ -4805,68 +4816,80 @@ function App(){
     else if(k===1)orbySteal(rn);
     else orbyHide(rn);
   }
-  // ① プレイヤーの手札を全部別の数字に入れ替える。終わるまで双方停止
-  // v148: 何が起きたか分かるよう段階を踏む
-  // ①技名 → ②自分の手札が光って回り出す → ③数字が次々に変わる → ④確定
+  // v150: 1枚ずつ順に数字が変わる。高速に全部が変わると何が起きたか読めないため
   function orbyShuffle(rn){
     showSkillCustom('再 観 測','RE-OBSERVE','#c79bff');r2Say('その手札は、こう在るべきだ',"#c79bff");
-    setFxNote({t:'あなたの手札の数字が すべて変わる',c:'#c79bff'});
-    freezeBoth(rn,2600,null);
-    setTimeout(()=>{ // 手札全体を「回転中」にする
-      setShufFx(true);
-      try{resumeAC();fxTone({f:700,f2:1500,type:'sine',v:0.05,a:0.02,d:0.5,rev:0.6});}catch(e){}
-    },500);
-    // 数字を何度も切り替えて「混ざっている」のを見せる
-    let n=0;
-    const iv=setInterval(()=>{
-      const h=pHR.current.slice();
-      for(let i=0;i<h.length;i++)if(h[i]!==null)h[i]=1+Math.floor(Math.random()*5);
-      setPH(h);pHR.current=h;
-      try{resumeAC();fxTone({f:1200+((n%4)*180),type:'sine',v:0.03,a:0.002,d:0.06,rev:0.2});}catch(e){}
-      n++;
-    },110);
-    setTimeout(()=>{ // 確定
-      clearInterval(iv);
+    const idxs=pHR.current.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);
+    const STEP=330; // 1枚あたりにかける時間
+    const total=700+idxs.length*STEP+700;
+    freezeBoth(rn,total,null);
+    setFxNote({t:'手札の数字が 1枚ずつ 書き換わる',c:'#c79bff'});
+    idxs.forEach((idx,k)=>{
+      const at=700+k*STEP;
+      // その札だけ回転させる
+      setTimeout(()=>{setShufOne(idx);},at);
+      // 回転中に数字を数回パラパラ変える
+      for(let t=0;t<4;t++){
+        setTimeout(()=>{
+          const h=pHR.current.slice();
+          if(h[idx]!==null)h[idx]=1+Math.floor(Math.random()*5);
+          setPH(h);pHR.current=h;
+        },at+40+t*60);
+      }
+      // 確定
+      setTimeout(()=>{
+        const h=pHR.current.slice();
+        if(h[idx]!==null)h[idx]=1+Math.floor(Math.random()*5);
+        setPH(h);pHR.current=h;
+        setShufOne(-1);
+        try{resumeAC();fxTone({f:1250+(k%5)*110,type:'sine',v:0.05,a:0.004,d:0.2,rev:0.35});}catch(e){}
+      },at+STEP-60);
+    });
+    setTimeout(()=>{
       const h=pHR.current.slice();
       setLocks(h.map(()=>false));setCmd(null);clearConfuse();
-      setShufFx(false);setFxNote(null);
+      setShufOne(-1);setFxNote(null);
       try{resumeAC();fxBell({f:1568,v:0.09,d:1.0,bright:1.4,rev:0.8});}catch(e){}
-    },2200);
+    },700+idxs.length*STEP+200);
   }
-  // ② プレイヤーの手札から3枚を奪ってオルビィの手札に加える。渡り終わるまで双方停止
-  // v148: ①技名 → ②奪う3枚に印が付く → ③1枚ずつ吸い上げられる → ④オルビィの手札で光る
+  // v150: ①技名 → ②3枚すべてに枠が付く → ③そろってから一斉に引き抜く
   function orbySteal(rn){
     showSkillCustom('捕 獲 軌 道','CAPTURE ORBIT','#8ad6ff');r2Say('その3枚、僕の軌道に入った',"#8ad6ff");
-    const hand0=pHR.current;
-    const cand=hand0.map((v,i)=>v!==null?i:-1).filter(i=>i>=0).sort(()=>Math.random()-0.5).slice(0,3);
+    const cand=pHR.current.map((v,i)=>v!==null?i:-1).filter(i=>i>=0).sort(()=>Math.random()-0.5).slice(0,3);
     if(!cand.length)return;
-    setFxNote({t:'印の付いた '+cand.length+'枚 が奪われる',c:'#8ad6ff'});
-    freezeBoth(rn,900+cand.length*520,null);
-    setTimeout(()=>{ // どれが奪われるか先に見せる
-      setMarked(cand.slice());
-      try{resumeAC();fxTone({f:1500,f2:1900,type:'sine',v:0.05,a:0.01,d:0.35,rev:0.5});}catch(e){}
-    },420);
-    // 1枚ずつ順番に吸い上げる
-    cand.forEach((idx,k)=>{
+    freezeBoth(rn,4300,null);
+    setFxNote({t:'枠が付いた札が奪われる',c:'#8ad6ff'});
+    cand.forEach((idx,k)=>{ // 1枚ずつ順に枠を付け、どれが対象かゆっくり見せる
       setTimeout(()=>{
-        const hand=pHR.current.slice();
-        const val=hand[idx];
-        if(val==null)return;
-        hand[idx]=null;setPH(hand);pHR.current=hand;
-        const ids=dIdsR.current;
-        setDealer([...dHR.current,val],[...dRingR.current,false],[...ids,null]);
-        setTimeout(()=>{const n=dIdsR.current.length;setJustStolen([dIdsR.current[n-1]]);
-          setTimeout(()=>setJustStolen([]),700);},30);
-        try{resumeAC();fxTone({f:1000-k*140,f2:320,type:'sine',v:0.07,a:0.008,d:0.45,rev:0.6});}catch(e){}
-      },900+k*520);
+        setMarked(m=>[...m,idx]);
+        try{resumeAC();fxTone({f:1300+k*200,type:'sine',v:0.06,a:0.005,d:0.25,rev:0.4});}catch(e){}
+      },600+k*600);
     });
-    setTimeout(()=>{setMarked([]);setFxNote(null);},900+cand.length*520);
+    setTimeout(()=>{ // 3枚そろってから、まとめて引き抜く
+      setFxNote({t:'3枚 引き抜かれる',c:'#8ad6ff'});
+      const hand=pHR.current.slice();
+      const taken=cand.map(i=>hand[i]).filter(v=>v!=null);
+      cand.forEach(i=>{hand[i]=null;});
+      setPH(hand);pHR.current=hand;
+      setDealer([...dHR.current,...taken],[...dRingR.current,...taken.map(()=>false)],[...dIdsR.current,...taken.map(()=>null)]);
+      setTimeout(()=>{const n=dIdsR.current.length;setJustStolen(dIdsR.current.slice(n-taken.length));
+        setTimeout(()=>setJustStolen([]),1000);},30);
+      setMarked([]);
+      try{resumeAC();fxTone({f:900,f2:280,type:'sine',v:0.09,a:0.01,d:0.7,rev:0.7});}catch(e){}
+    },2900);
+    setTimeout(()=>{setFxNote(null);refillPlayerIfEmpty(rn,'steal');},4100); // v150 空なら補充
   }
   // ③ オルビィの手札が5ラウンドの間 裏返る
+  // v150: 静かに変わるだけで気づけなかったので、時間を止めて札が伏せられる瞬間を見せる
   function orbyHide(rn){
     showSkillCustom('不 可 観 測','UNOBSERVABLE','#ffd36e');r2Say('僕を観測することはできない',"#ffd36e");
-    setHideLeft2(ORBY_HIDE_ROUNDS);
-    try{resumeAC();fxTone({f:500,f2:180,type:'sine',v:0.07,a:0.02,d:0.8,rev:0.7});}catch(e){}
+    freezeBoth(rn,2400,null);
+    setFxNote({t:'オルビィの手札が '+ORBY_HIDE_ROUNDS+'ラウンド 見えなくなる',c:'#ffd36e'});
+    setTimeout(()=>{
+      setHideLeft2(ORBY_HIDE_ROUNDS);
+      try{resumeAC();fxTone({f:500,f2:180,type:'sine',v:0.09,a:0.02,d:0.9,rev:0.7});fxAir({v:0.07,a:0.02,d:0.7,hp:3000,rev:0.6});}catch(e){}
+    },700);
+    setTimeout(()=>setFxNote(null),2200);
   }
   // 双方の時間を止めて処理する共通部分
   function freezeBoth(rn,ms,work){
@@ -4881,6 +4904,27 @@ function App(){
       try{resumeAC();playChronoReleaseSE();}catch(e){}
       if(phaseR.current==='playing'&&!resolvingR.current){clearTimeout(aiRef.current);scheduleAi(rn);}
     },ms);
+  }
+  // v150: 手札が空になったら補充する。自分で出し切った時だけでなく、
+  // 奪われて空になった時にも必要。補充が終わるまで時間を止めて、
+  // 「出したいのに札が無い」状態で再開しないようにする
+  function refillPlayerIfEmpty(rn,reason){
+    if(pHR.current.filter(v=>v!==null).length)return false;
+    clearTimeout(aiRef.current);cancelCursor();
+    pStopR.current=true;setPStop(true);lockR.current=true;
+    setFxNote({t:'手札を補充しています',c:'#9fe8ff'});
+    setChronoFx('in');playChronoStopSE();duckBGM(true);
+    setTimeout(()=>{
+      dealPlayer(createDeck());
+      try{resumeAC();fxBell({f:1318,v:0.07,d:0.8,bright:1.2,rev:0.7});}catch(e){}
+    },420);
+    setTimeout(()=>{
+      pStopR.current=false;setPStop(false);lockR.current=false;
+      setFxNote(null);setChronoFx('out');setTimeout(()=>setChronoFx(null),420);duckBGM(false);
+      try{resumeAC();playChronoReleaseSE();}catch(e){}
+      if(phaseR.current==='playing'&&!resolvingR.current){clearTimeout(aiRef.current);scheduleAi(rn);}
+    },1100);
+    return true;
   }
   function denyActive(){const so=stageOptsR.current;return !!(so&&so.deny);}
   function aiPlay(rn){
@@ -5287,13 +5331,14 @@ function App(){
       ),
       skillFx&&h('div',{key:skillFx.k,className:'skill-title',style:{'--sc':skillFx.color}},h('div',{className:'en'},skillFx.en),h('div',{className:'jp'},skillFx.jp)),
       fxNote&&h('div',{className:'fx-note',style:{'--nc2':fxNote.c}},fxNote.t), // v148 技の内容を文で説明
+      hideLeft>0&&h('div',{className:'hide-badge'},'不可観測  あと '+hideLeft+' ラウンド'), // v150 効果が続いている間ずっと出す
       h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
       h('div',{className:'gp-hand-rows'},
         h('div',{className:'gp-hand-row'},
-          pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const dv=confuse[i]!=null?confuse[i]:v;return h(SlideCard,{key:i+'_'+v,value:dv,onPlay:()=>playCard(i),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[i]||pFrz[i]!=null||(cmdIdx!=null&&cmdIdx!==i),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[i],justFrozen:justFrz.includes(i),pRing:pRing===i,shuffling:shufFx,marked:marked.includes(i),onLocked:()=>fxLockHint(pFrz[i]!=null?'凍結中 あと'+pFrz[i]+'秒':pLock[i]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[i],rCmd:cmdIdx===i,rWait:cmdIdx!=null&&cmdIdx!==i,confused:confuse[i]!=null});})())
+          pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const dv=confuse[i]!=null?confuse[i]:v;return h(SlideCard,{key:i+'_'+v,value:dv,onPlay:()=>playCard(i),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[i]||pFrz[i]!=null||(cmdIdx!=null&&cmdIdx!==i),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[i],justFrozen:justFrz.includes(i),pRing:pRing===i,shuffling:shufOne===i,marked:marked.includes(i),onLocked:()=>fxLockHint(pFrz[i]!=null?'凍結中 あと'+pFrz[i]+'秒':pLock[i]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[i],rCmd:cmdIdx===i,rWait:cmdIdx!=null&&cmdIdx!==i,confused:confuse[i]!=null});})())
         ),
         h('div',{className:'gp-hand-row'},
-          pH.slice(5).map((v,i)=>v===null?h('div',{key:i+5,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const j=i+5,dv=confuse[j]!=null?confuse[j]:v;return h(SlideCard,{key:j+'_'+v,value:dv,onPlay:()=>playCard(j),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[j]||pFrz[j]!=null||(cmdIdx!=null&&cmdIdx!==j),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[j],justFrozen:justFrz.includes(j),pRing:pRing===j,shuffling:shufFx,marked:marked.includes(j),onLocked:()=>fxLockHint(pFrz[j]!=null?'凍結中 あと'+pFrz[j]+'秒':pLock[j]?'星環ロック':(cmdIdx!=null&&cmdIdx!==j)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[j],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[j],rCmd:cmdIdx===j,rWait:cmdIdx!=null&&cmdIdx!==j,confused:confuse[j]!=null});})())
+          pH.slice(5).map((v,i)=>v===null?h('div',{key:i+5,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const j=i+5,dv=confuse[j]!=null?confuse[j]:v;return h(SlideCard,{key:j+'_'+v,value:dv,onPlay:()=>playCard(j),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[j]||pFrz[j]!=null||(cmdIdx!=null&&cmdIdx!==j),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[j],justFrozen:justFrz.includes(j),pRing:pRing===j,shuffling:shufOne===j,marked:marked.includes(j),onLocked:()=>fxLockHint(pFrz[j]!=null?'凍結中 あと'+pFrz[j]+'秒':pLock[j]?'星環ロック':(cmdIdx!=null&&cmdIdx!==j)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[j],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[j],rCmd:cmdIdx===j,rWait:cmdIdx!=null&&cmdIdx!==j,confused:confuse[j]!=null});})())
         )
       )
     ),
