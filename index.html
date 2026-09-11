@@ -2744,7 +2744,7 @@ function stageBrief(st){
   else gName='通常ルール';
   // 補足（速い相手・短い持ち時間）は説明の頭に足す
   const ex=[];
-  if(st.ability==='orbit')ex.push('星環を出すと3種のうち1つが起きる：手札の入れ替え／3枚を奪う／相手の手札が5ラウンド裏返る');
+  if(st.ability==='orbit')ex.push('星環を出すと3種のうち1つが起きる。再観測＝こちらの手札の数字が全て変わる／捕獲軌道＝こちらの手札3枚を奪う／不可観測＝相手の手札が5ラウンド裏返る');
   if(st.deny)ex.push('こちらに10を作らせない立ち回りをする');
   if(st.ability==='freeze')ex.push('凍った札は右下の秒数が0になるまで出せない');
   if(st.smart)ex.push('こちらの手札を読んで手を選んでくる');
@@ -3017,7 +3017,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v142'; // v142(2026/09/09): オルビィ戦の専用BGM「Clockwork Waltz」を追加（3.3MB→2.0MB、既存曲と同じ112kbps）
+const APP_VER='v143'; // v143(2026/09/11): オルビィの技名を「再観測」「捕獲軌道」「不可観測」に変更し、それぞれ専用の色と台詞を設定。技名の表示時間を1.4秒→2.0秒
+// v142(2026/09/09): オルビィ戦の専用BGM「Clockwork Waltz」を追加（3.3MB→2.0MB、既存曲と同じ112kbps）
 // v141(2026/09/09): 奪われた札がオルビィの手札に加わった瞬間を光らせる演出を追加（絵は要素側で決まるため自動でオルビィのデザインになる）
 // v140(2026/09/09): チャレンジ④「オルビィ」追加。相手に10を作らせない封殺思考＋星環3種（手札シャッフル／3枚強奪／5ラウンド裏返し）
 // v139(2026/09/09): セトラの星環カードを砂時計デザインに変更。背景が濃紺なので数字を白抜きに（手札・飛行中・場の3箇所）
@@ -4042,7 +4043,7 @@ function App(){
     showSkillCustom('鱗粉の環','SCALE RING','#8fd8ff');r2Say('星環をまとった',"#8fd8ff");
     try{resumeAC();fxTone({f:900,f2:1600,type:'sine',v:0.04,a:0.02,d:0.5,rev:0.6});}catch(e){}
   }
-  function showSkillCustom(jp,en,color){const item={k:Date.now(),jp,en,color};if(comboOnR.current||resolvingR.current){skillQ.current.push(item);return;}setSkillFx(item);setTimeout(()=>setSkillFx(s=>s&&s.k===item.k?null:s),1400);}
+  function showSkillCustom(jp,en,color){const item={k:Date.now(),jp,en,color};if(comboOnR.current||resolvingR.current){skillQ.current.push(item);return;}setSkillFx(item);setTimeout(()=>setSkillFx(s=>s&&s.k===item.k?null:s),2000);} // v143: 技名を読む時間を確保
   const flyR=useRef(null);const[flyCard,setFlyCard]=useState(null); // v107 降りてくる相手の札
   // v109 選択カーソル：常に相手の手札のどこかにいて、出す札まで1枚ずつ移動→タップ→降下
   const[dCur,setDCur]=useState({id:null,tap:false});const dCurR=useRef(null);const curBusyR=useRef(false);const curT=useRef([]);const curTokR=useRef(0);
@@ -4740,13 +4741,15 @@ function App(){
   // v140 オルビィの星環：出した瞬間に3種のうち1つがランダムで起きる
   function orbyRingFire(rn){
     const k=Math.floor(Math.random()*3);
+    // v143: 環の発動と技名が二重に出ると読めないので、技名だけを見せる
+    setSkillFx(null);
     if(k===0)orbyShuffle(rn);
     else if(k===1)orbySteal(rn);
     else orbyHide(rn);
   }
   // ① プレイヤーの手札を全部別の数字に入れ替える。終わるまで双方停止
   function orbyShuffle(rn){
-    showSkillCustom('星の攪拌','SHUFFLE','#b98cff');r2Say('手札を混ぜた',"#b98cff");
+    showSkillCustom('再 観 測','RE-OBSERVE','#c79bff');r2Say('その手札は、こう在るべきだ',"#c79bff");
     freezeBoth(rn,1400,()=>{
       const hand=pHR.current.slice();
       for(let i=0;i<hand.length;i++)if(hand[i]!==null)hand[i]=1+Math.floor(Math.random()*5);
@@ -4757,7 +4760,7 @@ function App(){
   }
   // ② プレイヤーの手札から3枚を奪ってオルビィの手札に加える。渡り終わるまで双方停止
   function orbySteal(rn){
-    showSkillCustom('星の簒奪','STEAL','#b98cff');r2Say('3枚もらう',"#b98cff");
+    showSkillCustom('捕 獲 軌 道','CAPTURE ORBIT','#8ad6ff');r2Say('その3枚、僕の軌道に入った',"#8ad6ff");
     freezeBoth(rn,1600,()=>{
       const hand=pHR.current.slice();
       const cand=hand.map((v,i)=>v!==null?i:-1).filter(i=>i>=0).sort(()=>Math.random()-0.5).slice(0,3);
@@ -4777,7 +4780,7 @@ function App(){
   }
   // ③ オルビィの手札が5ラウンドの間 裏返る
   function orbyHide(rn){
-    showSkillCustom('星の帳','VEIL','#b98cff');r2Say('手札を伏せた',"#b98cff");
+    showSkillCustom('不 可 観 測','UNOBSERVABLE','#ffd36e');r2Say('僕を観測することはできない',"#ffd36e");
     setHideLeft2(ORBY_HIDE_ROUNDS);
     try{resumeAC();fxTone({f:500,f2:180,type:'sine',v:0.07,a:0.02,d:0.8,rev:0.7});}catch(e){}
   }
