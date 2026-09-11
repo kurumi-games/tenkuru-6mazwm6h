@@ -1426,6 +1426,14 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7.ch9 .fly-card.face-setra{background:url('img/card-setra-ring.webp') center/100% 100% no-repeat !important;filter:none !important;color:#ffffff;text-shadow:0 0 4px rgba(120,200,255,.95),0 2px 4px rgba(0,15,40,.95);}
 .gp-screen.ch7.ch9 .card-stage.face-setra{--cardimg:url('img/card-setra-ring.webp');--nc:#ffffff;}
 
+/* v141: 奪われた札がオルビィの手札に加わった瞬間の強調 */
+.gp-dealer-card.just-stolen{animation:justStolen .9s ease-out both;z-index:5;}
+@keyframes justStolen{
+  0%{filter:brightness(2.6) saturate(.4);transform:scale(1.25);}
+  20%{filter:brightness(1.8);transform:scale(.94);}
+  45%{filter:brightness(1.2);transform:scale(1.04);}
+  100%{filter:none;transform:scale(1);}
+}
 /* v140 オルビィ（チャレンジ④） */
 .gp-screen.ch7.ch10{background-image:url('img/challenge10-bg.webp');background-color:#1a1040;}
 .gp-screen.ch7.ch10 .boss-img{background-image:url('img/challenge10-orby.webp');top:calc(14 * var(--u));height:calc(150 * var(--u));width:calc(178 * var(--u));margin-left:calc(-89 * var(--u));
@@ -3009,7 +3017,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v140'; // v140(2026/09/09): チャレンジ④「オルビィ」追加。相手に10を作らせない封殺思考＋星環3種（手札シャッフル／3枚強奪／5ラウンド裏返し）
+const APP_VER='v141'; // v141(2026/09/09): 奪われた札がオルビィの手札に加わった瞬間を光らせる演出を追加（絵は要素側で決まるため自動でオルビィのデザインになる）
+// v140(2026/09/09): チャレンジ④「オルビィ」追加。相手に10を作らせない封殺思考＋星環3種（手札シャッフル／3枚強奪／5ラウンド裏返し）
 // v139(2026/09/09): セトラの星環カードを砂時計デザインに変更。背景が濃紺なので数字を白抜きに（手札・飛行中・場の3箇所）
 // v138(2026/09/09): セトラのAIが弱かった原因を修正。場を低く保つ評価が逆効果で1ばかり出していた。場を高くして相手の選択肢を削る方針に変更（勝率28%→59%）
 // v137(2026/09/09): セトラが自滅バーストするバグを修正。時間停止3秒＋クロノリンク演出、飛行中の敵札を返却。凍ったカードの数字を表示
@@ -3804,6 +3813,7 @@ function App(){
   const[justFrz,setJustFrz]=useState([]); // v131 凍った直後の強調用
   // v140 オルビィ: 手札が裏返っている残りラウンド数
   const[hideLeft,setHideLeft]=useState(0);const hideLeftR=useRef(0);
+  const[justStolen,setJustStolen]=useState([]); // v141 奪った直後の強調
   function setHideLeft2(n){hideLeftR.current=n;setHideLeft(n);}
   // v136 プレイヤーの星環（時間停止）。5ラウンドに1回、手札の1枚に付く。
   // 出すと3ラウンドの間、自分が場の合計を6にするたびに敵が2秒止まる
@@ -4758,6 +4768,9 @@ function App(){
       const r2=[...dRingR.current,...taken.map(()=>false)];
       const ids2=[...dIdsR.current,...taken.map(()=>null)]; // nullを渡すとsetDealerが採番する
       setDealer(h2,r2,ids2);
+      // v141: 渡った瞬間に光らせる。絵はオルビィ側の要素で描かれるので自動的に切り替わる
+      setTimeout(()=>{const n=dHR.current.length;setJustStolen(dIdsR.current.slice(n-taken.length));
+        setTimeout(()=>setJustStolen([]),900);},30);
       try{resumeAC();fxTone({f:900,f2:300,type:'sine',v:0.07,a:0.01,d:0.6,rev:0.6});}catch(e){}
     });
   }
@@ -5146,7 +5159,7 @@ function App(){
       h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
       h('div',{className:'gp-dealer-cards'},
         dSlots.map((id,s)=>{const i=id==null?-1:dIdsR.current.indexOf(id);if(i<0||i>=dH.length)return h('div',{key:'e'+s,className:'gp-dealer-card empty'});const v=dH[i];
-          return h('div',{key:'c'+id,'data-card-id':id,className:'gp-dealer-card'+(hideLeft>0&&dRing[i]!=='orby'?' hidden-card':'')+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dRing[i]==='setra'?' sring':'')+(dRing[i]==='orby'?' oring':'')+(dCur.id===id?' dsel':'')},h('span',{className:'dv'},v),
+          return h('div',{key:'c'+id,'data-card-id':id,className:'gp-dealer-card'+(justStolen.includes(id)?' just-stolen':'')+(hideLeft>0&&dRing[i]!=='orby'?' hidden-card':'')+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dRing[i]==='setra'?' sring':'')+(dRing[i]==='orby'?' oring':'')+(dCur.id===id?' dsel':'')},h('span',{className:'dv'},v),
           dCur.id===id&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.id===id&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&dRing[i]!=='setra'&&dRing[i]!=='orby'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapCardId===id?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined}));})
       )
     ),
