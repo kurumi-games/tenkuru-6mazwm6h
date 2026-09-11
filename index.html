@@ -1432,10 +1432,11 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* v155: 縦の綱引きゲージ。左端に通す。
    画面は「上＝オルビィ / 下＝くるみ」なので、境界が上に行くほど自分が押している。
    カードを見ている間も視界の隅に入り続けるのが狙い */
-.tugv{position:fixed;left:calc(4 * var(--u));top:calc(62 * var(--u));bottom:calc(150 * var(--u));
-  width:calc(15 * var(--u));z-index:58;pointer-events:none;
+/* v156: 画面を縦断すると長すぎたので、上部の帯だけの短い長さにした */
+.tugv{position:fixed;left:calc(5 * var(--u));top:calc(66 * var(--u));
+  height:calc(96 * var(--u));width:calc(14 * var(--u));z-index:58;pointer-events:none;
   display:flex;flex-direction:column;align-items:center;}
-.tugv-bar{position:relative;flex:1;width:calc(9 * var(--u));margin:calc(4 * var(--u)) 0;
+.tugv-bar{position:relative;flex:1;width:calc(11 * var(--u));margin:calc(3 * var(--u)) 0;
   display:flex;flex-direction:column;border-radius:calc(5 * var(--u));overflow:hidden;
   background:rgba(8,10,24,.5);border:1px solid rgba(255,255,255,.22);
   box-shadow:0 calc(2 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,.55),inset 0 0 calc(6 * var(--u)) rgba(0,0,0,.6);}
@@ -3083,7 +3084,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v155'; // v155(2026/09/11): 綱引きゲージを左端の縦に変更。上=オルビィ・下=くるみで、画面の配置とそのまま対応させた
+const APP_VER='v156'; // v156(2026/09/11): 縦ゲージが画面を縦断して長すぎたので短縮。手札マットに掛からない長さにし、太さを少し上げた
+// v155(2026/09/11): 綱引きゲージを左端の縦に変更。上=オルビィ・下=くるみで、画面の配置とそのまま対応させた
 // v154(2026/09/11): 毎ラウンド中央に出るゲージを廃止（画面を塞ぐため）。常設表示のみに戻した
 // v153(2026/09/11): 常設ゲージをTIME直下に小さく配置。役が完成した時とバースト時だけ中央に大きなゲージを出し、境界が動くのを見せる
 // v152(2026/09/11): 綱引きゲージの位置を修正。TIMEやホームと重なっていたので、上部バーの真下（指定された赤線の位置）へ移動
