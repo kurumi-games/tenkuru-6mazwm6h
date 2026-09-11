@@ -1426,6 +1426,29 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7.ch9 .fly-card.face-setra{background:url('img/card-setra-ring.webp') center/100% 100% no-repeat !important;filter:none !important;color:#ffffff;text-shadow:0 0 4px rgba(120,200,255,.95),0 2px 4px rgba(0,15,40,.95);}
 .gp-screen.ch7.ch9 .card-stage.face-setra{--cardimg:url('img/card-setra-ring.webp');--nc:#ffffff;}
 
+/* v140 オルビィ（チャレンジ④） */
+.gp-screen.ch7.ch10{background-image:url('img/challenge10-bg.webp');background-color:#1a1040;}
+.gp-screen.ch7.ch10 .boss-img{background-image:url('img/challenge10-orby.webp');top:calc(14 * var(--u));height:calc(150 * var(--u));width:calc(178 * var(--u));margin-left:calc(-89 * var(--u));
+  opacity:.82;filter:drop-shadow(0 0 calc(12 * var(--u)) rgba(180,130,255,.45));
+  animation:champIn .6s cubic-bezier(.2,1,.3,1) both, orbyDrift 6.4s ease-in-out .6s infinite;}
+@keyframes orbyDrift{0%,100%{transform:translateY(0);opacity:.82;}50%{transform:translateY(calc(-6 * var(--u)));opacity:.95;}}
+.gp-screen.ch7.ch10 .gp-hand-rows::before{background-image:url('img/challenge10-hand-mat.webp');aspect-ratio:1500/1000;}
+/* オルビィの通常カード */
+.gp-screen.ch7.ch10 .gp-dealer-card{background:url('img/card-orby-normal.webp') center/contain no-repeat !important;filter:none;}
+.gp-screen.ch7.ch10 .gp-dealer-card .dv{color:#3a2a6a;text-shadow:0 0 calc(2 * var(--u)) rgba(255,255,255,.95);}
+.gp-screen.ch7.ch10 .fly-card{background:url('img/card-orby-normal.webp') center/100% 100% no-repeat;filter:none;border:none;box-shadow:none;color:#3a2a6a;text-shadow:0 0 4px rgba(255,255,255,.95);}
+.gp-screen.ch7.ch10 .card-stage.magenta{--cardimg:url('img/card-orby-normal.webp');--nc:#3a2a6a;}
+/* プレイヤーの手札カード */
+.gp-screen.ch7.ch10 .card-stage.cyan{--cardimg:url('img/card-player-orby.webp');--nc:#2a4a6a;}
+/* 観測の環 */
+.gp-screen.ch7.ch10 .gp-dealer-card.oring{background:url('img/card-orby-ring.webp') center/contain no-repeat !important;filter:none !important;}
+.gp-screen.ch7.ch10 .gp-dealer-card.oring .dv{color:#ffffff;text-shadow:0 0 calc(2 * var(--u)) rgba(180,140,255,.95),0 calc(0.6 * var(--u)) calc(1.6 * var(--u)) rgba(10,0,30,.95);}
+.gp-screen.ch7.ch10 .fly-card.face-orby{background:url('img/card-orby-ring.webp') center/100% 100% no-repeat !important;color:#ffffff;text-shadow:0 0 4px rgba(180,140,255,.95),0 2px 4px rgba(10,0,30,.95);}
+.gp-screen.ch7.ch10 .card-stage.face-orby{--cardimg:url('img/card-orby-ring.webp');--nc:#ffffff;}
+/* 星の帳：手札が裏返る。数字は隠す */
+.gp-screen.ch7.ch10 .gp-dealer-card.hidden-card{background:url('img/card-orby-back.webp') center/contain no-repeat !important;filter:none !important;}
+.gp-screen.ch7.ch10 .gp-dealer-card.hidden-card .dv{opacity:0;}
+
 /* v136: プレイヤーの星環（時の砂）。手札にいる間からこの絵で見える */
 .card-stage.p-ring .card{background-image:url('img/card-player-ring-time.webp')!important;background-size:100% 100%!important;}
 .card-stage.p-ring{filter:drop-shadow(0 0 calc(4 * var(--u)) rgba(255,220,140,.85));animation:pRingGlow 2.2s ease-in-out infinite;}
@@ -2690,6 +2713,8 @@ const PLAYER_RING_EVERY=5;   // 何ラウンドに1回 手札に付くか
 const PLAYER_RING_ROUNDS=3;  // 出したあと効果が続くラウンド数
 const PLAYER_RING_SUM=6;     // この合計を自分が作ると発動
 
+const ORBY_RING_EVERY=4;   // v140 オルビィの星環が付く間隔（ラウンド）
+const ORBY_HIDE_ROUNDS=5;  // 手札が裏返る期間
 const SETRA_FREEZE_N=1;    // 一度に凍らせる枚数（v131: 3枚は強すぎたので1枚に）
 const SETRA_FREEZE_SEC=5;  // 凍結する秒数（ラウンドタイマーが動いている間だけ減る）
 // v119: 対戦前に相手のギミックを見せる画面。初見で対策できないという声への対応
@@ -2699,7 +2724,8 @@ function stageBrief(st){
   // description の書式が変わっても壊れないようにするため（以前は「：」で分割していた）
   const d=String(st.description||'');
   let gName;
-  if(st.ability==='freeze')gName='氷結の星環';
+  if(st.ability==='orbit')gName='観測の星環';
+  else if(st.ability==='freeze')gName='氷結の星環';
   else if(st.ability==='confuse')gName='鱗粉の幻惑';
   else if(st.ability==='starRing')gName='星環';
   else if(st.ability==='coreShift')gName='コア・シフト';
@@ -2710,6 +2736,8 @@ function stageBrief(st){
   else gName='通常ルール';
   // 補足（速い相手・短い持ち時間）は説明の頭に足す
   const ex=[];
+  if(st.ability==='orbit')ex.push('星環を出すと3種のうち1つが起きる：手札の入れ替え／3枚を奪う／相手の手札が5ラウンド裏返る');
+  if(st.deny)ex.push('こちらに10を作らせない立ち回りをする');
   if(st.ability==='freeze')ex.push('凍った札は右下の秒数が0になるまで出せない');
   if(st.smart)ex.push('こちらの手札を読んで手を選んでくる');
   if(st.speed&&st.speed<1)ex.push('相手の手が速い');
@@ -2981,7 +3009,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v139'; // v139(2026/09/09): セトラの星環カードを砂時計デザインに変更。背景が濃紺なので数字を白抜きに（手札・飛行中・場の3箇所）
+const APP_VER='v140'; // v140(2026/09/09): チャレンジ④「オルビィ」追加。相手に10を作らせない封殺思考＋星環3種（手札シャッフル／3枚強奪／5ラウンド裏返し）
+// v139(2026/09/09): セトラの星環カードを砂時計デザインに変更。背景が濃紺なので数字を白抜きに（手札・飛行中・場の3箇所）
 // v138(2026/09/09): セトラのAIが弱かった原因を修正。場を低く保つ評価が逆効果で1ばかり出していた。場を高くして相手の選択肢を削る方針に変更（勝率28%→59%）
 // v137(2026/09/09): セトラが自滅バーストするバグを修正。時間停止3秒＋クロノリンク演出、飛行中の敵札を返却。凍ったカードの数字を表示
 // v136(2026/09/09): セトラ20pt勝利・星環は5ラウンドに1回。凍った札だけ残る詰みを救済。プレイヤーの星環「時間停止」を実装（合計6で相手が2秒停止、3ラウンド持続）。ホームに技のON/OFF一覧を追加
@@ -3091,12 +3120,14 @@ const AREA_01={
     {no:12,challengeNo:2,name:'モルフォ',description:'鱗粉の幻惑で手札の数字を変え続ける強敵',icon:'card',winPt:30,diff:'hard',rule:'normal',challenge:true,ch8:true,unlockAfter:11,rivalName:'モルフォ',ability:'confuse',speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,intro:'video/intro-8-morpho.mp4',bgm:'Cold Logic.mp3'},
     // v127 チャレンジ③ セトラ。モルフォ撃破で解放。氷結の環＋盤面を読む思考
     {no:13,challengeNo:3,name:'セトラ',description:'氷結の星環で手札を凍らせ、盤面を読んで退路を断つ',icon:'snow',winPt:20,diff:'master',rule:'normal',challenge:true,ch9:true,unlockAfter:12,rivalName:'セトラ',ability:'freeze',smart:true,playerRing:true,speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,firstMs:20,firstJit:40,curStepFirst:10,curArrFirst:20,curHoldFirst:25,flyMsFirst:120,winMs:520,winJit:220,bgm:'Frozen%20Judgment.mp3'},
+    // v140 チャレンジ4 オルビィ。セトラ撃破で解放。相手に10を作らせない「封殺」思考＋星環3種
+    {no:14,challengeNo:4,name:'オルビィ',description:'星の観測者。10を作らせない立ち回りと三種の星環',icon:'card',winPt:20,diff:'master',rule:'normal',challenge:true,ch10:true,unlockAfter:13,rivalName:'オルビィ',ability:'orbit',smart:true,deny:true,playerRing:true,speed:0.36,curStep:24,curArr:48,curHold:56,flyMs:200,firstMs:15,firstJit:30,curStepFirst:8,curArrFirst:16,curHoldFirst:20,flyMsFirst:100,winMs:480,winJit:200,bgm:'Iridescent_Trap.mp3'},
   ]
 };
 const STAGES={
   areas:[AREA_01],
   // マップ上の座標（viewBox 360×360、下から上へ。AREA_01.stages と同じ順）
-  pos:[[56,322],[132,294],[224,318],[298,270],[246,218],[148,240],[66,188],[126,132],[230,154],[190,58],[300,112],[318,38],[248,-18]],
+  pos:[[56,322],[132,294],[224,318],[298,270],[246,218],[148,240],[66,188],[126,132],[230,154],[190,58],[300,112],[318,38],[248,-18],[170,-70]],
   // v127: [12]=チャレンジ③セトラ。ステージを増やす時はここに座標を足さないと pos[i] が undefined になり画面が真っ白になる
 };
 const RULE_LABEL={normal:'ノーマル',shuffle:'シャッフル',frost:'フロスト'};
@@ -3771,6 +3802,9 @@ function App(){
   // カウントはラウンドタイマーが動いている間だけ進む（出せない時間は止まる）
   const[pFrz,setPFrz]=useState({});const pFrzR=useRef({});
   const[justFrz,setJustFrz]=useState([]); // v131 凍った直後の強調用
+  // v140 オルビィ: 手札が裏返っている残りラウンド数
+  const[hideLeft,setHideLeft]=useState(0);const hideLeftR=useRef(0);
+  function setHideLeft2(n){hideLeftR.current=n;setHideLeft(n);}
   // v136 プレイヤーの星環（時間停止）。5ラウンドに1回、手札の1枚に付く。
   // 出すと3ラウンドの間、自分が場の合計を6にするたびに敵が2秒止まる
   const[pRing,setPRing]=useState(-1);const pRingR=useRef(-1);           // 環が付いている手札の位置
@@ -3966,6 +4000,17 @@ function App(){
     showSkillCustom('時の砂 発動','TIME SAND','#ffd98a');
     try{resumeAC();fxBell({f:2093,v:0.08,d:1.2,bright:1.4,rev:0.85});fxTone({f:600,f2:1800,type:'sine',v:0.05,a:0.02,d:0.6,rev:0.7});}catch(e){}
   }
+  function orbyRingOn(){const so=stageOptsR.current;return !!(so&&so.ability==='orbit');}
+  function attachOrbyRing(rn){
+    const hand=dHR.current,flags=dRingR.current.slice();
+    if(flags.some(f=>f==='orby'))return;
+    const cand=hand.map((v,i)=>(v!=null&&!flags[i])?i:-1).filter(i=>i>=0);
+    if(!cand.length)return;
+    const k=cand[Math.floor(Math.random()*cand.length)];
+    flags[k]='orby';setDRing(flags);dRingR.current=flags;
+    showSkillCustom('観測の環','ORBIT RING','#b98cff');r2Say('星環を構えた',"#b98cff");
+    try{resumeAC();fxBell({f:1397,v:0.06,d:1.0,bright:1.3,rev:0.8});}catch(e){}
+  }
   function attachSetraRing(rn){
     const hand=dHR.current,flags=dRingR.current.slice();
     if(flags.some(f=>f==='setra'))return; // 既に構えているなら重ねない
@@ -4117,7 +4162,7 @@ function App(){
   function isTapped(f){return typeof f==='string'&&f.indexOf('tapped-')===0;}
   function isRing(f){return !!f&&!isTapped(f);}
   // v117: ルナ/レイピアの環は「付いた札は温存」だが、モルフォの環は出すために付く
-  function isHoldRing(f){return isRing(f)&&f!=='morpho'&&f!=='setra';} // v127: セトラの環も出せる環
+  function isHoldRing(f){return isRing(f)&&f!=='morpho'&&f!=='setra'&&f!=='orby';} // v127/v140: モルフォ・セトラ・オルビィの環は出せる
   function ensureDealerRefill(){
     let hand=dHR.current,rf=dRingR.current;
     if(rf.length!==hand.length){rf=hand.map((v,i)=>rf[i]||false);setDRing(rf);dRingR.current=rf;} // 環の配列がズレてたら揃える
@@ -4390,7 +4435,7 @@ function App(){
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
   // ── ストーリー進行 ──
-  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
+  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
   function openFlowSample(kind){
     const ar=STAGES.areas[0];
     const stIdx=(kind==='normal'||kind==='intro')?0:ar.stages.findIndex(st=>st.boss);
@@ -4415,7 +4460,7 @@ function App(){
       if(CHRONO_CONFIG.guaranteeFirstUnlock&&firstChrono&&st.no===firstChrono.no&&!saveR.current.chronoIntro){chrono=true;updSave(s=>{s.chronoIntro=true;return s;});}
       else chrono=Math.random()<CHRONO_CONFIG.appearRate;
     }
-    stageOptsR.current={chrono,firstMs:st.firstMs||null,firstJit:st.firstJit||0,curStepFirst:st.curStepFirst||null,curArrFirst:st.curArrFirst||null,curHoldFirst:st.curHoldFirst||null,flyMsFirst:st.flyMsFirst||null,winMs:st.winMs||null,winJit:st.winJit||0,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,ch9:!!st.ch9,smart:!!st.smart,playerRing:!!st.playerRing,speed:st.speed||1,curStep:st.curStep||null,curArr:st.curArr||null,curHold:st.curHold||null,flyMs:st.flyMs||null,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
+    stageOptsR.current={chrono,firstMs:st.firstMs||null,firstJit:st.firstJit||0,curStepFirst:st.curStepFirst||null,curArrFirst:st.curArrFirst||null,curHoldFirst:st.curHoldFirst||null,flyMsFirst:st.flyMsFirst||null,winMs:st.winMs||null,winJit:st.winJit||0,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,ch9:!!st.ch9,ch10:!!st.ch10,smart:!!st.smart,deny:!!st.deny,playerRing:!!st.playerRing,speed:st.speed||1,curStep:st.curStep||null,curArr:st.curArr||null,curHold:st.curHold||null,flyMs:st.flyMs||null,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
     if(st.challenge&&typeof SHIFT_VIDEO!=='undefined'){try{[SHIFT_VIDEO.v1,SHIFT_VIDEO.v2].forEach(u=>fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(()=>{}));}catch(e){}} // v78: 変身動画を先読み
     if(st.no===1&&!st.challenge&&!saveR.current.storyIntroSeen){setPhase('storyIntro');phaseR.current='storyIntro';return;}
     if(st.champion&&CHAMPIONS[st.champion]){setPendingDiff(st.diff);setPhase('champIntro');phaseR.current='champIntro';return;} // v61 登場画面を挟む
@@ -4511,6 +4556,8 @@ function App(){
           if(confuseActive()&&rn%2===1)setTimeout(()=>attachMorphoRing(rn),500); // v117 モルフォ：2ラウンドに1回、環を1枚に付与（発動はその札を出した時）
           if(freezeActive()&&rn%5===1)setTimeout(()=>attachSetraRing(rn),500); // v136 セトラ：第1ラウンドから1枚、以降5ラウンドおき
           if(playerRingOn()&&rn%PLAYER_RING_EVERY===1)setTimeout(()=>attachPlayerRing(rn),700); // v136 プレイヤーの星環
+          if(orbyRingOn()&&rn%ORBY_RING_EVERY===1)setTimeout(()=>attachOrbyRing(rn),500); // v140 オルビィの星環
+          if(hideLeftR.current>0&&rn>1)setHideLeft2(hideLeftR.current-1); // v140 裏返しの消化
           if(tsLeftR.current>0&&rn>1)setTsLeft2(tsLeftR.current-1); // v136 効果ラウンドを消化
           ensureDealerRefill(); // v89 保険：環付きしか残ってなければ10枚まで補充
         },650);
@@ -4640,6 +4687,101 @@ function App(){
     return best;
   }
   function smartActive(){const so=stageOptsR.current;return !!(so&&so.smart);}
+  // v140 オルビィ: 「相手に10を作らせない」封殺の思考。
+  // 自分で閉じられない列は最初から作らない。作れないなら出さずに待ち、
+  // 時間切れリセットか、相手が動いた後のカウンターを狙う
+  function denyPick(playable,cs,cf){
+    const pHand=pHR.current||[],frz=pFrzR.current||{};
+    const pUsable=pHand.map((v,i)=>(v!==null&&frz[i]==null)?v:null).filter(v=>v!==null);
+    const dHand=dHR.current||[];
+    const slots=4-cf.filter(x=>x!==null).length; // この列にあと何枚置けるか
+    const sc=v=>{
+      const ns=cs+v,nf=[...cf,v];
+      if(ns===10)return 100000+calcPts(nf).total*10; // 取れるなら取る
+      if(ns>10)return -1e6;
+      // この手のあと相手が即10にできるなら論外
+      if(pUsable.some(w=>canPlay(w,ns,nf)&&ns+w===10))return -1e5;
+      const rest=dHand.slice();rest.splice(rest.indexOf(v),1);
+      // 自分の手札だけで、残り枠内に合計10へ到達できるか（枚数制限つきの部分和）
+      const reach=(sum,depth,pool)=>{
+        if(sum===10)return true;
+        if(sum>10||depth<=0)return false;
+        for(let k=0;k<pool.length;k++){
+          const p2=pool.slice();const w=p2.splice(k,1)[0];
+          if(reach(sum+w,depth-1,p2))return true;
+        }
+        return false;
+      };
+      const iCanFinish=reach(ns,slots-1,rest);
+      const stuck=!pUsable.some(w=>canPlay(w,ns,nf));
+      let s=0;
+      if(iCanFinish)s+=3000;  // 自分で閉じられる列だけ作る
+      if(stuck)s+=800;        // 相手を動けなくする
+      s+=8*ns;
+      return s;
+    };
+    let best=null,bs=-1e9;
+    playable.forEach(v=>{const x=sc(v);if(x>bs){bs=x;best=v;}});
+    if(bs<=-1e5)return null;            // 相手に渡すだけ／バースト → 出さない
+    if(bs<3000&&cs===0)return null;     // 自分で閉じられない列を新しく始めない
+    return best;
+  }
+  // v140 オルビィの星環：出した瞬間に3種のうち1つがランダムで起きる
+  function orbyRingFire(rn){
+    const k=Math.floor(Math.random()*3);
+    if(k===0)orbyShuffle(rn);
+    else if(k===1)orbySteal(rn);
+    else orbyHide(rn);
+  }
+  // ① プレイヤーの手札を全部別の数字に入れ替える。終わるまで双方停止
+  function orbyShuffle(rn){
+    showSkillCustom('星の攪拌','SHUFFLE','#b98cff');r2Say('手札を混ぜた',"#b98cff");
+    freezeBoth(rn,1400,()=>{
+      const hand=pHR.current.slice();
+      for(let i=0;i<hand.length;i++)if(hand[i]!==null)hand[i]=1+Math.floor(Math.random()*5);
+      setPH(hand);pHR.current=hand;
+      setLocks(hand.map(()=>false));setCmd(null);clearConfuse();
+      try{resumeAC();fxBell({f:1568,v:0.07,d:0.9,bright:1.3,rev:0.8});}catch(e){}
+    });
+  }
+  // ② プレイヤーの手札から3枚を奪ってオルビィの手札に加える。渡り終わるまで双方停止
+  function orbySteal(rn){
+    showSkillCustom('星の簒奪','STEAL','#b98cff');r2Say('3枚もらう',"#b98cff");
+    freezeBoth(rn,1600,()=>{
+      const hand=pHR.current.slice();
+      const cand=hand.map((v,i)=>v!==null?i:-1).filter(i=>i>=0).sort(()=>Math.random()-0.5).slice(0,3);
+      if(!cand.length)return;
+      const taken=cand.map(i=>hand[i]);
+      cand.forEach(i=>{hand[i]=null;});
+      setPH(hand);pHR.current=hand;
+      const h2=[...dHR.current,...taken];
+      const r2=[...dRingR.current,...taken.map(()=>false)];
+      const ids2=[...dIdsR.current,...taken.map(()=>null)]; // nullを渡すとsetDealerが採番する
+      setDealer(h2,r2,ids2);
+      try{resumeAC();fxTone({f:900,f2:300,type:'sine',v:0.07,a:0.01,d:0.6,rev:0.6});}catch(e){}
+    });
+  }
+  // ③ オルビィの手札が5ラウンドの間 裏返る
+  function orbyHide(rn){
+    showSkillCustom('星の帳','VEIL','#b98cff');r2Say('手札を伏せた',"#b98cff");
+    setHideLeft2(ORBY_HIDE_ROUNDS);
+    try{resumeAC();fxTone({f:500,f2:180,type:'sine',v:0.07,a:0.02,d:0.8,rev:0.7});}catch(e){}
+  }
+  // 双方の時間を止めて処理する共通部分
+  function freezeBoth(rn,ms,work){
+    clearTimeout(aiRef.current);cancelCursor();
+    pStopR.current=true;setPStop(true);
+    lockR.current=true; // プレイヤーも出せない
+    setChronoFx('in');playChronoStopSE();duckBGM(true);
+    setTimeout(()=>{try{work();}catch(e){}},Math.round(ms*0.45));
+    setTimeout(()=>{
+      pStopR.current=false;setPStop(false);lockR.current=false;
+      setChronoFx('out');setTimeout(()=>setChronoFx(null),420);duckBGM(false);
+      try{resumeAC();playChronoReleaseSE();}catch(e){}
+      if(phaseR.current==='playing'&&!resolvingR.current){clearTimeout(aiRef.current);scheduleAi(rn);}
+    },ms);
+  }
+  function denyActive(){const so=stageOptsR.current;return !!(so&&so.deny);}
   function aiPlay(rn){
     // 場が完成した直後にAIの出す動作が間に合ってしまった場合 → カード返却（出さない）
     // ※lockRは見ない：あれはラウンド開始時のプレイヤー用ハンデロックと共用のため
@@ -4661,7 +4803,11 @@ function App(){
     const safeCap  =diff==='easy'?0.50:diff==='hard'?0.90:diff==='master'?0.95:0.65;
     const firstRate=diff==='easy'?0.45:diff==='hard'?0.80:diff==='master'?0.90:0.55;
     let chosen=null;
-    if(smartActive()){ // v127 セトラ：確率任せではなく盤面を読んで選ぶ
+    if(denyActive()){ // v140 オルビィ：相手に10を作らせない封殺の思考
+      chosen=denyPick(playable,cs,cf);
+      if(chosen==null){scheduleAi(rn);return;} // 出さずに待つ（時間切れリセットかカウンター狙い）
+    }
+    else if(smartActive()){ // v127 セトラ：確率任せではなく盤面を読んで選ぶ
       chosen=smartPick(playable,cs,cf);
       if(chosen==null){scheduleAi(rn);return;} // 出さずに待つ
     }
@@ -4676,7 +4822,7 @@ function App(){
     else{if(Math.random()<firstRate&&safe.length)chosen=safe.sort((a,b)=>a-b)[0];}
     if(!chosen){scheduleAi(rn);return;}
     let idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&isTapped(rf[i]));
-    if(idx<0)idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&(rf[i]==='morpho'||rf[i]==='setra')); // v117/v127: 同じ数字なら環付きを優先して出す
+    if(idx<0)idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&(rf[i]==='morpho'||rf[i]==='setra'||rf[i]==='orby')); // v117/v127: 同じ数字なら環付きを優先して出す
     if(idx<0)idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&!rf[i]);
     if(idx<0){scheduleAi(rn);return;}
     const cardId=dIdsR.current[idx];if(cardId==null){scheduleAi(rn);return;}
@@ -4694,7 +4840,7 @@ function App(){
     const dHand=dHR.current,rf=dRingR.current,cf=fieldR.current,cs=fieldSumR.current;
     if(idx<0||dHand[idx]!==pick.value||isHoldRing(rf[idx])||pick.id===r2PendingCardR.current||!canPlay(dHand[idx],cs,cf)||countNumR.current>=0){scheduleAi(rn);return;}
     const chosen=dHand[idx],pickedRf=rf[idx];
-    const face=isTapped(pickedRf)?pickedRf.slice(7):((pickedRf==='morpho'||pickedRf==='setra')?pickedRf:null);
+    const face=isTapped(pickedRf)?pickedRf.slice(7):((pickedRf==='morpho'||pickedRf==='setra'||pickedRf==='orby')?pickedRf:null);
     resumeAC();setTimeout(()=>playPlaceSE(false),100);
     // v107: すぐ置かず、相手の手札から場へスーッと降りてくる。着地時にまだ出せる札なら置く（プレイヤーが先に動いて出せなくなったら戻す）
     const u=window.innerHeight/640;
@@ -4724,6 +4870,7 @@ function App(){
       if(f.face)tapFaceR.current=f.face;
       if(f.rf==='morpho')startConfuse(rn); // v117: 環の札が場に出た瞬間に鱗粉の幻惑が発動
       if(f.rf==='setra'){const n=freezeHand(SETRA_FREEZE_N,SETRA_FREEZE_SEC);if(n)r2Say('氷結 '+n+'枚',"#8fe0ff");} // v127
+      if(f.rf==='orby')orbyRingFire(rn); // v140
       if(!dHR.current.filter((v,i)=>!isHoldRing(dRingR.current[i])).length){ // 環付きだけ残った → 補充
         const keep=dHR.current,keepRf=dRingR.current;const nd=createDeck().slice(0,10-keep.length);
         setDealer([...keep,...nd],[...keepRf,...nd.map(()=>false)],[...dIdsR.current,...nd.map(()=>null)]);
@@ -4891,7 +5038,7 @@ function App(){
   const so=stageOptsR.current||{};
   const rival=(form2&&so.form2Name)||so.rivalName||'DEALER';
   // v62: 第7は「ルナ」／v70: 第2形態は「レイピア」
-  return h('div',{className:'gp-screen'+(so.challenge?' ch7':'')+(so.ch8?' ch8':'')+(so.ch9?' ch9':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
+  return h('div',{className:'gp-screen'+(so.challenge?' ch7':'')+(so.ch8?' ch8':'')+(so.ch9?' ch9':'')+(so.ch10?' ch10':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
     h(ChampionLayer,{champ:stageOptsR.current&&stageOptsR.current.champion?CHAMPIONS[stageOptsR.current.champion]:null}), // v61 チャンピオン戦は立ち絵
     so.challenge&&h('div',{className:'champ-layer'},
       form2
@@ -4999,8 +5146,8 @@ function App(){
       h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
       h('div',{className:'gp-dealer-cards'},
         dSlots.map((id,s)=>{const i=id==null?-1:dIdsR.current.indexOf(id);if(i<0||i>=dH.length)return h('div',{key:'e'+s,className:'gp-dealer-card empty'});const v=dH[i];
-          return h('div',{key:'c'+id,'data-card-id':id,className:'gp-dealer-card'+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dRing[i]==='setra'?' sring':'')+(dCur.id===id?' dsel':'')},h('span',{className:'dv'},v),
-          dCur.id===id&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.id===id&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&dRing[i]!=='setra'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapCardId===id?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined}));})
+          return h('div',{key:'c'+id,'data-card-id':id,className:'gp-dealer-card'+(hideLeft>0&&dRing[i]!=='orby'?' hidden-card':'')+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dRing[i]==='setra'?' sring':'')+(dRing[i]==='orby'?' oring':'')+(dCur.id===id?' dsel':'')},h('span',{className:'dv'},v),
+          dCur.id===id&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.id===id&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&dRing[i]!=='setra'&&dRing[i]!=='orby'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapCardId===id?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined}));})
       )
     ),
     srBanner&&h('div',{className:'sr-banner'},h('b',null,'STAR RING'),'星環 ── 完成'),
