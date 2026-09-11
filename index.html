@@ -1437,7 +1437,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .tugv{position:absolute;right:calc(4 * var(--u));top:calc(10 * var(--u));bottom:calc(10 * var(--u));
   width:calc(14 * var(--u));z-index:58;pointer-events:none;
   display:flex;flex-direction:column;align-items:center;}
-.tugv-bar{position:relative;flex:1;width:calc(11 * var(--u));margin:calc(3 * var(--u)) 0;
+.tugv-bar{position:relative;flex:1;width:calc(11 * var(--u));margin:calc(3 * var(--u)) 0;min-height:0;
   display:flex;flex-direction:column;border-radius:calc(5 * var(--u));overflow:hidden;
   background:rgba(8,10,24,.5);border:1px solid rgba(255,255,255,.22);
   box-shadow:0 calc(2 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,.55),inset 0 0 calc(6 * var(--u)) rgba(0,0,0,.6);}
@@ -1450,7 +1450,11 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
   margin-bottom:calc(-1 * var(--u));border-radius:calc(2 * var(--u));background:#fff;
   box-shadow:0 0 calc(7 * var(--u)) rgba(255,255,255,.95),0 0 calc(14 * var(--u)) rgba(190,225,255,.7);
   transition:bottom .6s cubic-bezier(.3,1.15,.4,1);}
-.tugv-num{font-family:'Inter',sans-serif;font-weight:800;font-size:calc(10 * var(--u));line-height:1;
+/* v158: 上下の数字の占める高さを固定して、バーが上下の中央に来るようにする
+   （高さが揃っていないと、わずかに下へ寄って見える） */
+.tugv-num{font-family:'Inter',sans-serif;font-weight:800;font-size:calc(10 * var(--u));
+  height:calc(12 * var(--u));line-height:calc(12 * var(--u));flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
   text-shadow:0 calc(1 * var(--u)) calc(3 * var(--u)) rgba(0,0,0,.95);}
 .tugv-num.you{color:#2ccadf;}
 .tugv-num.dealer{color:#f06ba8;}
@@ -3086,7 +3090,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v157'; // v157(2026/09/11): 縦ゲージを左端から右端へ移動（カードが左から右へ流れる終着点に合わせた）。場エリアの中に入れ、相手の手札の下〜手札マットの上に自動で収まるようにした
+const APP_VER='v158'; // v158(2026/09/11): 縦ゲージが下寄りに見えていたのを修正。上下の数字の高さが揃っておらず中心がずれていた
+// v157(2026/09/11): 縦ゲージを左端から右端へ移動（カードが左から右へ流れる終着点に合わせた）。場エリアの中に入れ、相手の手札の下〜手札マットの上に自動で収まるようにした
 // v156(2026/09/11): 縦ゲージが画面を縦断して長すぎたので短縮。手札マットに掛からない長さにし、太さを少し上げた
 // v155(2026/09/11): 綱引きゲージを左端の縦に変更。上=オルビィ・下=くるみで、画面の配置とそのまま対応させた
 // v154(2026/09/11): 毎ラウンド中央に出るゲージを廃止（画面を塞ぐため）。常設表示のみに戻した
