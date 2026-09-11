@@ -1447,7 +1447,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.ch7.ch10 .fly-card{background:url('img/card-orby-normal.webp') center/100% 100% no-repeat;filter:none;border:none;box-shadow:none;color:#3a2a6a;text-shadow:0 0 4px rgba(255,255,255,.95);}
 .gp-screen.ch7.ch10 .card-stage.magenta{--cardimg:url('img/card-orby-normal.webp');--nc:#3a2a6a;}
 /* プレイヤーの手札カード */
-.gp-screen.ch7.ch10 .card-stage.cyan{--cardimg:url('img/card-player-orby.webp');--nc:#2a4a6a;}
+.gp-screen.ch7.ch10 .card-stage.cyan{--cardimg:url('img/card-player-orby-v2.webp');--nc:#2a4a6a;}
 /* 観測の環 */
 .gp-screen.ch7.ch10 .gp-dealer-card.oring{background:url('img/card-orby-ring.webp') center/contain no-repeat !important;filter:none !important;}
 .gp-screen.ch7.ch10 .gp-dealer-card.oring .dv{color:#ffffff;text-shadow:0 0 calc(2 * var(--u)) rgba(180,140,255,.95),0 calc(0.6 * var(--u)) calc(1.6 * var(--u)) rgba(10,0,30,.95);}
@@ -3017,7 +3017,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v144'; // v144(2026/09/11): プレイヤーの手札カードが透けて背景と重なって見えるバグを修正。市松除去がカード内部の明るい部分まで抜いていた
+const APP_VER='v145'; // v145(2026/09/11): v144で画像を直したのにファイル名が同じため端末のキャッシュが古い画像を使い続けていた。ファイル名をv2に変更して確実に読み直させる
+// v144(2026/09/11): プレイヤーの手札カードが透けて背景と重なって見えるバグを修正。市松除去がカード内部の明るい部分まで抜いていた
 // v143(2026/09/11): オルビィの技名を「再観測」「捕獲軌道」「不可観測」に変更し、それぞれ専用の色と台詞を設定。技名の表示時間を1.4秒→2.0秒
 // v142(2026/09/09): オルビィ戦の専用BGM「Clockwork Waltz」を追加（3.3MB→2.0MB、既存曲と同じ112kbps）
 // v141(2026/09/09): 奪われた札がオルビィの手札に加わった瞬間を光らせる演出を追加（絵は要素側で決まるため自動でオルビィのデザインになる）
