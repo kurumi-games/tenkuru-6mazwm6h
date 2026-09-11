@@ -1452,29 +1452,6 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .tug-wrap.tug-hit .tug-bar{animation:tugHit .5s ease-out;}
 @keyframes tugHit{0%{transform:scaleY(1);}40%{transform:scaleY(1.35);}100%{transform:scaleY(1);}}
 
-/* v153: 得点した時だけ中央に大きく出るゲージ */
-.bigtug{position:fixed;left:calc(14 * var(--u));right:calc(14 * var(--u));top:50%;transform:translateY(-50%);
-  z-index:175;pointer-events:none;animation:bigTugIn .3s cubic-bezier(.2,1.2,.4,1) both;}
-@keyframes bigTugIn{from{opacity:0;transform:translateY(-50%) scale(.86);}to{opacity:1;transform:translateY(-50%) scale(1);}}
-.bigtug-head{text-align:center;font-size:calc(14 * var(--u));font-weight:900;letter-spacing:.06em;
-  margin-bottom:calc(8 * var(--u));text-shadow:0 calc(2 * var(--u)) calc(6 * var(--u)) rgba(0,0,0,.95);}
-.bigtug-bar{position:relative;height:calc(26 * var(--u));display:flex;border-radius:calc(13 * var(--u));overflow:hidden;
-  background:rgba(8,10,24,.75);border:calc(1.4 * var(--u)) solid rgba(255,255,255,.42);
-  box-shadow:0 calc(6 * var(--u)) calc(20 * var(--u)) rgba(0,0,0,.75),inset 0 0 calc(10 * var(--u)) rgba(0,0,0,.6);}
-.bigtug-fill{height:100%;transition:width .85s cubic-bezier(.25,1.15,.35,1);}
-.bigtug-fill.you{background:linear-gradient(90deg,rgba(44,202,223,1),rgba(44,202,223,.6));}
-.bigtug-fill.dealer{background:linear-gradient(90deg,rgba(240,107,168,.6),rgba(240,107,168,1));}
-.bigtug-edge{position:absolute;top:calc(-4 * var(--u));bottom:calc(-4 * var(--u));width:calc(4 * var(--u));
-  margin-left:calc(-2 * var(--u));border-radius:calc(3 * var(--u));background:#fff;
-  box-shadow:0 0 calc(12 * var(--u)) rgba(255,255,255,1),0 0 calc(24 * var(--u)) rgba(190,225,255,.85);
-  transition:left .85s cubic-bezier(.25,1.15,.35,1);}
-.bigtug-nums{display:flex;justify-content:space-between;align-items:baseline;margin-top:calc(7 * var(--u));
-  font-family:'Inter',sans-serif;font-weight:900;font-size:calc(17 * var(--u));
-  text-shadow:0 calc(2 * var(--u)) calc(5 * var(--u)) rgba(0,0,0,.95);}
-.bigtug-nums .you{color:#2ccadf;}
-.bigtug-nums .dealer{color:#f06ba8;}
-.bigtug-nums .goal{font-size:calc(9.5 * var(--u));font-weight:700;color:rgba(235,240,255,.85);letter-spacing:.06em;}
-
 /* v150: 不可観測が続いている間ずっと出しておくバッジ */
 .hide-badge{position:fixed;left:50%;top:calc(92 * var(--u));transform:translateX(-50%);z-index:120;pointer-events:none;
   white-space:nowrap;padding:calc(4 * var(--u)) calc(10 * var(--u));border-radius:calc(7 * var(--u));
@@ -3103,7 +3080,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v153'; // v153(2026/09/11): 常設ゲージをTIME直下に小さく配置。役が完成した時とバースト時だけ中央に大きなゲージを出し、境界が動くのを見せる
+const APP_VER='v154'; // v154(2026/09/11): 毎ラウンド中央に出るゲージを廃止（画面を塞ぐため）。常設表示のみに戻した
+// v153(2026/09/11): 常設ゲージをTIME直下に小さく配置。役が完成した時とバースト時だけ中央に大きなゲージを出し、境界が動くのを見せる
 // v152(2026/09/11): 綱引きゲージの位置を修正。TIMEやホームと重なっていたので、上部バーの真下（指定された赤線の位置）へ移動
 // v151(2026/09/11): スコア箱2つを廃止し、中央から押し合う綱引きゲージに変更（全ステージ共通）
 // v150(2026/09/11): 奪われて手札が空になると補充されないバグを修正。補充中は時間を止める。捕獲軌道は3枚に枠が付いてから一斉に引き抜く。再観測は1枚ずつゆっくり。不可観測に説明と残りラウンド表示を追加
@@ -3889,7 +3867,6 @@ function App(){
   const[form2,setForm2]=useState(false);const form2R=useRef(false);   // v70 第2形態になったか
   const shiftPendingR=useRef(false);const[shiftScene,setShiftScene]=useState(null);const sceneOnR=useRef(false); // 次のカウントダウン前に演出を挟む
   const[ptBurst,setPtBurst]=useState(false);const[screenPop,setScreenPop]=useState(false);
-  const[bigTug,setBigTug]=useState(null); // v153 得点時に中央へ大きく出すゲージ
   function sayChamp(key,ms){ // v61 チャンピオンのセリフ（吹き出し）
     const opts=stageOptsR.current;const champ=opts&&opts.champion&&CHAMPIONS[opts.champion];
     const text=champ&&champ.lines[key];if(!text)return;
@@ -5161,10 +5138,6 @@ function App(){
       clearTimers();lockR.current=true;resolvingR.current=true;playBurstSE();setBurstAnim(true);
       const newPP=who==='player'?Math.max(0,pPtR.current-2):pPtR.current;
       const newDP=who==='dealer'?Math.max(0,dPtR.current-2):dPtR.current;
-      // v153: バーストで減点された時もゲージを見せる
-      setBigTug({from:{p:pPtR.current,d:dPtR.current},to:{p:newPP,d:newDP},who,pts:-2,label:'BURST'});
-      setTimeout(()=>setBigTug(b2=>b2?{...b2,moved:true}:b2),450);
-      setTimeout(()=>setBigTug(null),2400);
       setPPt(newPP);setDPt(newDP);pPtR.current=newPP;dPtR.current=newDP;
       setComboShow({id:Date.now()+Math.random(),text:'BURST',pts:-2,color:'#ff3b3b',who,burst:true,opp:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||undefined});sayChamp(who==='player'?'burstYou':'burstSelf');
       setTimeout(()=>setComboShow(null),4000);
@@ -5191,10 +5164,6 @@ function App(){
       const prevPPv=pPtR.current;
       const newPP=who==='player'?pPtR.current+pts.total:pPtR.current;
       const newDP=who==='dealer'?dPtR.current+pts.total:dPtR.current;
-      // v153: 役が決まった時に中央へ大きくゲージを出し、境界が動くのを見せる
-      setBigTug({from:{p:pPtR.current,d:dPtR.current},to:{p:newPP,d:newDP},who,pts:pts.total,label:(pts.label||'').replace(/\s*\+?\d+pt\s*$/,'')});
-      setTimeout(()=>setBigTug(b2=>b2?{...b2,moved:true}:b2),450);
-      setTimeout(()=>setBigTug(null),2400);
       setPPt(newPP);setDPt(newDP);pPtR.current=newPP;dPtR.current=newDP;
       // v75: 変身トリガー = 直前<shiftPt かつ 今回>=shiftPt（15→17でも発動）。1試合1回。勝利点に達した時は変身より決着を優先
       let shiftNow=false;
@@ -5305,27 +5274,6 @@ function App(){
         h('span',{className:'num'},trackNum===0?'OFF':String(trackNum).padStart(2,'0'))
       )
     ),
-
-    // v153: 得点時だけ中央に大きく出るゲージ
-    bigTug&&(()=>{
-      const f=bigTug.moved?bigTug.to:bigTug.from;
-      const pos=Math.max(3,Math.min(97,50+((f.p-f.d)/Math.max(1,winPt))*50));
-      const mine=bigTug.who==='player';
-      return h('div',{className:'bigtug'},
-        h('div',{className:'bigtug-head',style:{color:mine?'#2ccadf':'#f06ba8'}},
-          (mine?'YOU':rival)+'  '+(bigTug.pts>=0?'+':'')+bigTug.pts+'pt'+(bigTug.label?'　'+bigTug.label:'')),
-        h('div',{className:'bigtug-bar'},
-          h('div',{className:'bigtug-fill you',style:{width:pos+'%'}}),
-          h('div',{className:'bigtug-fill dealer',style:{width:(100-pos)+'%'}}),
-          h('div',{className:'bigtug-edge',style:{left:pos+'%'}})
-        ),
-        h('div',{className:'bigtug-nums'},
-          h('span',{className:'you'},f.p),
-          h('span',{className:'goal'},'先取 '+winPt+'pt'),
-          h('span',{className:'dealer'},f.d)
-        )
-      );
-    })(),
 
     // v151: 綱引きゲージ。中央から始まり、点を取った側が相手陣を押し込む
     (()=>{
