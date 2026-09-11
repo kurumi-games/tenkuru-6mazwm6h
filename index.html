@@ -3044,7 +3044,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v148'; // v148(2026/09/11): 時間停止中にAIが出そうとして弾かれる動作を停止。再観測と捕獲軌道を段階表示にして何が起きているか分かるようにした
+const APP_VER='v149'; // v149(2026/09/11): オルビィが弱い真因は1枚出すのに465〜616msかかっていたこと（プレイヤーは150〜200ms）。全体を約250〜330msに短縮。denyPickが温存中の札まで当てにしていたのも修正
+// v148(2026/09/11): 時間停止中にAIが出そうとして弾かれる動作を停止。再観測と捕獲軌道を段階表示にして何が起きているか分かるようにした
 // v147(2026/09/11): オルビィが勝てる場面で固まるバグを修正（相手も10にできる場面を絶対拒否していた）。強い役を狙う評価を追加。星環を2ラウンドおきに。立ち絵の白い枠を除去
 // v146(2026/09/11): オルビィの顔が透けるバグを修正。白い顔が市松と誤判定されていた。市松のマス目(10px)に合わせた模様検出に変更
 // v145(2026/09/11): v144で画像を直したのにファイル名が同じため端末のキャッシュが古い画像を使い続けていた。ファイル名をv2に変更して確実に読み直させる
@@ -3164,7 +3165,7 @@ const AREA_01={
     // v127 チャレンジ③ セトラ。モルフォ撃破で解放。氷結の環＋盤面を読む思考
     {no:13,challengeNo:3,name:'セトラ',description:'氷結の星環で手札を凍らせ、盤面を読んで退路を断つ',icon:'snow',winPt:20,diff:'master',rule:'normal',challenge:true,ch9:true,unlockAfter:12,rivalName:'セトラ',ability:'freeze',smart:true,playerRing:true,speed:0.45,curStep:30,curArr:60,curHold:70,flyMs:240,firstMs:20,firstJit:40,curStepFirst:10,curArrFirst:20,curHoldFirst:25,flyMsFirst:120,winMs:520,winJit:220,bgm:'Frozen%20Judgment.mp3'},
     // v140 チャレンジ4 オルビィ。セトラ撃破で解放。相手に10を作らせない「封殺」思考＋星環3種
-    {no:14,challengeNo:4,name:'オルビィ',description:'星の観測者。10を作らせない立ち回りと三種の星環',icon:'card',winPt:20,diff:'master',rule:'normal',challenge:true,ch10:true,unlockAfter:13,rivalName:'オルビィ',ability:'orbit',smart:true,deny:true,playerRing:true,speed:0.36,curStep:24,curArr:48,curHold:56,flyMs:200,firstMs:15,firstJit:30,curStepFirst:8,curArrFirst:16,curHoldFirst:20,flyMsFirst:100,winMs:480,winJit:200,bgm:'Clockwork%20Waltz.mp3'},
+    {no:14,challengeNo:4,name:'オルビィ',description:'星の観測者。10を作らせない立ち回りと三種の星環',icon:'card',winPt:20,diff:'master',rule:'normal',challenge:true,ch10:true,unlockAfter:13,rivalName:'オルビィ',ability:'orbit',smart:true,deny:true,playerRing:true,speed:0.20,curStep:12,curArr:20,curHold:24,flyMs:120,firstMs:10,firstJit:20,curStepFirst:6,curArrFirst:12,curHoldFirst:16,flyMsFirst:90,winMs:480,winJit:200,bgm:'Clockwork%20Waltz.mp3'},
   ]
 };
 const STAGES={
@@ -4738,10 +4739,12 @@ function App(){
   // v140 オルビィ: 「相手に10を作らせない」封殺の思考。
   // 自分で閉じられない列は最初から作らない。作れないなら出さずに待ち、
   // 時間切れリセットか、相手が動いた後のカウンターを狙う
-  function denyPick(playable,cs,cf){
+  function denyPick(playable,cs,cf,avail){
     const pHand=pHR.current||[],frz=pFrzR.current||{};
     const pUsable=pHand.map((v,i)=>(v!==null&&frz[i]==null)?v:null).filter(v=>v!==null);
-    const dHand=dHR.current||[];
+    // v149: 温存中の環などを除いた「実際に出せる手札」で読む。
+    // 以前は全手札で読んでいたため、使えない札を当てにして閉じられない列を作っていた
+    const dHand=(avail&&avail.length)?avail.slice():(dHR.current||[]);
     const slots=4-cf.filter(x=>x!==null).length; // この列にあと何枚置けるか
     const sc=v=>{
       const ns=cs+v,nf=[...cf,v];
@@ -4903,7 +4906,7 @@ function App(){
     const firstRate=diff==='easy'?0.45:diff==='hard'?0.80:diff==='master'?0.90:0.55;
     let chosen=null;
     if(denyActive()){ // v140 オルビィ：相手に10を作らせない封殺の思考
-      chosen=denyPick(playable,cs,cf);
+      chosen=denyPick(playable,cs,cf,avail);
       if(chosen==null){scheduleAi(rn);return;} // 出さずに待つ（時間切れリセットかカウンター狙い）
     }
     else if(smartActive()){ // v127 セトラ：確率任せではなく盤面を読んで選ぶ
