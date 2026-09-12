@@ -3073,7 +3073,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v168'; // v168(2026/09/11): 技のあとにできる隙を解消。時間停止が解けてからゼロで考え始めていたため250〜330ms出遅れていた。停止中に狙いを定めておくよう変更
+const APP_VER='v169'; // v169(2026/09/11): 出せるはずの札が押せない不具合を修正。技の停止・補充が決着処理と同じロックを共有していたため、解除が互いに干渉していた
+// v168(2026/09/11): 技のあとにできる隙を解消。時間停止が解けてからゼロで考え始めていたため250〜330ms出遅れていた。停止中に狙いを定めておくよう変更
 // v167(2026/09/11): 計測でオルビィが687回中34回しか動いていないと判明。「列を作らない」470回・「相手に渡すから出さない」183回が原因。どちらも緩和した
 // v166(2026/09/11): オルビィが弱い原因を特定するための計測を追加（画面左下に表示。原因が分かり次第削除）
 // v165(2026/09/11): 捕獲軌道で相手の手札が11枚になるバグを修正。手札は10枠しかないため、空き枠を超えて奪わないようにした
@@ -3899,6 +3900,9 @@ function App(){
   const[justStolen,setJustStolen]=useState([]); // v141 奪った直後の強調
   const[shufAll,setShufAll]=useState(false);    // v164 再観測：全部が同時に回っている状態
   const[spotFx,setSpotFx]=useState(false);      // v164 不可観測：相手の手札を照らす
+  // v169: 技の停止と補充は lockR を共有していたため、決着処理などと解除が
+  // 干渉して「出せるはずの札が出せない」状態が残っていた。専用のフラグに分ける
+  const fxLockR=useRef(false);
   const[orbyStat,setOrbyStat]=useState(null);   // v166 調査用の表示
   const[marked,setMarked]=useState([]);         // v148 捕獲軌道：奪われる札の印
   const[fxNote,setFxNote]=useState(null);       // v148 技の内容を文で出す
@@ -4953,11 +4957,11 @@ function App(){
   function freezeBoth(rn,ms,work){
     clearTimeout(aiRef.current);cancelCursor();
     pStopR.current=true;setPStop(true);
-    lockR.current=true; // プレイヤーも出せない
+    fxLockR.current=true; // v169: プレイヤーも出せない（lockRとは別管理）
     setChronoFx('in');playChronoStopSE();duckBGM(true);
     if(work)setTimeout(()=>{try{work();}catch(e){}},Math.round(ms*0.45)); // v148: workは任意
     setTimeout(()=>{
-      pStopR.current=false;setPStop(false);lockR.current=false;
+      pStopR.current=false;setPStop(false);fxLockR.current=false;
       setChronoFx('out');setTimeout(()=>setChronoFx(null),420);duckBGM(false);
       try{resumeAC();playChronoReleaseSE();}catch(e){}
       // v168: 解除の瞬間からゼロで考え始めると、思考＋カーソル移動＋降下で
@@ -4992,6 +4996,8 @@ function App(){
     if(id==null)return;
     // 位置だけ合わせる。到着したら curBusy を解いて、解除後の本番の動作を妨げない
     cursorToCard(id,()=>{curBusyR.current=false;},null,()=>{curBusyR.current=false;});
+    // v169: 何らかの理由で到着しなくても、必ず掴みを解く保険
+    setTimeout(()=>{curBusyR.current=false;},420);
   }
   // v150: 手札が空になったら補充する。自分で出し切った時だけでなく、
   // 奪われて空になった時にも必要。補充が終わるまで時間を止めて、
@@ -4999,7 +5005,7 @@ function App(){
   function refillPlayerIfEmpty(rn,reason){
     if(pHR.current.filter(v=>v!==null).length)return false;
     clearTimeout(aiRef.current);cancelCursor();
-    pStopR.current=true;setPStop(true);lockR.current=true;
+    pStopR.current=true;setPStop(true);fxLockR.current=true; // v169
     setFxNote({t:'手札を補充しています',c:'#9fe8ff'});
     setChronoFx('in');playChronoStopSE();duckBGM(true);
     setTimeout(()=>{
@@ -5007,7 +5013,7 @@ function App(){
       try{resumeAC();fxBell({f:1318,v:0.07,d:0.8,bright:1.2,rev:0.7});}catch(e){}
     },420);
     setTimeout(()=>{
-      pStopR.current=false;setPStop(false);lockR.current=false;
+      pStopR.current=false;setPStop(false);fxLockR.current=false;
       setFxNote(null);setChronoFx('out');setTimeout(()=>setChronoFx(null),420);duckBGM(false);
       try{resumeAC();playChronoReleaseSE();}catch(e){}
       if(phaseR.current==='playing'&&!resolvingR.current){clearTimeout(aiRef.current);scheduleAi(rn);}
@@ -5120,6 +5126,7 @@ function App(){
       try{resumeAC();fxIceTap();}catch(e){} // v130: 氷を触った手応え
       return;
     }
+    if(fxLockR.current)return; // v169: 技の演出中・補充中は静かに無視する
     if(lockR.current){
       // 場が完成した直後に滑り込んだカード → バーストさせず手札に返却
       if(resolvingR.current&&!bounceMsgR.current){
