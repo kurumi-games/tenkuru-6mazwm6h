@@ -1432,6 +1432,12 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* v155: 縦の綱引きゲージ。左端に通す。
    画面は「上＝オルビィ / 下＝くるみ」なので、境界が上に行くほど自分が押している。
    カードを見ている間も視界の隅に入り続けるのが狙い */
+/* v166: 調査用の表示。原因が分かったら消す */
+.orby-stat{position:fixed;left:calc(4 * var(--u));bottom:calc(4 * var(--u));z-index:200;pointer-events:none;
+  font-size:calc(8 * var(--u));font-weight:700;color:#9fe8ff;background:rgba(8,10,24,.85);
+  padding:calc(3 * var(--u)) calc(6 * var(--u));border-radius:calc(4 * var(--u));
+  border:1px solid rgba(140,200,255,.5);white-space:nowrap;}
+
 /* v164: 不可観測。相手の手札の帯を一瞬だけ照らす */
 .spot-fx{position:fixed;left:0;right:0;top:calc(52 * var(--u));height:calc(58 * var(--u));z-index:118;pointer-events:none;
   background:radial-gradient(60% 100% at 50% 50%,rgba(255,211,110,.5),rgba(255,211,110,.12) 60%,transparent 80%);
@@ -3067,7 +3073,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v165'; // v165(2026/09/11): 捕獲軌道で相手の手札が11枚になるバグを修正。手札は10枠しかないため、空き枠を超えて奪わないようにした
+const APP_VER='v166'; // v166(2026/09/11): オルビィが弱い原因を特定するための計測を追加（画面左下に表示。原因が分かり次第削除）
+// v165(2026/09/11): 捕獲軌道で相手の手札が11枚になるバグを修正。手札は10枠しかないため、空き枠を超えて奪わないようにした
 // v164(2026/09/11): AIに「相手が10を作れる道の数」を評価に追加（くるみの打ち方を式にしたもの）。技3種を椅子取りゲーム式にして先読みできないようにした
 // v163(2026/09/11): バースト制に復帰。v160の弾き返しを撤去し、プレイヤー・AIともに10超えでバースト(-2pt)する元の仕様に戻した
 // v162(2026/09/11): 綱引きゲージを撤去し、元のスコア表示（YOU / 相手の箱）に戻した
@@ -3890,6 +3897,7 @@ function App(){
   const[justStolen,setJustStolen]=useState([]); // v141 奪った直後の強調
   const[shufAll,setShufAll]=useState(false);    // v164 再観測：全部が同時に回っている状態
   const[spotFx,setSpotFx]=useState(false);      // v164 不可観測：相手の手札を照らす
+  const[orbyStat,setOrbyStat]=useState(null);   // v166 調査用の表示
   const[marked,setMarked]=useState([]);         // v148 捕獲軌道：奪われる札の印
   const[fxNote,setFxNote]=useState(null);       // v148 技の内容を文で出す
   function setHideLeft2(n){hideLeftR.current=n;setHideLeft(n);}
@@ -4780,6 +4788,9 @@ function App(){
   // v140 オルビィ: 「相手に10を作らせない」封殺の思考。
   // 自分で閉じられない列は最初から作らない。作れないなら出さずに待ち、
   // 時間切れリセットか、相手が動いた後のカウンターを狙う
+  // v166: オルビィが何回動けて何回見送ったかを記録する（調査用。window.orbyLog で見る）
+  const oLog=(k)=>{try{const w=window;w.__orby=w.__orby||{};w.__orby[k]=(w.__orby[k]||0)+1;
+    clearTimeout(w.__orbyT);w.__orbyT=setTimeout(()=>setOrbyStat({...w.__orby}),120);}catch(e){}};
   function denyPick(playable,cs,cf,avail){
     const pHand=pHR.current||[],frz=pFrzR.current||{};
     const pUsable=pHand.map((v,i)=>(v!==null&&frz[i]==null)?v:null).filter(v=>v!==null);
@@ -4851,9 +4862,9 @@ function App(){
     };
     let best=null,bs=-1e9;
     playable.forEach(v=>{const x=sc(v);if(x>bs){bs=x;best=v;}});
-    if(bs<=-1e5)return null;            // 相手に渡すだけ／バースト → 出さない
-    if(bs<3000&&cs===0)return null;     // 自分で閉じられない列を新しく始めない
-    return best;
+    if(bs<=-1e5){oLog('skip_gift');return null;}        // 相手に渡すだけ／バースト → 出さない
+    if(bs<3000&&cs===0){oLog('skip_nostart');return null;} // 自分で閉じられない列を新しく始めない
+    oLog('play');return best;
   }
   // v140 オルビィの星環：出した瞬間に3種のうち1つがランダムで起きる
   function orbyRingFire(rn){
@@ -4980,7 +4991,8 @@ function App(){
     const eligible=i=>!isHoldRing(rf[i])&&dIdsR.current[i]!==r2PendingCardR.current;
     const avail=dHand.filter((v,i)=>eligible(i)); // v79: 星環付きは温存。v121: レイピアが今タップした札は専用処理に任せる
     const playable=avail.filter(v=>canPlay(v,cs,cf));
-    if(!playable.length){scheduleAi(rn);return;}
+    if(denyActive())oLog('call');
+    if(!playable.length){if(denyActive())oLog('no_playable');scheduleAi(rn);return;}
     const wins=playable.filter(v=>cs+v===10);
     const safe=playable.filter(v=>cs+v<10);
     const diff=diffRef.current;
@@ -5377,6 +5389,8 @@ function App(){
       skillFx&&h('div',{key:skillFx.k,className:'skill-title',style:{'--sc':skillFx.color}},h('div',{className:'en'},skillFx.en),h('div',{className:'jp'},skillFx.jp)),
       fxNote&&h('div',{className:'fx-note',style:{'--nc2':fxNote.c}},fxNote.t), // v148 技の内容を文で説明
       spotFx&&h('div',{className:'spot-fx'}), // v164 不可観測：相手の手札を一瞬照らす
+      orbyStat&&denyActive()&&h('div',{className:'orby-stat'}, // v166 調査用。原因が分かったら消す
+        '判断'+(orbyStat.call||0)+' / 出した'+(orbyStat.play||0)+' / 見送り'+(orbyStat.skip_gift||0)+' / 列作らず'+(orbyStat.skip_nostart||0)+' / 出せる札なし'+(orbyStat.no_playable||0)),
       hideLeft>0&&h('div',{className:'hide-badge'},'不可観測  あと '+hideLeft+' ラウンド'), // v150 効果が続いている間ずっと出す
       h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
       h('div',{className:'gp-hand-rows'},
