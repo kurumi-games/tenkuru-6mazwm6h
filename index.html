@@ -3110,7 +3110,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v160'; // v160(2026/09/11): バーストを廃止。ルール上出せない札は場まで飛んで弾き返され、元の位置に戻る。減点なし
+const APP_VER='v161'; // v161(2026/09/11): オルビィ側のバーストを修正。着地判定がcanPlayのみで10超えを通していた。飛行中に場が変わっても着地せず手札へ返す
+// v160(2026/09/11): バーストを廃止。ルール上出せない札は場まで飛んで弾き返され、元の位置に戻る。減点なし
 // v159(2026/09/11): 縦ゲージに画像の枠を導入。溝の位置を実測（横18.8〜80.1% / 縦11.0〜88.4%）して光をぴったり収めた
 // v158(2026/09/11): 縦ゲージが下寄りに見えていたのを修正。上下の数字の高さが揃っておらず中心がずれていた
 // v157(2026/09/11): 縦ゲージを左端から右端へ移動（カードが左から右へ流れる終着点に合わせた）。場エリアの中に入れ、相手の手札の下〜手札マットの上に自動で収まるようにした
@@ -5072,7 +5073,7 @@ function App(){
     setTimeout(()=>{
       const f=flyR.current;flyR.current=null;if(!f)return;
       const cf2=fieldR.current,cs2=fieldSumR.current;
-      const ok=phaseR.current==='playing'&&countNumR.current<0&&!resolvingR.current&&!eraseBusyR.current&&!pausedR.current&&!pStopR.current&&canPlay(f.value,cs2,cf2); // v137: 時間停止中は着地させず手札へ返す
+      const ok=phaseR.current==='playing'&&countNumR.current<0&&!resolvingR.current&&!eraseBusyR.current&&!pausedR.current&&!pStopR.current&&cs2+f.value<=10&&canPlay(f.value,cs2,cf2); // v137: 時間停止中は着地させず手札へ返す / v161: 10超えも着地させず返す（canPlayは10超えを許すため）
       if(!ok){ // 戻す
         setFlyCard(c=>c?{...c,back:true}:c);setTimeout(()=>setFlyCard(null),380);
         const h2=[...dHR.current,f.value],r2=[...dRingR.current,f.rf||false],ids2=[...dIdsR.current,f.id];setDealer(h2,r2,ids2);
