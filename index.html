@@ -2490,6 +2490,11 @@ function TimeUpDisplay({show}){
 }
 
 // ── 完成演出：白閃光→衝撃波→スピードライン→破片→テキストスラム（爽快インパクト版）──
+function fxCollisionStamp(){ // v179 事故バースト回避の表示
+  if(document.querySelector('.fx2-reject'))return;
+  const el=document.createElement('div');el.className='fx2-reject';el.textContent='↩ 衝突 セーフ';
+  document.body.appendChild(el);void el.offsetWidth;el.classList.add('go');setTimeout(()=>el.remove(),1050);
+}
 function fxRejectStamp(){
   if(document.querySelector('.fx2-reject'))return;
   const el=document.createElement('div');
@@ -3103,7 +3108,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v178'; // v178(2026/09/13): ラウンド制に戻す。カウントは1R目5・2R目以降3、GOあり、10達成の演出も元通り。FLOWは enabled:false で残置
+const APP_VER='v179'; // v179(2026/09/13): 衝突事故の救済。相手の札が落ちて0.22秒以内に出した札がバーストになるなら「衝突 セーフ」で手札に戻す（相手側も同様）。数値はCOLLISION_MS
+// const APP_VER='v178'; // v178(2026/09/13): ラウンド制に戻す。カウントは1R目5・2R目以降3、GOあり、10達成の演出も元通り。FLOWは enabled:false で残置
 // const APP_VER='v177'; // v177(2026/09/13): 配り直し判定を「バーストせずに出せる札が誰にもない」に変更。jsdomで自動テスト（詰み・手札切れ・60秒）を通した
 // const APP_VER='v176'; // v176(2026/09/13): FLOWで手札を使い切っても補充されない不具合を修正。相手側も空なら補充
 // const APP_VER='v175'; // v175(2026/09/13): 区切りなし（FLOW）。TIMEは試合全体で60秒1本、時間切れで点が多い方の勝ち。10達成は軽い演出（役名＋pt吸い寄せ）で止まらない。お互い出せる札がなければ配り直し
@@ -3289,6 +3295,9 @@ const CHRONO_CONFIG={
 // 戻す時は laterSkip:false（GOだけ出る）／firstFrom:5 stepMs:650 goMs:650 で v172 以前の形
 // v178：1ラウンド目は5から、2ラウンド目以降は3から数える。GO表示あり。演出も元に戻した
 const COUNT_CFG={firstFrom:5,laterFrom:3,stepMs:650,goMs:650,laterSkip:false};
+// ── v179 衝突事故の救済：相手の札が場に落ちた直後（COLLISION_MS以内）に出した札がバーストになるなら「事故」として手札に戻す。ペナルティなし ──
+// 自分で見て出したバーストはそのまま。相手側（AI）にも同じ救済がかかる。0にすると無効
+const COLLISION_MS=220;
 // ── v175 区切りなし（FLOW）：トランプの「スピード」のように、TIMEは試合全体で1本 ──
 // 時間切れ＝点が多い方の勝ち。目標点での先取り終了はしない。10ができたら軽く光って +pt が自分の点まで吸い寄せられ、そのまま続く
 // お互い出せる札がなくなったら、場を空けて両方の手札を配り直す。戻す時は enabled:false
@@ -4029,6 +4038,7 @@ function App(){
   const chronoR=useRef({armed:false,count:0,pending:false,deals:0}); // 1試合ぶんのクロノリンク状態
   const[chronoFx,setChronoFx]=useState(null); // 'in' | 'out' | null
   const[ptFly,setPtFly]=useState(null); // v175 +pt 吸い寄せ演出
+  const dLandAtR=useRef(0),pLandAtR=useRef(0); // v179 相手／自分の札が場に落ちた時刻
   const[burstPos,setBurstPos]=useState({x:'50%',y:'45%'});
   const coreShiftR=useRef({active:false,used:false});
   const[champLine,setChampLine]=useState(null);const champLineT=useRef(null);
@@ -5322,6 +5332,13 @@ function App(){
         const keep=dHR.current,keepRf=dRingR.current;const nd=createDeck().slice(0,10-keep.length);
         setDealer([...keep,...nd],[...keepRf,...nd.map(()=>false)],[...dIdsR.current,...nd.map(()=>null)]);
       }
+      if(cs2+f.value>10&&COLLISION_MS>0&&Date.now()-pLandAtR.current<COLLISION_MS){ // v179 プレイヤーの札が落ちた直後の事故バースト → 相手も返却
+        setFlyCard(c=>c?{...c,back:true}:c);setTimeout(()=>setFlyCard(null),380);
+        const h2=[...dHR.current,f.value],r2=[...dRingR.current,f.rf||false],ids2=[...dIdsR.current,f.id];setDealer(h2,r2,ids2);
+        if(phaseR.current==='playing'&&!resolvingR.current)scheduleAi(rn);
+        return;
+      }
+      dLandAtR.current=Date.now(); // v179
       if(!resolvePlay(f.value,cf2,cs2,'dealer',rn))scheduleAi(rn);
     },FLY_MS);
   }
@@ -5352,6 +5369,10 @@ function App(){
     if(confuseR.current[idx]!=null){value=confuseR.current[idx];} // v112: 幻惑中は見えてる数字が出る
     // v163: バースト制に戻す。canPlayが通す手はそのまま出せる（10超えはバースト）
     if(!value||!canPlay(value,cs,cf))return;
+    if(cs+value>10&&COLLISION_MS>0&&Date.now()-dLandAtR.current<COLLISION_MS){ // v179 相手の札が落ちた直後の事故バースト → 返却
+      if(!bounceMsgR.current){bounceMsgR.current=true;fxCollisionStamp();setTimeout(()=>{bounceMsgR.current=false;},900);}
+      return;
+    }
     if(rStopR.current||eraseBusyR.current||pausedR.current)return; // v84 時間停止中は出せない / v89 削除中も / v91 一時停止中も
     if(pLockR.current[idx]){fxLockHint('星環ロック');return;}   // v84 ロック中
     if(cmdIdxR.current!=null&&cmdIdxR.current!==idx){fxLockHint('指名された札から');return;} // v84 指名
@@ -5381,6 +5402,7 @@ function App(){
     }
     if(wasLink){playChronoReleaseSE();}
     if(pRingR.current===idx)activatePlayerRing(); // v136: 星環の札を出した → 効果が3ラウンド続く
+    pLandAtR.current=Date.now(); // v179
     const ended=resolvePlay(value,cf,cs,'player',rNum,isSp,shifted);
     // v137: 自分が場の合計をちょうど6にしたら相手を3秒止める。
     // activatePlayerRing が先に走るので、環を出したそのターンに6になった場合も発動する
