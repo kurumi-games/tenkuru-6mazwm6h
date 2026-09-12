@@ -3103,7 +3103,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v175'; // v175(2026/09/13): 区切りなし（FLOW）。TIMEは試合全体で60秒1本、時間切れで点が多い方の勝ち。10達成は軽い演出（役名＋pt吸い寄せ）で止まらない。お互い出せる札がなければ配り直し
+const APP_VER='v176'; // v176(2026/09/13): FLOWで手札を使い切っても補充されない不具合を修正。相手側も空なら補充
+// const APP_VER='v175'; // v175(2026/09/13): 区切りなし（FLOW）。TIMEは試合全体で60秒1本、時間切れで点が多い方の勝ち。10達成は軽い演出（役名＋pt吸い寄せ）で止まらない。お互い出せる札がなければ配り直し
 // const APP_VER='v174'; // v174(2026/09/13): 2ラウンド目からGO表示もなし。区切りなく次の手札へ（COUNT_CFG.laterSkip）
 // const APP_VER='v173'; // v173(2026/09/13): カウントダウン短縮（案A）。1ラウンド目だけ3・2・1・GO、2ラウンド目からGOのみ。待ち時間 約4.5秒→約2.2秒/約0.5秒
 // const APP_VER='v172'; // v172(2026/09/12): 見送りの結果画面を専用に。勝ったら「次の魂へ」で画面に戻らず連戦できる
@@ -4547,6 +4548,8 @@ function App(){
   const[resetFA,setResetFA]=useState(false);
   const[comboShow,setComboShow]=useState(null);const comboOnR=useRef(false);
   // v101: 監視。対戦中、相手の手札が環だけ／空になってたら補充する（どの経路で起きても拾う）
+  const flowChkR=useRef(null);flowChkR.current=flowStuckCheck; // v176 補充・詰みチェックを0.7秒ごとに
+  useEffect(()=>{if(!FLOW_CFG.enabled)return;const id=setInterval(()=>{try{flowChkR.current&&flowChkR.current();}catch(e){}},FLOW_CFG.stuckCheckMs);return()=>clearInterval(id);},[]);
   useEffect(()=>{const id=setInterval(()=>{try{const so=stageOptsR.current;if(!so||!so.challenge||phaseR.current!=='playing'||countNumR.current>=0||resolvingR.current||sceneOnR.current)return;ensureDealerRefill();}catch(e){}},800);return()=>clearInterval(id);},[]);
   useEffect(()=>{comboOnR.current=!!comboShow;if(comboShow)setSkillFx(null);else setTimeout(flushSkillQ,250);},[comboShow]);
   const[gameEndData,setGameEndData]=useState(null);
@@ -4877,14 +4880,17 @@ function App(){
       tickFreeze(); // v127: 凍結解除のカウントはこのタイマーと同じ歩幅で進む
       if(freezeActive())reliefIfAllFrozen(); // v136: 凍った札だけになったら配り直して詰みを回避
       if(t===4&&r2Active())r2Think(rn,'late'); // v85 残り4秒での判断
-      if(FLOW_CFG.enabled)flowStuckCheck(); // v175 お互い出せる札がなければ配り直し
+
       if(t<=0){clearInterval(timerRef.current);clearTimeout(aiRef.current);doTimeUp(rn);}
     },1000);
   }
 
   // v175 お互いに出せる札がない → 場を空けて両方の手札を配り直す
   function flowStuckCheck(){
-    if(phaseR.current!=='playing'||resolvingR.current||lockR.current||countNumR.current>=0)return;
+    if(phaseR.current!=='playing'||resolvingR.current||lockR.current||countNumR.current>=0||pStopR.current)return;
+    // v176 手札を使い切ったら補充（v175は「お互い詰み」しか見ていなかった）
+    if(!pHR.current.filter(v=>v!==null).length){refillPlayerIfEmpty(rnR.current,'empty');return;}
+    ensureDealerRefill();
     const fs=fieldSumR.current,fd=fieldR.current;
     const pOk=pHR.current.some((v,i)=>v!==null&&pFrzR.current[i]==null&&canPlay(v,fs,fd));
     const dOk=dHR.current.some(v=>v!==null&&canPlay(v,fs,fd));
