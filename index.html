@@ -3073,7 +3073,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v166'; // v166(2026/09/11): オルビィが弱い原因を特定するための計測を追加（画面左下に表示。原因が分かり次第削除）
+const APP_VER='v167'; // v167(2026/09/11): 計測でオルビィが687回中34回しか動いていないと判明。「列を作らない」470回・「相手に渡すから出さない」183回が原因。どちらも緩和した
+// v166(2026/09/11): オルビィが弱い原因を特定するための計測を追加（画面左下に表示。原因が分かり次第削除）
 // v165(2026/09/11): 捕獲軌道で相手の手札が11枚になるバグを修正。手札は10枠しかないため、空き枠を超えて奪わないようにした
 // v164(2026/09/11): AIに「相手が10を作れる道の数」を評価に追加（くるみの打ち方を式にしたもの）。技3種を椅子取りゲーム式にして先読みできないようにした
 // v163(2026/09/11): バースト制に復帰。v160の弾き返しを撤去し、プレイヤー・AIともに10超えでバースト(-2pt)する元の仕様に戻した
@@ -4805,9 +4806,10 @@ function App(){
       const rest=dHand.slice();rest.splice(rest.indexOf(v),1);
       const closeNow=rest.some(w=>canPlay(w,ns,nf)&&ns+w===10); // 次の一手で決められるか
       const gift=pUsable.some(w=>canPlay(w,ns,nf)&&ns+w===10);
-      // v147: 相手も10にできる場面でも、自分が次の一手で閉じられるなら競り合いを取りに行く。
-      // 以前はここを絶対拒否にしていたため、勝てる場面で一手も出せず固まっていた
-      if(gift&&!closeNow)return -1e5;
+      // v167: 「相手に渡すなら絶対に出さない」も固まる原因だった（687回中183回）。
+      // 待っている間に相手は自由に組めるので、待つこと自体が損。
+      // 拒否ではなく大きな減点にして、他に手が無いときは出すようにする
+      if(gift&&!closeNow)return -4000+8*ns;
       // 自分の手札だけで、残り枠内に合計10へ到達できるか（枚数制限つきの部分和）
       const reach=(sum,depth,pool)=>{
         if(sum===10)return true;
@@ -4862,8 +4864,11 @@ function App(){
     };
     let best=null,bs=-1e9;
     playable.forEach(v=>{const x=sc(v);if(x>bs){bs=x;best=v;}});
-    if(bs<=-1e5){oLog('skip_gift');return null;}        // 相手に渡すだけ／バースト → 出さない
-    if(bs<3000&&cs===0){oLog('skip_nostart');return null;} // 自分で閉じられない列を新しく始めない
+    if(bs<=-1e5){oLog('skip_gift');return null;}  // 相手に渡すだけ／バースト → 出さない
+    // v167: 以前は「自分で閉じられない列は始めない」で止めていたが、
+    // 手札が3枚以下だと76%以上がこれに該当し、687回中470回も動けなくなっていた。
+    // 待っても相手は自由に組めるので、待つのは損。手札が十分ある時だけ選り好みする
+    if(bs<3000&&cs===0&&dHand.length>=6){oLog('skip_nostart');return null;}
     oLog('play');return best;
   }
   // v140 オルビィの星環：出した瞬間に3種のうち1つがランダムで起きる
