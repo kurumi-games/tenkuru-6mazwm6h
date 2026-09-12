@@ -3073,7 +3073,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v169'; // v169(2026/09/11): 出せるはずの札が押せない不具合を修正。技の停止・補充が決着処理と同じロックを共有していたため、解除が互いに干渉していた
+const APP_VER='v170'; // v170(2026/09/11): 昔から「まれに押しても出ない」不具合の原因を特定。カードを出す処理だけ画面表示用の値を読んでおり、内部の最新値とズレた瞬間に無反応になっていた
+// v169(2026/09/11): 出せるはずの札が押せない不具合を修正。技の停止・補充が決着処理と同じロックを共有していたため、解除が互いに干渉していた
 // v168(2026/09/11): 技のあとにできる隙を解消。時間停止が解けてからゼロで考え始めていたため250〜330ms出遅れていた。停止中に狙いを定めておくよう変更
 // v167(2026/09/11): 計測でオルビィが687回中34回しか動いていないと判明。「列を作らない」470回・「相手に渡すから出さない」183回が原因。どちらも緩和した
 // v166(2026/09/11): オルビィが弱い原因を特定するための計測を追加（画面左下に表示。原因が分かり次第削除）
@@ -5138,7 +5139,11 @@ function App(){
     }
     // 判定はstateでなくrefを使う（同時タイミングで相手の直前プレイが消えるのを防ぐ）
     const cf=fieldR.current,cs=fieldSumR.current;
-    let value=pH[idx];
+    // v170: ここだけ画面表示用の pH を読んでいたため、内部の最新値 pHR.current と
+    // ズレた瞬間にタップすると value が取れず、黙って何も起きなかった。
+    // 連打・補充直後・技の直後など、画面の更新が追いつかない場面で発生していた
+    const hand=pHR.current;
+    let value=hand[idx];
     if(confuseR.current[idx]!=null){value=confuseR.current[idx];} // v112: 幻惑中は見えてる数字が出る
     // v163: バースト制に戻す。canPlayが通す手はそのまま出せる（10超えはバースト）
     if(!value||!canPlay(value,cs,cf))return;
@@ -5151,7 +5156,7 @@ function App(){
     clearTimeout(aiRef.current);resumeAC();
     if(isSp){playChronoTapSE();chronoR.current.pending=false;}
     setTimeout(()=>playPlaceSE(true),100);
-    const newPH=pH.map((v,i)=>i===idx?null:v);
+    const newPH=hand.map((v,i)=>i===idx?null:v);
     const newSp=pSpR.current.map((f,i)=>i===idx?false:f);
     setPH(newPH);pHR.current=newPH;setPSp(newSp);pSpR.current=newSp;
     if(pLockR.current.length)r2CheckUnlock(newPH); // v84
