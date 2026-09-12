@@ -2772,6 +2772,7 @@ const PLAYER_RING_SUM=6;     // この合計を自分が作ると発動
 
 const ORBY_RING_EVERY=2;   // v147 開始時に1枚、以降2ラウンドおきに付与
 const ORBY_HIDE_ROUNDS=5;  // 手札が裏返る期間
+const DEALER_MAX=10;       // v165 相手の手札の上限（枠が10個しかない）
 const SETRA_FREEZE_N=1;    // 一度に凍らせる枚数（v131: 3枚は強すぎたので1枚に）
 const SETRA_FREEZE_SEC=5;  // 凍結する秒数（ラウンドタイマーが動いている間だけ減る）
 // v119: 対戦前に相手のギミックを見せる画面。初見で対策できないという声への対応
@@ -3066,7 +3067,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v164'; // v164(2026/09/11): AIに「相手が10を作れる道の数」を評価に追加（くるみの打ち方を式にしたもの）。技3種を椅子取りゲーム式にして先読みできないようにした
+const APP_VER='v165'; // v165(2026/09/11): 捕獲軌道で相手の手札が11枚になるバグを修正。手札は10枠しかないため、空き枠を超えて奪わないようにした
+// v164(2026/09/11): AIに「相手が10を作れる道の数」を評価に追加（くるみの打ち方を式にしたもの）。技3種を椅子取りゲーム式にして先読みできないようにした
 // v163(2026/09/11): バースト制に復帰。v160の弾き返しを撤去し、プレイヤー・AIともに10超えでバースト(-2pt)する元の仕様に戻した
 // v162(2026/09/11): 綱引きゲージを撤去し、元のスコア表示（YOU / 相手の箱）に戻した
 // v161(2026/09/11): オルビィ側のバーストを修正。着地判定がcanPlayのみで10超えを通していた。飛行中に場が変わっても着地せず手札へ返す
@@ -4236,7 +4238,8 @@ function App(){
     }
     const removed=new Set(oldIds.filter(id=>!used.has(id)));
     const slots=dSlotsR.current.slice();slots.forEach((id,s)=>{if(id!=null&&removed.has(id))slots[s]=null;});
-    for(let i=0;i<ids.length;i++){const id=ids[i];if(!slots.includes(id)){let s=slots.indexOf(null);if(s<0){slots.push(id);}else slots[s]=id;}}
+    // v165: 空き枠が無いときに枠を増やすと10枠を超えて崩れる。増やさず捨てる
+    for(let i=0;i<ids.length;i++){const id=ids[i];if(!slots.includes(id)){let s=slots.indexOf(null);if(s<0){if(slots.length<DEALER_MAX)slots.push(id);}else slots[s]=id;}}
     // 枠にあるが手札に無いIDは掃除
     const alive=new Set(ids);for(let s=0;s<slots.length;s++)if(slots[s]!=null&&!alive.has(slots[s]))slots[s]=null;
     while(slots.length>10&&slots[slots.length-1]==null)slots.pop();
@@ -4890,16 +4893,20 @@ function App(){
     showSkillCustom('捕 獲 軌 道','CAPTURE ORBIT','#8ad6ff');r2Say('その3枚、僕の軌道に入った',"#8ad6ff");
     const alive=()=>pHR.current.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);
     if(!alive().length)return;
+    // v165: 相手の手札は10枠までなので、空き枠を超えて奪うと枠から溢れる
+    const room=Math.max(0,DEALER_MAX-dHR.current.filter(v=>v!=null).length);
+    const takeN=Math.min(3,room,alive().length);
+    if(takeN<=0){r2Say('もう持てない',"#8ad6ff");return;}
     const ROAM=1500;
     freezeBoth(rn,ROAM+120,null); // 抜いた直後に再開する
-    setFxNote({t:'枠が止まった札が奪われる',c:'#8ad6ff'});
+    setFxNote({t:'枠が止まった '+takeN+'枚 が奪われる',c:'#8ad6ff'});
     const iv=setInterval(()=>{
       const a=alive();
-      setMarked(a.sort(()=>Math.random()-0.5).slice(0,3));
+      setMarked(a.sort(()=>Math.random()-0.5).slice(0,takeN));
     },90);
     setTimeout(()=>{
       clearInterval(iv);
-      const cand=alive().sort(()=>Math.random()-0.5).slice(0,3);
+      const cand=alive().sort(()=>Math.random()-0.5).slice(0,takeN);
       setMarked(cand); // ピタッと止まる
       try{resumeAC();fxTone({f:1500,f2:1900,type:'sine',v:0.07,a:0.004,d:0.3,rev:0.5});}catch(e){}
       setTimeout(()=>{ // 止まって見せた直後に抜く
