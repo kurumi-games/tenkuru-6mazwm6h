@@ -3103,7 +3103,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v177'; // v177(2026/09/13): 配り直し判定を「バーストせずに出せる札が誰にもない」に変更。jsdomで自動テスト（詰み・手札切れ・60秒）を通した
+const APP_VER='v178'; // v178(2026/09/13): ラウンド制に戻す。カウントは1R目5・2R目以降3、GOあり、10達成の演出も元通り。FLOWは enabled:false で残置
+// const APP_VER='v177'; // v177(2026/09/13): 配り直し判定を「バーストせずに出せる札が誰にもない」に変更。jsdomで自動テスト（詰み・手札切れ・60秒）を通した
 // const APP_VER='v176'; // v176(2026/09/13): FLOWで手札を使い切っても補充されない不具合を修正。相手側も空なら補充
 // const APP_VER='v175'; // v175(2026/09/13): 区切りなし（FLOW）。TIMEは試合全体で60秒1本、時間切れで点が多い方の勝ち。10達成は軽い演出（役名＋pt吸い寄せ）で止まらない。お互い出せる札がなければ配り直し
 // const APP_VER='v174'; // v174(2026/09/13): 2ラウンド目からGO表示もなし。区切りなく次の手札へ（COUNT_CFG.laterSkip）
@@ -3286,11 +3287,12 @@ const CHRONO_CONFIG={
 // 案A：1ラウンド目だけ 3・2・1・GO、2ラウンド目からは GO の一発だけ（v172までは毎ラウンド 5〜GO＝約4.5秒）
 // v174：2ラウンド目からはGO表示もなし（laterSkip:true）。開花が終わったらそのまま札が押せる。トランプの「スピード」のように区切りなく流れる
 // 戻す時は laterSkip:false（GOだけ出る）／firstFrom:5 stepMs:650 goMs:650 で v172 以前の形
-const COUNT_CFG={firstFrom:3,laterFrom:0,stepMs:550,goMs:500,laterSkip:true};
+// v178：1ラウンド目は5から、2ラウンド目以降は3から数える。GO表示あり。演出も元に戻した
+const COUNT_CFG={firstFrom:5,laterFrom:3,stepMs:650,goMs:650,laterSkip:false};
 // ── v175 区切りなし（FLOW）：トランプの「スピード」のように、TIMEは試合全体で1本 ──
 // 時間切れ＝点が多い方の勝ち。目標点での先取り終了はしない。10ができたら軽く光って +pt が自分の点まで吸い寄せられ、そのまま続く
 // お互い出せる札がなくなったら、場を空けて両方の手札を配り直す。戻す時は enabled:false
-const FLOW_CFG={enabled:true,matchSec:60,tenMs:900,flyMs:750,stuckCheckMs:700};
+const FLOW_CFG={enabled:false,matchSec:60,tenMs:900,flyMs:750,stuckCheckMs:700}; // v178：区切りなしはやめてラウンド制に戻した（試したい時は enabled:true）
 const CHRONO_TEXT={name:'クロノリンク',en:'CHRONO LINK',hint:'もう1枚選べ'};
 
 // ── v61 チャンピオン（キャラクター）：名前・セリフはここだけで変更 ──
