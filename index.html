@@ -1961,6 +1961,30 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 @media (prefers-reduced-motion: reduce){
   .a1-st,.a1-core,.a1-core::before,.a1-nd .glow,.a1-nd.sel .sel-ring,.card-stage .sv,.card-stage.link-pick .card{animation:none !important;}
 }
+/* ── v171 見送り（アニマ・ヴェール）：1枚の背景に魂が迷い込む ── */
+.veil{position:fixed;inset:0;background:#0b0a1c url('img/veil-bg.webp') center/cover no-repeat;overflow:hidden;font-family:'Noto Serif JP',serif;color:#dbe4f5;}
+.veil-top{position:absolute;top:0;left:0;right:0;padding:calc(12 * var(--u)) calc(14 * var(--u));display:flex;justify-content:space-between;align-items:center;z-index:5;}
+.veil-top .k{font-family:'Cinzel',serif;font-size:calc(9 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
+.veil-top .t{font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.1em;}
+.veil-top .n{font-size:calc(11 * var(--u));color:#c9c2e8;text-align:right;line-height:1.5;}
+.veil-home{position:absolute;bottom:calc(16 * var(--u));left:50%;transform:translateX(-50%);z-index:5;min-height:calc(38 * var(--u));padding:0 calc(22 * var(--u));border-radius:999px;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.65);color:#d6cfff;font-family:inherit;font-size:calc(12 * var(--u));cursor:pointer;}
+.veil-soul{position:absolute;width:calc(var(--sz) * var(--u));height:calc(var(--sz) * var(--u));transform:translate(-50%,-50%);cursor:pointer;-webkit-tap-highlight-color:transparent;z-index:3;animation:veilDrift var(--d) ease-in-out infinite alternate;animation-delay:var(--dl);}
+.veil-soul img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;filter:drop-shadow(0 0 calc(10 * var(--u)) rgba(140,190,255,.55));}
+.veil-soul.rare img{filter:drop-shadow(0 0 calc(16 * var(--u)) rgba(255,210,120,.7));}
+.veil-soul.in{animation:veilIn 1.6s ease-out both, veilDrift var(--d) ease-in-out 1.6s infinite alternate;}
+.veil-soul.out{animation:veilOut 1.4s ease-in both;pointer-events:none;}
+.veil-soul .tm{position:absolute;left:50%;bottom:calc(-8 * var(--u));transform:translateX(-50%);font-family:'Fira Code',monospace;font-size:calc(11 * var(--u));color:#ffd98a;text-shadow:0 0 6px rgba(0,0,0,.8);white-space:nowrap;}
+@keyframes veilDrift{from{margin-top:0;margin-left:0}to{margin-top:calc(-10 * var(--u));margin-left:calc(6 * var(--u))}}
+@keyframes veilIn{from{opacity:0;transform:translate(-50%,-30%) scale(.4)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes veilOut{to{opacity:0;transform:translate(-50%,-140%) scale(.6)}}
+.veil-ask{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:rgba(5,4,18,.6);animation:fadeUp .2s ease;}
+.veil-ask .box{width:min(88vw,calc(300 * var(--u)));padding:calc(20 * var(--u)) calc(18 * var(--u));border-radius:calc(20 * var(--u));background:linear-gradient(180deg,rgba(30,24,70,.98),rgba(10,8,34,.98));border:1px solid rgba(190,180,255,.3);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+.veil-ask .box img{width:calc(90 * var(--u));height:calc(90 * var(--u));object-fit:contain;}
+.veil-ask .nm{font-size:calc(16 * var(--u));font-weight:700;margin-top:calc(4 * var(--u));}
+.veil-ask .ln{font-size:calc(12 * var(--u));color:#c3bde3;line-height:1.7;margin:calc(8 * var(--u)) 0 calc(14 * var(--u));}
+.veil-ask .row{display:flex;gap:calc(10 * var(--u));}
+.veil-ask button{flex:1;min-height:calc(42 * var(--u));border-radius:calc(14 * var(--u));font-family:inherit;font-size:calc(13 * var(--u));cursor:pointer;border:1px solid rgba(190,180,255,.35);background:transparent;color:#cfc8f0;}
+.veil-ask button.go{background:linear-gradient(160deg,#8f7dff,#5a48d8);color:#fff;border-color:transparent;font-weight:700;}
 </style>
 </head>
 <body>
@@ -3073,7 +3097,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v170'; // v170(2026/09/11): 昔から「まれに押しても出ない」不具合の原因を特定。カードを出す処理だけ画面表示用の値を読んでおり、内部の最新値とズレた瞬間に無反応になっていた
+const APP_VER='v171'; // v171(2026/09/12): 見送りモード（アニマ・ヴェール）追加。ホームの「見送り」から入る。1枚の背景に魂が5〜6個、タップで対戦、勝てば消えて新しい魂が流れ着く。時間制限つきのレア魂（セトラ）もたまに来る
+// const APP_VER='v170'; // v170(2026/09/11): 昔から「まれに押しても出ない」不具合の原因を特定。カードを出す処理だけ画面表示用の値を読んでおり、内部の最新値とズレた瞬間に無反応になっていた
 // v169(2026/09/11): 出せるはずの札が押せない不具合を修正。技の停止・補充が決着処理と同じロックを共有していたため、解除が互いに干渉していた
 // v168(2026/09/11): 技のあとにできる隙を解消。時間停止が解けてからゼロで考え始めていたため250〜330ms出遅れていた。停止中に狙いを定めておくよう変更
 // v167(2026/09/11): 計測でオルビィが687回中34回しか動いていないと判明。「列を作らない」470回・「相手に渡すから出さない」183回が原因。どちらも緩和した
@@ -3416,7 +3441,7 @@ function SkillPanel(){
     )
   );
 }
-function TitleScreen({onPlay,onTutorial,musicOn,toggleMusic}){
+function TitleScreen({onPlay,onVeil,onTutorial,musicOn,toggleMusic}){
   const btnBase={borderRadius:14,padding:'15px 0',fontSize:13,fontWeight:800,letterSpacing:2,cursor:'pointer',fontFamily:"'Inter',sans-serif",background:'rgba(255,255,255,.78)',boxShadow:'0 4px 16px rgba(70,100,150,.16), inset 0 1px 0 #fff',width:'100%'};
   return h('div',{style:{minHeight:'100vh',background:"url('img/title-bg.jpg') center/cover no-repeat, #eef2f8",display:'flex',alignItems:'center',justifyContent:'center',padding:16,position:'relative'}},
     h('div',{style:{textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:18,width:'100%',maxWidth:340,animation:'fadeUp 0.5s ease'}},
@@ -3424,12 +3449,95 @@ function TitleScreen({onPlay,onTutorial,musicOn,toggleMusic}){
       h('img',{src:'img/logo.webp',alt:'テンクル',style:{width:'100%',maxWidth:330,height:'auto',filter:'drop-shadow(0 8px 22px rgba(80,110,160,.28))',animation:'float 3.5s ease-in-out infinite'}}),
       h('div',{style:{display:'flex',flexDirection:'column',gap:12,width:'100%',marginTop:6}},
         h('button',{onClick:onPlay,style:{...btnBase,padding:'17px 0',fontSize:16,letterSpacing:6,border:'1.5px solid rgba(46,127,232,.55)',color:'#2e7fe8',boxShadow:'0 6px 20px rgba(46,127,232,.22), inset 0 1px 0 #fff'}},'遊ぶ'),
+        h('button',{onClick:onVeil,style:{...btnBase,padding:'13px 0',fontSize:13,letterSpacing:4,border:'1.5px solid rgba(128,100,230,.5)',color:'#6a4fd8',boxShadow:'0 5px 18px rgba(128,100,230,.2), inset 0 1px 0 #fff'}},'見送り'), // v171 アニマ・ヴェール
         h('button',{onClick:onTutorial,style:{...btnBase,padding:'10px 0',fontSize:11,fontWeight:700,background:'rgba(255,255,255,.55)',border:'1.5px solid rgba(120,150,190,.35)',color:'#5a80ab',boxShadow:'0 3px 10px rgba(70,100,150,.12)'}},'✦ あそびかた')
       ),
       h(SkillPanel),
       h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',width:'100%',marginTop:2}},
         h('div',{style:{fontSize:10,letterSpacing:2,color:'#8aa0be',fontFamily:"'Inter',sans-serif",fontWeight:700}},'TEN-KURU '+APP_VER),
         h('button',{onClick:toggleMusic,style:{background:'rgba(255,255,255,.7)',border:'1.5px solid rgba(120,150,190,.35)',borderRadius:12,padding:'9px 14px',color:'#5a80ab',fontSize:14,cursor:'pointer',boxShadow:'0 3px 10px rgba(70,100,150,.12)'}},musicOn?'🎵':'🔇')
+      )
+    )
+  );
+}
+
+// ── v171 見送り（アニマ・ヴェール）：数値はここだけで調整 ──
+// 1枚の背景に魂が5〜6個迷い込む。タップ→「見送りますか？」→勝てば消えて、しばらくすると新しい魂が流れ着く。
+// 魂の大きさ＝相手の強さ。stIdx は AREA_01.stages の添字（0始まり）
+const VEIL_CFG={
+  count:6,                 // 同時にいる魂の数
+  respawnMs:[4000,9000],   // 消えてから次が来るまで（最小,最大）
+  kinds:{
+    s:{img:'img/veil-soul-s.webp',sz:56,name:'小さな魂',stIdx:1,w:.5},
+    m:{img:'img/veil-soul-m.webp',sz:76,name:'迷い魂',stIdx:5,w:.35},
+    l:{img:'img/veil-soul-l.webp',sz:98,name:'大きな魂',stIdx:8,w:.15},
+  },
+  rare:{img:'img/veil-soul-rare.webp',sz:130,name:'強い魂',stIdx:12,limitSec:120,chance:.25,checkMs:30000,minSent:0}, // 時間制限つきで迷い込む強敵（釣りスピリッツ方式）。minSent=何体見送ったら出るか
+  area:{x:[14,86],y:[36,84]}, // 魂を置く範囲（%）。上は遠景なので避ける
+  lines:['……まだ、帰りたくない。','だれか、名前を呼んで。','ここは、暗いね。','約束が、あったんだ。','もう少しだけ、ここにいたい。','眠いのに、眠れないの。','だれかを、待っていたんだ。'],
+  rareLine:'……私を、送れるとでも？',
+  grades:[[0,'見習い'],[5,'二級'],[15,'一級'],[30,'マスター']], // [必要見送り数, 呼び名]
+};
+function veilGrade(sent){let g=VEIL_CFG.grades[0][1];VEIL_CFG.grades.forEach(([n,l])=>{if(sent>=n)g=l;});return g;}
+let veilSeq=1;
+function veilMakeSoul(rare){
+  const a=VEIL_CFG.area;
+  const k=rare?'rare':(()=>{const r=Math.random();let acc=0;for(const key of ['s','m','l']){acc+=VEIL_CFG.kinds[key].w;if(r<acc)return key;}return 's';})();
+  return {id:veilSeq++,kind:k,x:a.x[0]+Math.random()*(a.x[1]-a.x[0]),y:a.y[0]+Math.random()*(a.y[1]-a.y[0]),
+    line:rare?VEIL_CFG.rareLine:VEIL_CFG.lines[Math.floor(Math.random()*VEIL_CFG.lines.length)],
+    d:(5+Math.random()*4).toFixed(1)+'s',dl:(-Math.random()*6).toFixed(1)+'s',state:'in',
+    until:rare?Date.now()+VEIL_CFG.rare.limitSec*1000:null};
+}
+function veilKind(s){return s.kind==='rare'?VEIL_CFG.rare:VEIL_CFG.kinds[s.kind];}
+function VeilScreen({souls,setSouls,sent,onBattle,onBack}){
+  const[ask,setAsk]=useState(null);
+  const[now,setNow]=useState(Date.now());
+  // レア魂の残り時間表示＆期限切れ／レア出現チェック
+  useEffect(()=>{
+    const t=setInterval(()=>{setNow(Date.now());
+      setSouls(ss=>{let ch=false;const out=ss.map(s=>{if(s.until&&s.state!=='out'&&Date.now()>s.until){ch=true;return{...s,state:'out'};}return s;});return ch?out:ss;});
+    },1000);
+    return()=>clearInterval(t);
+  },[]);
+  useEffect(()=>{
+    const t=setInterval(()=>{
+      if(sent<VEIL_CFG.rare.minSent)return;
+      setSouls(ss=>{if(ss.some(s=>s.kind==='rare'&&s.state!=='out'))return ss;if(Math.random()>VEIL_CFG.rare.chance)return ss;return[...ss,veilMakeSoul(true)];});
+    },VEIL_CFG.rare.checkMs);
+    return()=>clearInterval(t);
+  },[sent]);
+  // 消えた魂は少し待って新しい魂に入れ替える（レアは補充しない）
+  useEffect(()=>{
+    const outs=souls.filter(s=>s.state==='out'&&!s._t);
+    if(!outs.length)return;
+    const timers=[];
+    outs.forEach(s=>{
+      s._t=true;
+      const[mn,mx]=VEIL_CFG.respawnMs;
+      timers.push(setTimeout(()=>{setSouls(ss=>{const rest=ss.filter(x=>x.id!==s.id);return s.kind==='rare'?rest:[...rest,veilMakeSoul(false)];});},1500+mn+Math.random()*(mx-mn)));
+    });
+    return()=>{};
+  },[souls]);
+  return h('div',{className:'veil'},
+    h('div',{className:'veil-top'},
+      h('div',null,h('div',{className:'k'},'ANIMA VEIL'),h('div',{className:'t'},'見送り')),
+      h('div',{className:'n'},'見送った魂 '+sent,h('br'),'階級：'+veilGrade(sent))
+    ),
+    souls.map(s=>{const k=veilKind(s);const left=s.until?Math.max(0,Math.ceil((s.until-now)/1000)):null;
+      return h('div',{key:s.id,className:'veil-soul '+s.state+(s.kind==='rare'?' rare':''),style:{left:s.x+'%',top:s.y+'%','--sz':k.sz,'--d':s.d,'--dl':s.dl},onClick:()=>{if(s.state!=='out')setAsk(s);}},
+        h('img',{src:k.img,alt:'',draggable:false}),
+        left!==null&&h('div',{className:'tm'},Math.floor(left/60)+':'+String(left%60).padStart(2,'0'))
+      );}),
+    h('button',{className:'veil-home',onClick:onBack},'ホームへ'),
+    ask&&h('div',{className:'veil-ask',onClick:()=>setAsk(null)},
+      h('div',{className:'box',onClick:e=>e.stopPropagation()},
+        h('img',{src:veilKind(ask).img,alt:''}),
+        h('div',{className:'nm'},veilKind(ask).name),
+        h('div',{className:'ln'},'「'+ask.line+'」'),
+        h('div',{className:'row'},
+          h('button',{onClick:()=>setAsk(null)},'やめておく'),
+          h('button',{className:'go',onClick:()=>{setAsk(null);onBattle(ask);}},'見送る')
+        )
       )
     )
   );
@@ -3856,6 +3964,9 @@ const DEFAULT_LAYOUT={handW:53,handY:0,fieldW:64,sumSize:30,sumX:1,sumY:-8,gapDF
 function App(){
   const[phase,setPhase]=useState('menu');
   const[demoMode,setDemoMode]=useState(false);
+  // v171 見送り（アニマ・ヴェール）：画面にいる魂と、今戦っている魂のid
+  const[veilSouls,setVeilSouls]=useState(()=>Array.from({length:VEIL_CFG.count},()=>veilMakeSoul(false)));
+  const veilR=useRef(null);
   const[pH,setPH]=useState([]);
   const[dH,setDH]=useState([]);
   const[field,setField]=useState([]);
@@ -4550,7 +4661,15 @@ function App(){
     setGameEndData({pPt:st.winPt,dPt:Math.max(0,st.winPt-4),winner:'player',diff:st.diff,stars:2,rivalName:st.rivalName||(st.champion&&CHAMPIONS[st.champion]?CHAMPIONS[st.champion].name:'DEALER')});
     setPhase('gameEnd');phaseR.current='gameEnd';
   }
-  function startStage(arIdx,stIdx){
+  // v171 見送り
+  function goVeil(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);veilR.current=null;setPhase('veil');phaseR.current='veil';}
+  function startVeilBattle(soul){veilR.current=soul.id;startStage(0,veilKind(soul).stIdx,true);}
+  function finishVeil(){ // 試合後：勝っていたらその魂を見送る（消す）
+    const id=veilR.current,won=gameEndData&&gameEndData.winner==='player';
+    if(id!=null&&won){setVeilSouls(ss=>ss.map(s=>s.id===id?{...s,state:'out'}:s));updSave(s=>{s.veilSent=(s.veilSent||0)+1;return s;});}
+    goVeil();
+  }
+  function startStage(arIdx,stIdx,fromVeil){
     const ar=STAGES.areas[arIdx],st=ar.stages[stIdx];
     if(!st||st.comingSoon){goMap();return;} // v54: 準備中は開始しない
     if(phaseR.current==='playing')return;      // v54: 二重開始防止
@@ -4566,6 +4685,7 @@ function App(){
     }
     stageOptsR.current={chrono,firstMs:st.firstMs||null,firstJit:st.firstJit||0,curStepFirst:st.curStepFirst||null,curArrFirst:st.curArrFirst||null,curHoldFirst:st.curHoldFirst||null,flyMsFirst:st.flyMsFirst||null,winMs:st.winMs||null,winJit:st.winJit||0,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,ch9:!!st.ch9,ch10:!!st.ch10,smart:!!st.smart,deny:!!st.deny,playerRing:!!st.playerRing,speed:st.speed||1,curStep:st.curStep||null,curArr:st.curArr||null,curHold:st.curHold||null,flyMs:st.flyMs||null,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
     if(st.challenge&&typeof SHIFT_VIDEO!=='undefined'){try{[SHIFT_VIDEO.v1,SHIFT_VIDEO.v2].forEach(u=>fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(()=>{}));}catch(e){}} // v78: 変身動画を先読み
+    if(fromVeil){goIntro(st.diff);return;} // v171 見送りからは物語・チュートリアル・登場画面を挟まない
     if(st.no===1&&!st.challenge&&!saveR.current.storyIntroSeen){setPhase('storyIntro');phaseR.current='storyIntro';return;}
     if(st.champion&&CHAMPIONS[st.champion]){setPendingDiff(st.diff);setPhase('champIntro');phaseR.current='champIntro';return;} // v61 登場画面を挟む
     if(st.tutorial&&!tutDoneR.current){openTutorial(st.diff);return;}
@@ -5254,14 +5374,15 @@ function App(){
     roundTokR.current++;stopBGM();
     let stars=0;
     const c=stageR.current;
-    if(c){const st=STAGES.areas[c.ar].stages[c.st];stars=calcStars(pp,dp,winPtR.current);if(stars>0)updSave(s=>{s.stars[st.no]=Math.max(s.stars[st.no]||0,stars);return s;});}
+    if(c&&veilR.current==null){const st=STAGES.areas[c.ar].stages[c.st];stars=calcStars(pp,dp,winPtR.current);if(stars>0)updSave(s=>{s.stars[st.no]=Math.max(s.stars[st.no]||0,stars);return s;});}
     setGameEndData({pPt:pp,dPt:dp,winner:pp>=winPtR.current?'player':'dealer',diff:diffRef.current,stars,rivalName:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||null});
     setPhase('gameEnd');phaseR.current='gameEnd';exitLink();
   }
-  function goHome(){if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
+  function goHome(){if(veilR.current!=null){goVeil();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
-  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
+  if(phase==='veil')return h(VeilScreen,{souls:veilSouls,setSouls:setVeilSouls,sent:save.veilSent||0,onBattle:startVeilBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v171
+  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onVeil:goVeil,onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
   if(phase==='brief'&&curStage)return h(BriefScreen,{stage:curStage,onStart:()=>startGame(pendingDiff)}); // v119
@@ -5279,6 +5400,7 @@ function App(){
       setTimeout(()=>startStage(0,si),80);
     }});
   if(phase==='gameEnd'&&gameEndData){
+    if(veilR.current!=null)return h(GameEndScreen,{data:gameEndData,onRestart:()=>startStage(stageCtx.ar,stageCtx.st,true),onHome:finishVeil}); // v171 見送りは結果→アニマ・ヴェールへ戻る
     if(stageCtx)return h(StageEndScreen,{data:gameEndData,stage:curStage,stars:gameEndData.stars||0,onNext:stageNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st),onMap:goMap,isLast:(()=>{const nx=STAGES.areas[stageCtx.ar].stages[stageCtx.st+1];return !nx||!!nx.comingSoon||!!nx.challenge;})()});
     return h(GameEndScreen,{data:gameEndData,onRestart:startGame,onHome:goHome});
   }
