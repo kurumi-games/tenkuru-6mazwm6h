@@ -1432,34 +1432,6 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* v155: 縦の綱引きゲージ。左端に通す。
    画面は「上＝オルビィ / 下＝くるみ」なので、境界が上に行くほど自分が押している。
    カードを見ている間も視界の隅に入り続けるのが狙い */
-/* v159: 画像の枠を使う縦ゲージ。右端、場エリアの中に収める。
-   枠の絵は 120x1197（比1:9.97）。溝の位置は実測値：
-   横 18.8%〜80.1% / 縦 11.0%〜88.4%。ここに光を収める */
-.tugv{position:absolute;right:calc(2 * var(--u));top:calc(4 * var(--u));bottom:calc(4 * var(--u));
-  width:calc(20 * var(--u));z-index:58;pointer-events:none;}
-.tugv-frame{position:absolute;inset:0;
-  background:url('img/gauge-frame.webp') center/100% 100% no-repeat;
-  filter:drop-shadow(0 calc(2 * var(--u)) calc(5 * var(--u)) rgba(0,0,0,.7));z-index:2;}
-/* 光が入る溝。枠の絵の穴にぴったり重ねる */
-.tugv-bar{position:absolute;left:18.8%;right:19.9%;top:11%;bottom:11.6%;
-  display:flex;flex-direction:column;overflow:hidden;z-index:1;
-  background:rgba(6,8,20,.7);}
-.tugv-fill{width:100%;transition:height .6s cubic-bezier(.3,1.15,.4,1);}
-.tugv-fill.dealer{background:linear-gradient(180deg,rgba(255,130,185,1),rgba(240,107,168,.55));}
-.tugv-fill.you{background:linear-gradient(180deg,rgba(44,202,223,.55),rgba(120,235,250,1));}
-.tugv-edge{position:absolute;left:0;right:0;height:calc(1.6 * var(--u));
-  margin-bottom:calc(-0.8 * var(--u));background:#fff;z-index:3;
-  box-shadow:0 0 calc(5 * var(--u)) rgba(255,255,255,.95),0 0 calc(10 * var(--u)) rgba(200,230,255,.8);
-  transition:bottom .6s cubic-bezier(.3,1.15,.4,1);}
-/* 点数は枠の外、上下に添える */
-.tugv-num{position:absolute;left:0;right:0;text-align:center;
-  font-family:'Inter',sans-serif;font-weight:800;font-size:calc(9 * var(--u));line-height:1;z-index:4;
-  text-shadow:0 0 calc(4 * var(--u)) rgba(0,0,0,1),0 calc(1 * var(--u)) calc(2 * var(--u)) rgba(0,0,0,1);}
-.tugv-num.dealer{top:calc(4.5 * var(--u));color:#ffd0e4;}
-.tugv-num.you{bottom:calc(4.5 * var(--u));color:#c8f4ff;}
-.tugv.tugv-hit .tugv-frame{animation:tugvHit .5s ease-out;}
-@keyframes tugvHit{0%{transform:scale(1);}40%{transform:scale(1.12);}100%{transform:scale(1);}}
-
 /* v160: ルール上出せない札は場まで飛んで弾き返される。
    出せないことを黙って無反応にせず、動きで理由を伝える */
 .bounce-card{position:fixed;left:0;top:0;z-index:150;pointer-events:none;
@@ -3110,7 +3082,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v161'; // v161(2026/09/11): オルビィ側のバーストを修正。着地判定がcanPlayのみで10超えを通していた。飛行中に場が変わっても着地せず手札へ返す
+const APP_VER='v162'; // v162(2026/09/11): 綱引きゲージを撤去し、元のスコア表示（YOU / 相手の箱）に戻した
+// v161(2026/09/11): オルビィ側のバーストを修正。着地判定がcanPlayのみで10超えを通していた。飛行中に場が変わっても着地せず手札へ返す
 // v160(2026/09/11): バーストを廃止。ルール上出せない札は場まで飛んで弾き返され、元の位置に戻る。減点なし
 // v159(2026/09/11): 縦ゲージに画像の枠を導入。溝の位置を実測（横18.8〜80.1% / 縦11.0〜88.4%）して光をぴったり収めた
 // v158(2026/09/11): 縦ゲージが下寄りに見えていたのを修正。上下の数字の高さが揃っておらず中心がずれていた
@@ -5330,9 +5303,19 @@ function App(){
         h('div',{className:'lbl'},'TIME'),
         h('div',{className:'val'},timeLeft)
       ),
+      h('div',{className:'gp-score you'+(ptBurst?' pt-burst':'')},
+        h('div',{className:'lbl'},'YOU'),
+        h('div',{className:'val'},pPt),
+        h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-pPt)),'pt')
+      ),
       h('div',{className:'gp-round-pill '+difficulty},
         h('span',{className:'r'},'R'+rNum),
         h('span',{className:'lvl'},curStage?(curStage.boss?'BOSS':'ST '+curStage.no):(difficulty==='easy'?'EASY':difficulty==='hard'?'HARD':difficulty==='master'?'MASTER':'NORMAL'))
+      ),
+      h('div',{className:'gp-score dealer'},
+        h('div',{className:'lbl'},rival),
+        h('div',{className:'val'},dPt),
+        h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-dPt)),'pt')
       ),
       h('div',{className:'gp-icon-btn',onClick:goHome,title:'ホームに戻る'},h('span',null,'⌂')),
       h('div',{className:'gp-track-btn',onClick:toggleMusic,title:'曲を変更（1→2→ミュート）'},
@@ -5395,22 +5378,7 @@ function App(){
       style:{animation:resetFA?'resetAnim 0.5s ease':burstAnim?'burst 0.5s ease':'none'}
     },
       h('div',{className:'field-planet'}),
-      // v157: 縦の綱引きゲージ（右端）。カードが左から右へ流れる終着点に置く。
-      // 場エリアの中に入れているので、相手の手札の下〜手札マットの上に自動で収まる
-      (()=>{
-        const lead=pPt-dPt;
-        const pos=Math.max(4,Math.min(96,50+(lead/Math.max(1,winPt))*50));
-        return h('div',{className:'tugv'+(ptBurst?' tugv-hit':'')},
-          h('div',{className:'tugv-frame'}),
-          h('div',{className:'tugv-num dealer'},dPt),
-          h('div',{className:'tugv-bar'},
-            h('div',{className:'tugv-fill dealer',style:{height:(100-pos)+'%'}}),
-            h('div',{className:'tugv-fill you',style:{height:pos+'%'}}),
-            h('div',{className:'tugv-edge',style:{bottom:pos+'%'}})
-          ),
-          h('div',{className:'tugv-num you'},pPt)
-        );
-      })(),
+
       h('div',{className:'gp-field-cards'},
         field.map((v,i)=>h('div',{key:i,className:eraseIdx.includes(i)?'fx-erase':undefined,style:{display:'contents'}},h(FieldCard,{value:v,by:fieldColors[i],isComplete:fieldSum===10&&i===field.length-1,isSpecial:!!fieldSp[i],shifted:!!fieldShift[i],ringed:fieldRing[i]||false})))
       ),
