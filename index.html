@@ -3103,7 +3103,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v176'; // v176(2026/09/13): FLOWで手札を使い切っても補充されない不具合を修正。相手側も空なら補充
+const APP_VER='v177'; // v177(2026/09/13): 配り直し判定を「バーストせずに出せる札が誰にもない」に変更。jsdomで自動テスト（詰み・手札切れ・60秒）を通した
+// const APP_VER='v176'; // v176(2026/09/13): FLOWで手札を使い切っても補充されない不具合を修正。相手側も空なら補充
 // const APP_VER='v175'; // v175(2026/09/13): 区切りなし（FLOW）。TIMEは試合全体で60秒1本、時間切れで点が多い方の勝ち。10達成は軽い演出（役名＋pt吸い寄せ）で止まらない。お互い出せる札がなければ配り直し
 // const APP_VER='v174'; // v174(2026/09/13): 2ラウンド目からGO表示もなし。区切りなく次の手札へ（COUNT_CFG.laterSkip）
 // const APP_VER='v173'; // v173(2026/09/13): カウントダウン短縮（案A）。1ラウンド目だけ3・2・1・GO、2ラウンド目からGOのみ。待ち時間 約4.5秒→約2.2秒/約0.5秒
@@ -4892,8 +4893,10 @@ function App(){
     if(!pHR.current.filter(v=>v!==null).length){refillPlayerIfEmpty(rnR.current,'empty');return;}
     ensureDealerRefill();
     const fs=fieldSumR.current,fd=fieldR.current;
-    const pOk=pHR.current.some((v,i)=>v!==null&&pFrzR.current[i]==null&&canPlay(v,fs,fd));
-    const dOk=dHR.current.some(v=>v!==null&&canPlay(v,fs,fd));
+    // v177 「出せる」ではなく「バーストせずに出せる（10に近づける）」札で判定。バーストしか残っていない状態も詰みとみなす
+    const safe=v=>canPlay(v,fs,fd)&&fs+v<=10;
+    const pOk=pHR.current.some((v,i)=>v!==null&&pFrzR.current[i]==null&&safe(v));
+    const dOk=dHR.current.some(v=>v!==null&&safe(v));
     if(pOk||dOk)return;
     resetField();
     const np=createDeck(),nd=createDeck();
