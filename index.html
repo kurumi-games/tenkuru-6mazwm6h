@@ -3097,7 +3097,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v171'; // v171(2026/09/12): 見送りモード（アニマ・ヴェール）追加。ホームの「見送り」から入る。1枚の背景に魂が5〜6個、タップで対戦、勝てば消えて新しい魂が流れ着く。時間制限つきのレア魂（セトラ）もたまに来る
+const APP_VER='v172'; // v172(2026/09/12): 見送りの結果画面を専用に。勝ったら「次の魂へ」で画面に戻らず連戦できる
+// const APP_VER='v171'; // v171(2026/09/12): 見送りモード（アニマ・ヴェール）追加。ホームの「見送り」から入る。1枚の背景に魂が5〜6個、タップで対戦、勝てば消えて新しい魂が流れ着く。時間制限つきのレア魂（セトラ）もたまに来る
 // const APP_VER='v170'; // v170(2026/09/11): 昔から「まれに押しても出ない」不具合の原因を特定。カードを出す処理だけ画面表示用の値を読んでおり、内部の最新値とズレた瞬間に無反応になっていた
 // v169(2026/09/11): 出せるはずの札が押せない不具合を修正。技の停止・補充が決着処理と同じロックを共有していたため、解除が互いに干渉していた
 // v168(2026/09/11): 技のあとにできる隙を解消。時間停止が解けてからゼロで考え始めていたため250〜330ms出遅れていた。停止中に狙いを定めておくよう変更
@@ -3955,6 +3956,30 @@ function GameEndScreen({data,onRestart,onHome}){
   );
 }
 
+// v172 見送りの結果画面：勝ったら「次の魂へ」で画面に戻らず連戦。負けたら「もう一度」
+function VeilEndScreen({data,soul,nextSoul,sent,onNext,onRetry,onBack}){
+  const win=data.winner==='player';
+  const k=veilKind(soul);
+  return h('div',{className:'veil',style:{display:'flex',alignItems:'center',justifyContent:'center',padding:16}},
+    h('div',{className:'veil-ask',style:{position:'static',background:'transparent',animation:'fadeUp .4s ease'}},
+      h('div',{className:'box'},
+        h('img',{src:k.img,alt:'',style:win?{animation:'veilOut 2.2s ease-in 0.6s both'}:{opacity:.6}}),
+        h('div',{className:'k',style:{fontFamily:"'Cinzel',serif",fontSize:'calc(9 * var(--u))',letterSpacing:'.3em',color:'#b9a8ff',marginTop:'calc(6 * var(--u))'}},win?'RELEASED':'DISCONNECTED'),
+        h('div',{className:'nm'},win?k.name+'を見送った':'接続が切れた'),
+        h('div',{className:'ln'},win?'見送った魂 '+sent+'　階級：'+veilGrade(sent):'魂はまだそこにいる。何度でも挑める。'),
+        h('div',{style:{display:'flex',justifyContent:'center',gap:'calc(18 * var(--u))',fontFamily:"'Fira Code',monospace",fontSize:'calc(20 * var(--u))',marginBottom:'calc(14 * var(--u))'}},
+          h('span',{style:{color:'#8ee9ff'}},data.pPt),h('span',{style:{color:'#8a86a8',fontSize:'calc(12 * var(--u))',alignSelf:'center'}},'vs'),h('span',{style:{color:'#ff9ab8'}},data.dPt)),
+        h('div',{className:'row',style:{flexDirection:'column'}},
+          win
+            ?(nextSoul?h('button',{className:'go',onClick:onNext},'次の魂へ　→ '+veilKind(nextSoul).name):h('button',{className:'go',onClick:onBack},'次の魂を待つ'))
+            :h('button',{className:'go',onClick:onRetry},'もう一度'),
+          h('button',{onClick:onBack},'アニマ・ヴェールへ戻る')
+        )
+      )
+    )
+  );
+}
+
 const DEFAULT_LAYOUT={handW:53,handY:0,fieldW:64,sumSize:30,sumX:1,sumY:-8,gapDF:10,gapFH:38};
 // v115: 場のカードを 53 → 64 に拡大（場は4枚までなので余白に余裕がある）
 // ★元に戻す時は fieldW を 53 に。試すなら 60(控えめ) / 70(さらに大きい) / 76(ほぼ限界)
@@ -4664,10 +4689,20 @@ function App(){
   // v171 見送り
   function goVeil(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);veilR.current=null;setPhase('veil');phaseR.current='veil';}
   function startVeilBattle(soul){veilR.current=soul.id;startStage(0,veilKind(soul).stIdx,true);}
-  function finishVeil(){ // 試合後：勝っていたらその魂を見送る（消す）
+  const veilCountedR=useRef(null); // v172 同じ試合を二重に数えない
+  function veilSettle(){ // 勝っていたらその魂を見送る（消す）＋カウント
     const id=veilR.current,won=gameEndData&&gameEndData.winner==='player';
-    if(id!=null&&won){setVeilSouls(ss=>ss.map(s=>s.id===id?{...s,state:'out'}:s));updSave(s=>{s.veilSent=(s.veilSent||0)+1;return s;});}
-    goVeil();
+    if(id!=null&&won&&veilCountedR.current!==id){veilCountedR.current=id;setVeilSouls(ss=>ss.map(s=>s.id===id?{...s,state:'out'}:s));updSave(s=>{s.veilSent=(s.veilSent||0)+1;return s;});}
+  }
+  function finishVeil(){veilSettle();goVeil();}
+  function veilNext(){ // v172 画面に戻らず次の魂と連戦
+    veilSettle();
+    const cur=veilR.current;
+    const cand=veilSouls.filter(s=>s.id!==cur&&s.state!=='out');
+    if(!cand.length){goVeil();return;}
+    const nx=cand[0]; // 結果画面のボタンに出した魂と同じにする
+    stageR.current=null;stageOptsR.current=null;
+    startVeilBattle(nx);
   }
   function startStage(arIdx,stIdx,fromVeil){
     const ar=STAGES.areas[arIdx],st=ar.stages[stIdx];
@@ -5400,7 +5435,8 @@ function App(){
       setTimeout(()=>startStage(0,si),80);
     }});
   if(phase==='gameEnd'&&gameEndData){
-    if(veilR.current!=null)return h(GameEndScreen,{data:gameEndData,onRestart:()=>startStage(stageCtx.ar,stageCtx.st,true),onHome:finishVeil}); // v171 見送りは結果→アニマ・ヴェールへ戻る
+    if(veilR.current!=null){const vs=veilSouls.find(s=>s.id===veilR.current)||veilSouls[0];const cand=veilSouls.filter(s=>s.id!==veilR.current&&s.state!=='out');const nx=cand.length?cand[0]:null;
+      return h(VeilEndScreen,{data:gameEndData,soul:vs,nextSoul:nx,sent:(save.veilSent||0)+((gameEndData.winner==='player'&&veilCountedR.current!==veilR.current)?1:0),onNext:veilNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st,true),onBack:finishVeil});} // v172
     if(stageCtx)return h(StageEndScreen,{data:gameEndData,stage:curStage,stars:gameEndData.stars||0,onNext:stageNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st),onMap:goMap,isLast:(()=>{const nx=STAGES.areas[stageCtx.ar].stages[stageCtx.st+1];return !nx||!!nx.comingSoon||!!nx.challenge;})()});
     return h(GameEndScreen,{data:gameEndData,onRestart:startGame,onHome:goHome});
   }
