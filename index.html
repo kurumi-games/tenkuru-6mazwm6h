@@ -3073,7 +3073,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v167'; // v167(2026/09/11): 計測でオルビィが687回中34回しか動いていないと判明。「列を作らない」470回・「相手に渡すから出さない」183回が原因。どちらも緩和した
+const APP_VER='v168'; // v168(2026/09/11): 技のあとにできる隙を解消。時間停止が解けてからゼロで考え始めていたため250〜330ms出遅れていた。停止中に狙いを定めておくよう変更
+// v167(2026/09/11): 計測でオルビィが687回中34回しか動いていないと判明。「列を作らない」470回・「相手に渡すから出さない」183回が原因。どちらも緩和した
 // v166(2026/09/11): オルビィが弱い原因を特定するための計測を追加（画面左下に表示。原因が分かり次第削除）
 // v165(2026/09/11): 捕獲軌道で相手の手札が11枚になるバグを修正。手札は10枠しかないため、空き枠を超えて奪わないようにした
 // v164(2026/09/11): AIに「相手が10を作れる道の数」を評価に追加（くるみの打ち方を式にしたもの）。技3種を椅子取りゲーム式にして先読みできないようにした
@@ -4959,8 +4960,38 @@ function App(){
       pStopR.current=false;setPStop(false);lockR.current=false;
       setChronoFx('out');setTimeout(()=>setChronoFx(null),420);duckBGM(false);
       try{resumeAC();playChronoReleaseSE();}catch(e){}
-      if(phaseR.current==='playing'&&!resolvingR.current){clearTimeout(aiRef.current);scheduleAi(rn);}
+      // v168: 解除の瞬間からゼロで考え始めると、思考＋カーソル移動＋降下で
+      // 250〜330ms出遅れ、その間プレイヤーだけが動けてしまう。
+      // 止まっている間に狙いを定めておき、解除と同時に降下させる
+      if(phaseR.current==='playing'&&!resolvingR.current){clearTimeout(aiRef.current);scheduleAi(rn,20);}
     },ms);
+    // 停止が解ける少し前に、出す札を決めてカーソルを合わせておく
+    setTimeout(()=>{
+      if(phaseR.current!=='playing'||resolvingR.current)return;
+      try{aimDuringFreeze();}catch(e){}
+    },Math.max(0,ms-360));
+  }
+  // v168: 停止中に「次に出す札」へカーソルを移動させておく。
+  // 人が止まっている間に狙いを定めるのと同じ
+  function aimDuringFreeze(){
+    const dHand=dHR.current,cf=fieldR.current,cs=fieldSumR.current;
+    if(!dHand.length)return;
+    const rf=dRingR.current;
+    const eligible=i=>!isHoldRing(rf[i])&&dIdsR.current[i]!==r2PendingCardR.current;
+    const avail=dHand.filter((v,i)=>eligible(i));
+    const playable=avail.filter(v=>canPlay(v,cs,cf)&&cs+v<=10);
+    if(!playable.length)return;
+    let chosen=null;
+    if(denyActive())chosen=denyPick(playable,cs,cf,avail);
+    else if(smartActive())chosen=smartPick(playable,cs,cf);
+    else chosen=playable.filter(v=>cs+v===10)[0]||playable[0];
+    if(chosen==null)return;
+    let idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen);
+    if(idx<0)return;
+    const id=dIdsR.current[idx];
+    if(id==null)return;
+    // 位置だけ合わせる。到着したら curBusy を解いて、解除後の本番の動作を妨げない
+    cursorToCard(id,()=>{curBusyR.current=false;},null,()=>{curBusyR.current=false;});
   }
   // v150: 手札が空になったら補充する。自分で出し切った時だけでなく、
   // 奪われて空になった時にも必要。補充が終わるまで時間を止めて、
