@@ -3097,7 +3097,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v173'; // v173(2026/09/13): カウントダウン短縮（案A）。1ラウンド目だけ3・2・1・GO、2ラウンド目からGOのみ。待ち時間 約4.5秒→約2.2秒/約0.5秒
+const APP_VER='v174'; // v174(2026/09/13): 2ラウンド目からGO表示もなし。区切りなく次の手札へ（COUNT_CFG.laterSkip）
+// const APP_VER='v173'; // v173(2026/09/13): カウントダウン短縮（案A）。1ラウンド目だけ3・2・1・GO、2ラウンド目からGOのみ。待ち時間 約4.5秒→約2.2秒/約0.5秒
 // const APP_VER='v172'; // v172(2026/09/12): 見送りの結果画面を専用に。勝ったら「次の魂へ」で画面に戻らず連戦できる
 // const APP_VER='v171'; // v171(2026/09/12): 見送りモード（アニマ・ヴェール）追加。ホームの「見送り」から入る。1枚の背景に魂が5〜6個、タップで対戦、勝てば消えて新しい魂が流れ着く。時間制限つきのレア魂（セトラ）もたまに来る
 // const APP_VER='v170'; // v170(2026/09/11): 昔から「まれに押しても出ない」不具合の原因を特定。カードを出す処理だけ画面表示用の値を読んでおり、内部の最新値とズレた瞬間に無反応になっていた
@@ -3274,7 +3275,9 @@ const CHRONO_CONFIG={
 };
 // ── v173 カウントダウン：数値はここだけで調整 ──
 // 案A：1ラウンド目だけ 3・2・1・GO、2ラウンド目からは GO の一発だけ（v172までは毎ラウンド 5〜GO＝約4.5秒）
-const COUNT_CFG={firstFrom:3,laterFrom:0,stepMs:550,goMs:500};
+// v174：2ラウンド目からはGO表示もなし（laterSkip:true）。開花が終わったらそのまま札が押せる。トランプの「スピード」のように区切りなく流れる
+// 戻す時は laterSkip:false（GOだけ出る）／firstFrom:5 stepMs:650 goMs:650 で v172 以前の形
+const COUNT_CFG={firstFrom:3,laterFrom:0,stepMs:550,goMs:500,laterSkip:true};
 const CHRONO_TEXT={name:'クロノリンク',en:'CHRONO LINK',hint:'もう1枚選べ'};
 
 // ── v61 チャンピオン（キャラクター）：名前・セリフはここだけで変更 ──
@@ -4798,13 +4801,14 @@ function App(){
     setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldSp([]);
     setFieldColors([]); // v46: 時間切れ後に前ラウンドの色記録が残って自分のカードがオレンジになるバグ修正
     setFlashMsg(null);setTimeLeft(roundSecR.current);setComboShow(null);setTimeUpShow(false);setFieldShift([]);
-    let c=rn===1?COUNT_CFG.firstFrom:COUNT_CFG.laterFrom;setCountNum(c);countNumR.current=c; // v173
+    const skip=rn>1&&COUNT_CFG.laterSkip; // v174 区切りなし
+    let c=rn===1?COUNT_CFG.firstFrom:COUNT_CFG.laterFrom;if(!skip){setCountNum(c);countNumR.current=c;} // v173
     function tick(){
-      setCountNum(c);countNumR.current=c;
+      if(!skip){setCountNum(c);countNumR.current=c;}
       // カウント中は無音（GOだけ鳴らす）
-      if(c===0){
+      if(c===0||skip){
         // GO！音（ワープSE）
-        playGoSE();
+        if(!skip)playGoSE();
         setTimeout(()=>{
           setCountNum(-1);countNumR.current=-1;
           aiFirstFastRef.current=Math.random()<0.90;
@@ -4823,7 +4827,7 @@ function App(){
           if(hideLeftR.current>0&&rn>1)setHideLeft2(hideLeftR.current-1); // v140 裏返しの消化
           if(tsLeftR.current>0&&rn>1)setTsLeft2(tsLeftR.current-1); // v136 効果ラウンドを消化
           ensureDealerRefill(); // v89 保険：環付きしか残ってなければ10枚まで補充
-        },COUNT_CFG.goMs);
+        },skip?0:COUNT_CFG.goMs);
         return;
       }
       c--;countRef.current=setTimeout(tick,COUNT_CFG.stepMs);
