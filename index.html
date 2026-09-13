@@ -2188,6 +2188,14 @@ const FXCONV=AC.createConvolver();
 })();
 const FXWET=AC.createGain();FXWET.gain.value=0.6;
 FXCONV.connect(FXWET);FXWET.connect(AC.destination);
+// ── v189 パズルのピースがはまる音（添付音源をそのまま再生、加工なし） ──
+// 先読みして AudioBuffer に持つ。他の効果音と同じ出力（fxOut）に流す。音源の先頭 200ms が無音なので、はまる瞬間の 200ms 前から再生する
+const SNAP_SE={url:'se/piece-snap.mp3',onsetMs:200,buf:null,loading:null};
+function loadSnapSE(){if(SNAP_SE.buf||SNAP_SE.loading)return SNAP_SE.loading;SNAP_SE.loading=fetch(SNAP_SE.url).then(r=>r.arrayBuffer()).then(ab=>new Promise((res,rej)=>AC.decodeAudioData(ab,res,rej))).then(b=>{SNAP_SE.buf=b;return b;}).catch(()=>{SNAP_SE.loading=null;});return SNAP_SE.loading;}
+function playSnapSE(){ // 読み込み前なら鳴らさず待たない
+  try{if(!SNAP_SE.buf)return null;resumeAC();const src=AC.createBufferSource();src.buffer=SNAP_SE.buf;const g=AC.createGain();g.gain.value=1;src.connect(g);fxOut(g,0);src.start();return src;}catch(e){return null;}
+}
+setTimeout(loadSnapSE,800); // 起動直後に先読み
 // ドライ＋リバーブセンドの2系統出力
 function fxOut(node,rev){
   node.connect(AC.destination);
@@ -3144,7 +3152,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v188'; // v188(2026/09/13): パズル画面の背景を img/panel-bg.webp に
+const APP_VER='v189'; // v189(2026/09/13): ピースがはまる効果音（se/piece-snap.mp3、加工なし）。はまる瞬間に1回、先読み、次戦へ進んだら未再生分はキャンセル
+// const APP_VER='v188'; // v188(2026/09/13): パズル画面の背景を img/panel-bg.webp に
 // const APP_VER='v187'; // v187(2026/09/13): 12ピースの panel_02 追加（4×3、正方形寄り）。パネルを円形台座の上に浮かぶ立体表示に（額縁・厚み・影・5秒周期の浮遊、reduced-motion対応）。panel_01 完成後は panel_02 へ
 // const APP_VER='v186'; // v186(2026/09/13): パズルモードの結果画面を完全に廃止。試合終了→即パネル（勝ちならピースが落ちてくる）
 // const APP_VER='v185'; // v185(2026/09/13): パズルを同梱素材 panel_01 に差し替え（manifest座標で配置、未獲得は形だけ）。勝敗どちらも結果から0.8秒で自動的にパネルへ。完成後は「もう一戦」。保存は save.puzzles[panel_01-v1]
@@ -4092,9 +4101,10 @@ function PuzzleScreen({save,pn,hasNext,onPlaced,onNext,onNextPanel,onBack}){
     const pending=st.got.filter(i=>!st.placed.includes(i)&&!shown.includes(i));pendingR.current=pending;
     if(!pending.length){if(shown.length>=N&&!done){const t=setTimeout(()=>setDone(true),120);return()=>clearTimeout(t);}return;}
     const idx=pending[0];
-    const t1=setTimeout(()=>{setDropping(idx);try{resumeAC();fxBell({f:1046,v:0.05,d:0.5,bright:1.1,rev:0.5});}catch(e){}},PZ_TIMING.gapMs);
+    const t1=setTimeout(()=>{setDropping(idx);},PZ_TIMING.gapMs);
+    const tSnap=setTimeout(()=>{playSnapSE();},Math.max(0,PZ_TIMING.gapMs+PZ_TIMING.dropMs-SNAP_SE.onsetMs)); // v189 はまる瞬間に立ち上がりを合わせる
     const t2=setTimeout(()=>{setDropping(null);setShown(s=>[...s,idx]);onPlaced(pn,[idx]);},PZ_TIMING.gapMs+PZ_TIMING.dropMs);
-    return()=>{clearTimeout(t1);clearTimeout(t2);}; // 離脱時に古いタイマーを止める
+    return()=>{clearTimeout(t1);clearTimeout(tSnap);clearTimeout(t2);}; // 離脱時に古いタイマーを止める（未再生の音もここで消える）
   },[shown]);
   const visible=[...shown,...(dropping!=null?[dropping]:[])];
   const next=()=>{if(wentR.current)return;wentR.current=true;setWent(true);if(pendingR.current.length)onPlaced(pn,pendingR.current);onNext();}; // 演出を飛ばしても獲得・配置は保存
