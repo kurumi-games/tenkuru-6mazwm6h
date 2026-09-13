@@ -4113,7 +4113,7 @@ function GameEndScreen({data,onRestart,onHome}){
 const PZ_TIMING={dropMs:1500,gapMs:300}; // はまる演出の長さ／間隔（v190：480→900ms、はまる瞬間を楽しめるようにゆっくり）
 const PANELS=[
   // v200/v201 順番＝STAGE1 記憶のランタンの少女（同梱素材）→ STAGE2 オルビィ（セトラの仮ステージは v201 で削除）
-  {id:'panel_05',ver:1,dir:'img/panel_05/',w:1448,h:1086,bossName:'記憶のランタンの少女',rect:true,
+  {id:'panel_05',ver:1,dir:'img/panel_05/',w:1448,h:1086,bossName:'記憶のランタンの少女',rect:true,late:[0,1], // 上段2枚は最後（顔がある想定）
    ladder:[{st:3,gk:'mist'},{st:4,gk:'chain'},{st:5,gk:'silence'},{st:6,gk:'heavy'},{st:7,gk:'lantern'},{st:8,gk:'lantern'}],
    boss:{st:8,gk:'lantern',rate:0.4,boost:{speed:0.5,diff:'master'}}, // 固有ギミック「ともしび」を高頻度で。通常AIの最強設定＋速さ
    boost:{speed:0.6,diff:'master'},
