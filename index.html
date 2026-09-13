@@ -3137,7 +3137,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v185'; // v185(2026/09/13): パズルを同梱素材 panel_01 に差し替え（manifest座標で配置、未獲得は形だけ）。勝敗どちらも結果から0.8秒で自動的にパネルへ。完成後は「もう一戦」。保存は save.puzzles[panel_01-v1]
+const APP_VER='v186'; // v186(2026/09/13): パズルモードの結果画面を完全に廃止。試合終了→即パネル（勝ちならピースが落ちてくる）
+// const APP_VER='v185'; // v185(2026/09/13): パズルを同梱素材 panel_01 に差し替え（manifest座標で配置、未獲得は形だけ）。勝敗どちらも結果から0.8秒で自動的にパネルへ。完成後は「もう一戦」。保存は save.puzzles[panel_01-v1]
 // const APP_VER='v184'; // v184(2026/09/13): パズルをジグソー形（凸凹）に。結果→自動でパネルへ、「ピースを集める」は演出中から押せて即次のバトル。飛ばしても配置は保存。素材は img/panel_01.webp
 // const APP_VER='v183'; // v183(2026/09/13): 役完成の演出スキップ。完成した瞬間に手札エリアが薄暗くなり「タップでスキップ」。押すと3-2-1を飛ばしてGOから次のラウンド
 // const APP_VER='v182'; // v182(2026/09/13): パネルが豆粒になる不具合を修正（見送り・パズル画面に --u が無かった）
@@ -4847,16 +4848,15 @@ function App(){
   // v180 パズル：勝った試合ごとに1回だけ抽選（同じ試合で結果画面を何度出しても重複しない）
   const pzModeR=useRef(false),pzBattleR=useRef(0); // v181 パズルモード中か／何戦目か（重複付与防止のキー）
   const pzAwardedR=useRef(null);const[pzPiece,setPzPiece]=useState(null);
-  useEffect(()=>{
-    if(phase!=='gameEnd'||!pzModeR.current||!gameEndData||gameEndData.winner!=='player')return;
-    if(pzAwardedR.current===pzBattleR.current)return;
-    pzAwardedR.current=pzBattleR.current;
-    const st=pzState(saveR.current);
-    const rest=Array.from({length:PZ_N},(_,i)=>i).filter(i=>!st.got.includes(i)); // 獲得済み（未はめ込み含む）は除外
-    if(!rest.length){setPzPiece(null);return;} // 完成後は追加なし
-    const idx=rest[Math.floor(Math.random()*rest.length)];
-    updSave(s=>pzWrite(s,{...st,got:[...st.got,idx]})); // 演出より先に保存
-    setPzPiece(idx);
+  useEffect(()=>{ // v186 結果画面は出さない。勝ちなら付与して保存→そのままパネルへ。負けもそのままパネルへ
+    if(phase!=='gameEnd'||!pzModeR.current||!gameEndData)return;
+    if(gameEndData.winner==='player'&&pzAwardedR.current!==pzBattleR.current){
+      pzAwardedR.current=pzBattleR.current;
+      const st=pzState(saveR.current);
+      const rest=Array.from({length:PZ_N},(_,i)=>i).filter(i=>!st.got.includes(i)); // 獲得済み（未はめ込み含む）は除外
+      if(rest.length){const idx=rest[Math.floor(Math.random()*rest.length)];updSave(s=>pzWrite(s,{...st,got:[...st.got,idx]}));} // 演出より先に保存（完成後は追加なし）
+    }
+    goPuzzle();
   },[phase]);
   function pzPlaced(idxs){updSave(s=>{const st=pzState(s);const add=(Array.isArray(idxs)?idxs:[idxs]).filter(i=>!st.placed.includes(i));return add.length?pzWrite(s,{...st,placed:[...st.placed,...add]}):s;});}
   function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);veilR.current=null;pzModeR.current=false;setPzPiece(null);setPhase('puzzle');phaseR.current='puzzle';}
@@ -5665,7 +5665,7 @@ function App(){
       setTimeout(()=>startStage(0,si),80);
     }});
   if(phase==='gameEnd'&&gameEndData){
-    if(pzModeR.current)return h(PuzzleEndScreen,{data:gameEndData,piece:pzPiece,pzCount:pzState(save).got.length,onPanel:goPuzzle}); // v181 / v185 勝敗どちらも自動でパネルへ
+    if(pzModeR.current)return h('div',{className:'pz-screen'}); // v186 結果画面なし。直後の effect でパネルへ（一瞬の空画面）
     if(veilR.current!=null){const vs=veilSouls.find(s=>s.id===veilR.current)||veilSouls[0];const cand=veilSouls.filter(s=>s.id!==veilR.current&&s.state!=='out');const nx=cand.length?cand[0]:null;
       return h(VeilEndScreen,{data:gameEndData,soul:vs,nextSoul:nx,sent:(save.veilSent||0)+((gameEndData.winner==='player'&&veilCountedR.current!==veilR.current)?1:0),onNext:veilNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st,true),onBack:finishVeil});} // v172
     if(stageCtx)return h(StageEndScreen,{data:gameEndData,stage:curStage,stars:gameEndData.stars||0,onNext:stageNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st),onMap:goMap,isLast:(()=>{const nx=STAGES.areas[stageCtx.ar].stages[stageCtx.st+1];return !nx||!!nx.comingSoon||!!nx.challenge;})()});
