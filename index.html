@@ -1993,7 +1993,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .ptfly.burst .pt{color:#ff8fa3;}
 /* ── v187 パズル：浮遊する立体パネル（reference/panel.css を既存画面に合わせて取り込み） ── */
 @keyframes pzPop{from{opacity:0;transform:scale(.4) rotate(-12deg)}to{opacity:1;transform:none}}
-.pz-screen{--u:min(calc(100vw / 360),calc(100dvh / 640));--gold:#d3be8c;position:fixed;inset:0;background:radial-gradient(ellipse at 50% 20%,#1b1747 0%,#07061a 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(12 * var(--u)) calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#dbe4f5;overflow:hidden;}
+.pz-screen{--u:min(calc(100vw / 360),calc(100dvh / 640));--gold:#d3be8c;position:fixed;inset:0;background:#0a0d24 url('img/panel-bg.webp') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(12 * var(--u)) calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#dbe4f5;overflow:hidden;}
 .pz-screen .k{font-family:'Cinzel',serif;font-size:calc(9 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
 .pz-screen .t{font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.1em;margin:calc(2 * var(--u)) 0 calc(4 * var(--u));}
 /* 舞台：台座＋影＋浮遊する板。装飾は全部 pointer-events:none */
@@ -3144,7 +3144,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v187'; // v187(2026/09/13): 12ピースの panel_02 追加（4×3、正方形寄り）。パネルを円形台座の上に浮かぶ立体表示に（額縁・厚み・影・5秒周期の浮遊、reduced-motion対応）。panel_01 完成後は panel_02 へ
+const APP_VER='v188'; // v188(2026/09/13): パズル画面の背景を img/panel-bg.webp に
+// const APP_VER='v187'; // v187(2026/09/13): 12ピースの panel_02 追加（4×3、正方形寄り）。パネルを円形台座の上に浮かぶ立体表示に（額縁・厚み・影・5秒周期の浮遊、reduced-motion対応）。panel_01 完成後は panel_02 へ
 // const APP_VER='v186'; // v186(2026/09/13): パズルモードの結果画面を完全に廃止。試合終了→即パネル（勝ちならピースが落ちてくる）
 // const APP_VER='v185'; // v185(2026/09/13): パズルを同梱素材 panel_01 に差し替え（manifest座標で配置、未獲得は形だけ）。勝敗どちらも結果から0.8秒で自動的にパネルへ。完成後は「もう一戦」。保存は save.puzzles[panel_01-v1]
 // const APP_VER='v184'; // v184(2026/09/13): パズルをジグソー形（凸凹）に。結果→自動でパネルへ、「ピースを集める」は演出中から押せて即次のバトル。飛ばしても配置は保存。素材は img/panel_01.webp
