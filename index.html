@@ -2854,7 +2854,7 @@ function stageBrief(st){
   else if(st.rule==='shuffle')gName='シャッフル';
   else if(st.rule==='frost')gName='フロスト・ロック';
   else if(st.tutorial)gName='チュートリアル';
-  else if(st.chrono)gName='クロノリンク';
+  else if(st.chrono&&CHRONO_CONFIG.enabled)gName='クロノリンク';
   else gName='通常ルール';
   // 補足（速い相手・短い持ち時間）は説明の頭に足す
   const ex=[];
@@ -3131,7 +3131,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v196'; // v196(2026/09/13): 通常ステージのディーラー全体強化（DEALER_BOOST：判断+2段階、速さ0.6倍）。パズルの相手は通常ステージ順に戻した（強化が乗る）
+const APP_VER='v197'; // v197(2026/09/13): パネル1削除、パネル2を12戦の本気構成に（1〜6通常ましまし、7〜11新ギミック：砂時計・霧・鎖・静寂・重罰、12オルビィ）。相手の星環は毎ラウンド20%。プレイヤーのクロノリンク廃止
+// const APP_VER='v196'; // v196(2026/09/13): 通常ステージのディーラー全体強化（DEALER_BOOST：判断+2段階、速さ0.6倍）。パズルの相手は通常ステージ順に戻した（強化が乗る）
 // const APP_VER='v195'; // v195(2026/09/13): パズルの進捗リセット（保存キー ver2）。相手を大幅に強化：panel_01=ST6→ST9→BOSS→ルナ→モルフォ→セトラ→オルビィ、panel_02はさらに上寄せ
 // const APP_VER='v194'; // v194(2026/09/13): カウントダウン（5-4-3-2-1／3-2-1）中も手札エリアをタップで即GO
 // const APP_VER='v193'; // v193(2026/09/13): 落下開始位置を「パネル上端より上」に固定（top を動かす方式）。下の段のピースも同じ高さから降りる
@@ -3321,7 +3322,7 @@ const RULE_HOOKS={
 //       途中で突然変化はしない。1=最初の10枚から。
 //       1試合 maxPerMatch 枚。未使用のまま配り直しになった時だけ次の手札へ引き継ぐ。
 const CHRONO_CONFIG={
-  enabled:true,
+  enabled:false, // v197 プレイヤー側のクロノリンクは廃止
   appearOnDeal:1,              // 1=最初の10枚から / 2=2周目から（使い切り・時間切れの配り直しどちらも1周と数える）
   maxPerMatch:1,
   appearRate:1.0,              // 1試合の開始時に1回だけ判定。1.0=毎試合必ず出る
@@ -3344,6 +3345,16 @@ const COLLISION_MS=220;
 const DEALER_BOOST={enabled:true,diffUp:2,speed:0.6};
 const DIFF_ORDER=['easy','normal','hard','master'];
 function boostDiff(d){if(!DEALER_BOOST.enabled)return d;const i=DIFF_ORDER.indexOf(d);return i<0?d:DIFF_ORDER[Math.min(3,i+DEALER_BOOST.diffUp)];}
+// ── v197 パズル用の新ギミック（相手の星環カードを場に出した瞬間だけ発動）：数値はここだけで調整 ──
+// 毎ラウンド開始時 GK_RING_RATE の確率で、相手の手札1枚に星環が付く。相手はその札を普通に出せる
+const GK_RING_RATE=0.20;
+const GIMMICKS={
+  hour:   {name:'砂時計',en:'HOURGLASS',color:'#7fd0ff',ring:'time',   desc:'残り時間が3秒減る',              sec:3},
+  mist:   {name:'霧',    en:'MIST',     color:'#c9d2e8',ring:'lock',   desc:'場の札と合計が3秒間見えなくなる',  ms:3000},
+  chain:  {name:'鎖',    en:'CHAIN',    color:'#ffd35e',ring:'command',desc:'次に出せるのは相手が今出した数字だけ',ms:4000},
+  silence:{name:'静寂',  en:'SILENCE',  color:'#b98cff',ring:'erase',  desc:'このラウンド、札を出すたび1秒出せない',cool:1000},
+  heavy:  {name:'重罰',  en:'PENALTY',  color:'#ff6b81',ring:'erase',  desc:'このラウンド、バーストが−4',        pen:4},
+};
 // ── v175 区切りなし（FLOW）：トランプの「スピード」のように、TIMEは試合全体で1本 ──
 // 時間切れ＝点が多い方の勝ち。目標点での先取り終了はしない。10ができたら軽く光って +pt が自分の点まで吸い寄せられ、そのまま続く
 // お互い出せる札がなくなったら、場を空けて両方の手札を配り直す。戻す時は enabled:false
@@ -3530,7 +3541,7 @@ function TitleScreen({onPlay,onPuzzle,onTutorial,musicOn,toggleMusic}){
         h('button',{onClick:onPuzzle,style:{...btnBase,padding:'13px 0',fontSize:13,letterSpacing:4,border:'1.5px solid rgba(230,180,90,.5)',color:'#b07a1e',boxShadow:'0 5px 18px rgba(230,180,90,.2), inset 0 1px 0 #fff'}},'パズル'), // v181
         h('button',{onClick:onTutorial,style:{...btnBase,padding:'10px 0',fontSize:11,fontWeight:700,background:'rgba(255,255,255,.55)',border:'1.5px solid rgba(120,150,190,.35)',color:'#5a80ab',boxShadow:'0 3px 10px rgba(70,100,150,.12)'}},'✦ あそびかた')
       ),
-      h(SkillPanel),
+      // h(SkillPanel), // v197 クロノリンク廃止に伴い非表示
       h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',width:'100%',marginTop:2}},
         h('div',{style:{fontSize:10,letterSpacing:2,color:'#8aa0be',fontFamily:"'Inter',sans-serif",fontWeight:700}},'TEN-KURU '+APP_VER),
         h('button',{onClick:toggleMusic,style:{background:'rgba(255,255,255,.7)',border:'1.5px solid rgba(120,150,190,.35)',borderRadius:12,padding:'9px 14px',color:'#5a80ab',fontSize:14,cursor:'pointer',boxShadow:'0 3px 10px rgba(70,100,150,.12)'}},musicOn?'🎵':'🔇')
@@ -3958,19 +3969,10 @@ function GameEndScreen({data,onRestart,onHome}){
 // ladder：獲得数→相手（AREA_01.stages の添字）。集めるほどだんだん強くなる
 const PZ_TIMING={dropMs:1500,gapMs:300}; // はまる演出の長さ／間隔（v190：480→900ms、はまる瞬間を楽しめるようにゆっくり）
 const PANELS=[
-  {id:'panel_01',ver:2,dir:'img/panel_01/',w:1619,h:971,ladder:[0,1,2,3,4,5,6,7,8,9],pieces:[ // v196 通常ステージ1〜9→ボス（ディーラー全体強化が乗る）。ver2=進捗リセット
-    {id:'piece_01',x:0,y:0,w:325,h:553,path:'M 0.00000,0.00000 L 323.80000,0.00000 L 323.80000,184.46600 C 323.80000,213.60800 322.18100,221.70300 310.84800,221.70300 C 302.75300,221.70300 301.13400,202.27500 276.84900,202.27500 C 250.94500,202.27500 250.94500,283.22500 276.84900,283.22500 C 301.13400,283.22500 302.75300,263.79700 310.84800,263.79700 C 322.18100,263.79700 323.80000,271.89200 323.80000,301.03400 L 323.80000,485.50000 L 220.18400,485.50000 C 191.04200,485.50000 182.94700,487.11900 182.94700,498.45200 C 182.94700,506.54700 202.37500,508.16600 202.37500,532.45100 C 202.37500,558.35500 121.42500,558.35500 121.42500,532.45100 C 121.42500,508.16600 140.85300,506.54700 140.85300,498.45200 C 140.85300,487.11900 132.75800,485.50000 103.61600,485.50000 L 0.00000,485.50000 L 0.00000,0.00000 Z'},
-    {id:'piece_02',x:257,y:0,w:458,h:487,path:'M 323.80000,0.00000 L 647.60000,0.00000 L 647.60000,184.46600 C 647.60000,213.60800 649.21900,221.70300 660.55200,221.70300 C 668.64700,221.70300 670.26600,202.27500 694.55100,202.27500 C 720.45500,202.27500 720.45500,283.22500 694.55100,283.22500 C 670.26600,283.22500 668.64700,263.79700 660.55200,263.79700 C 649.21900,263.79700 647.60000,271.89200 647.60000,301.03400 L 647.60000,485.50000 L 543.98400,485.50000 C 514.84200,485.50000 506.74700,483.88100 506.74700,472.54800 C 506.74700,464.45300 526.17500,462.83400 526.17500,438.54900 C 526.17500,412.64500 445.22500,412.64500 445.22500,438.54900 C 445.22500,462.83400 464.65300,464.45300 464.65300,472.54800 C 464.65300,483.88100 456.55800,485.50000 427.41600,485.50000 L 323.80000,485.50000 L 323.80000,301.03400 C 323.80000,271.89200 322.18100,263.79700 310.84800,263.79700 C 302.75300,263.79700 301.13400,283.22500 276.84900,283.22500 C 250.94500,283.22500 250.94500,202.27500 276.84900,202.27500 C 301.13400,202.27500 302.75300,221.70300 310.84800,221.70300 C 322.18100,221.70300 323.80000,213.60800 323.80000,184.46600 L 323.80000,0.00000 Z'},
-    {id:'piece_03',x:647,y:0,w:326,h:553,path:'M 647.60000,0.00000 L 971.40000,0.00000 L 971.40000,184.46600 C 971.40000,213.60800 969.78100,221.70300 958.44800,221.70300 C 950.35300,221.70300 948.73400,202.27500 924.44900,202.27500 C 898.54500,202.27500 898.54500,283.22500 924.44900,283.22500 C 948.73400,283.22500 950.35300,263.79700 958.44800,263.79700 C 969.78100,263.79700 971.40000,271.89200 971.40000,301.03400 L 971.40000,485.50000 L 867.78400,485.50000 C 838.64200,485.50000 830.54700,487.11900 830.54700,498.45200 C 830.54700,506.54700 849.97500,508.16600 849.97500,532.45100 C 849.97500,558.35500 769.02500,558.35500 769.02500,532.45100 C 769.02500,508.16600 788.45300,506.54700 788.45300,498.45200 C 788.45300,487.11900 780.35800,485.50000 751.21600,485.50000 L 647.60000,485.50000 L 647.60000,301.03400 C 647.60000,271.89200 649.21900,263.79700 660.55200,263.79700 C 668.64700,263.79700 670.26600,283.22500 694.55100,283.22500 C 720.45500,283.22500 720.45500,202.27500 694.55100,202.27500 C 670.26600,202.27500 668.64700,221.70300 660.55200,221.70300 C 649.21900,221.70300 647.60000,213.60800 647.60000,184.46600 L 647.60000,0.00000 Z'},
-    {id:'piece_04',x:905,y:0,w:458,h:487,path:'M 971.40000,0.00000 L 1295.20000,0.00000 L 1295.20000,184.46600 C 1295.20000,213.60800 1296.81900,221.70300 1308.15200,221.70300 C 1316.24700,221.70300 1317.86600,202.27500 1342.15100,202.27500 C 1368.05500,202.27500 1368.05500,283.22500 1342.15100,283.22500 C 1317.86600,283.22500 1316.24700,263.79700 1308.15200,263.79700 C 1296.81900,263.79700 1295.20000,271.89200 1295.20000,301.03400 L 1295.20000,485.50000 L 1191.58400,485.50000 C 1162.44200,485.50000 1154.34700,483.88100 1154.34700,472.54800 C 1154.34700,464.45300 1173.77500,462.83400 1173.77500,438.54900 C 1173.77500,412.64500 1092.82500,412.64500 1092.82500,438.54900 C 1092.82500,462.83400 1112.25300,464.45300 1112.25300,472.54800 C 1112.25300,483.88100 1104.15800,485.50000 1075.01600,485.50000 L 971.40000,485.50000 L 971.40000,301.03400 C 971.40000,271.89200 969.78100,263.79700 958.44800,263.79700 C 950.35300,263.79700 948.73400,283.22500 924.44900,283.22500 C 898.54500,283.22500 898.54500,202.27500 924.44900,202.27500 C 948.73400,202.27500 950.35300,221.70300 958.44800,221.70300 C 969.78100,221.70300 971.40000,213.60800 971.40000,184.46600 L 971.40000,0.00000 Z'},
-    {id:'piece_05',x:1295,y:0,w:324,h:553,path:'M 1295.20000,0.00000 L 1619.00000,0.00000 L 1619.00000,485.50000 L 1515.38400,485.50000 C 1486.24200,485.50000 1478.14700,487.11900 1478.14700,498.45200 C 1478.14700,506.54700 1497.57500,508.16600 1497.57500,532.45100 C 1497.57500,558.35500 1416.62500,558.35500 1416.62500,532.45100 C 1416.62500,508.16600 1436.05300,506.54700 1436.05300,498.45200 C 1436.05300,487.11900 1427.95800,485.50000 1398.81600,485.50000 L 1295.20000,485.50000 L 1295.20000,301.03400 C 1295.20000,271.89200 1296.81900,263.79700 1308.15200,263.79700 C 1316.24700,263.79700 1317.86600,283.22500 1342.15100,283.22500 C 1368.05500,283.22500 1368.05500,202.27500 1342.15100,202.27500 C 1317.86600,202.27500 1316.24700,221.70300 1308.15200,221.70300 C 1296.81900,221.70300 1295.20000,213.60800 1295.20000,184.46600 L 1295.20000,0.00000 Z'},
-    {id:'piece_06',x:0,y:485,w:392,h:486,path:'M 0.00000,485.50000 L 103.61600,485.50000 C 132.75800,485.50000 140.85300,487.11900 140.85300,498.45200 C 140.85300,506.54700 121.42500,508.16600 121.42500,532.45100 C 121.42500,558.35500 202.37500,558.35500 202.37500,532.45100 C 202.37500,508.16600 182.94700,506.54700 182.94700,498.45200 C 182.94700,487.11900 191.04200,485.50000 220.18400,485.50000 L 323.80000,485.50000 L 323.80000,669.96600 C 323.80000,699.10800 325.41900,707.20300 336.75200,707.20300 C 344.84700,707.20300 346.46600,687.77500 370.75100,687.77500 C 396.65500,687.77500 396.65500,768.72500 370.75100,768.72500 C 346.46600,768.72500 344.84700,749.29700 336.75200,749.29700 C 325.41900,749.29700 323.80000,757.39200 323.80000,786.53400 L 323.80000,971.00000 L 0.00000,971.00000 L 0.00000,485.50000 Z'},
-    {id:'piece_07',x:323,y:419,w:326,h:552,path:'M 323.80000,485.50000 L 427.41600,485.50000 C 456.55800,485.50000 464.65300,483.88100 464.65300,472.54800 C 464.65300,464.45300 445.22500,462.83400 445.22500,438.54900 C 445.22500,412.64500 526.17500,412.64500 526.17500,438.54900 C 526.17500,462.83400 506.74700,464.45300 506.74700,472.54800 C 506.74700,483.88100 514.84200,485.50000 543.98400,485.50000 L 647.60000,485.50000 L 647.60000,669.96600 C 647.60000,699.10800 645.98100,707.20300 634.64800,707.20300 C 626.55300,707.20300 624.93400,687.77500 600.64900,687.77500 C 574.74500,687.77500 574.74500,768.72500 600.64900,768.72500 C 624.93400,768.72500 626.55300,749.29700 634.64800,749.29700 C 645.98100,749.29700 647.60000,757.39200 647.60000,786.53400 L 647.60000,971.00000 L 323.80000,971.00000 L 323.80000,786.53400 C 323.80000,757.39200 325.41900,749.29700 336.75200,749.29700 C 344.84700,749.29700 346.46600,768.72500 370.75100,768.72500 C 396.65500,768.72500 396.65500,687.77500 370.75100,687.77500 C 346.46600,687.77500 344.84700,707.20300 336.75200,707.20300 C 325.41900,707.20300 323.80000,699.10800 323.80000,669.96600 L 323.80000,485.50000 Z'},
-    {id:'piece_08',x:581,y:485,w:458,h:486,path:'M 647.60000,485.50000 L 751.21600,485.50000 C 780.35800,485.50000 788.45300,487.11900 788.45300,498.45200 C 788.45300,506.54700 769.02500,508.16600 769.02500,532.45100 C 769.02500,558.35500 849.97500,558.35500 849.97500,532.45100 C 849.97500,508.16600 830.54700,506.54700 830.54700,498.45200 C 830.54700,487.11900 838.64200,485.50000 867.78400,485.50000 L 971.40000,485.50000 L 971.40000,669.96600 C 971.40000,699.10800 973.01900,707.20300 984.35200,707.20300 C 992.44700,707.20300 994.06600,687.77500 1018.35100,687.77500 C 1044.25500,687.77500 1044.25500,768.72500 1018.35100,768.72500 C 994.06600,768.72500 992.44700,749.29700 984.35200,749.29700 C 973.01900,749.29700 971.40000,757.39200 971.40000,786.53400 L 971.40000,971.00000 L 647.60000,971.00000 L 647.60000,786.53400 C 647.60000,757.39200 645.98100,749.29700 634.64800,749.29700 C 626.55300,749.29700 624.93400,768.72500 600.64900,768.72500 C 574.74500,768.72500 574.74500,687.77500 600.64900,687.77500 C 624.93400,687.77500 626.55300,707.20300 634.64800,707.20300 C 645.98100,707.20300 647.60000,699.10800 647.60000,669.96600 L 647.60000,485.50000 Z'},
-    {id:'piece_09',x:971,y:419,w:326,h:552,path:'M 971.40000,485.50000 L 1075.01600,485.50000 C 1104.15800,485.50000 1112.25300,483.88100 1112.25300,472.54800 C 1112.25300,464.45300 1092.82500,462.83400 1092.82500,438.54900 C 1092.82500,412.64500 1173.77500,412.64500 1173.77500,438.54900 C 1173.77500,462.83400 1154.34700,464.45300 1154.34700,472.54800 C 1154.34700,483.88100 1162.44200,485.50000 1191.58400,485.50000 L 1295.20000,485.50000 L 1295.20000,669.96600 C 1295.20000,699.10800 1293.58100,707.20300 1282.24800,707.20300 C 1274.15300,707.20300 1272.53400,687.77500 1248.24900,687.77500 C 1222.34500,687.77500 1222.34500,768.72500 1248.24900,768.72500 C 1272.53400,768.72500 1274.15300,749.29700 1282.24800,749.29700 C 1293.58100,749.29700 1295.20000,757.39200 1295.20000,786.53400 L 1295.20000,971.00000 L 971.40000,971.00000 L 971.40000,786.53400 C 971.40000,757.39200 973.01900,749.29700 984.35200,749.29700 C 992.44700,749.29700 994.06600,768.72500 1018.35100,768.72500 C 1044.25500,768.72500 1044.25500,687.77500 1018.35100,687.77500 C 994.06600,687.77500 992.44700,707.20300 984.35200,707.20300 C 973.01900,707.20300 971.40000,699.10800 971.40000,669.96600 L 971.40000,485.50000 Z'},
-    {id:'piece_10',x:1228,y:485,w:391,h:486,path:'M 1295.20000,485.50000 L 1398.81600,485.50000 C 1427.95800,485.50000 1436.05300,487.11900 1436.05300,498.45200 C 1436.05300,506.54700 1416.62500,508.16600 1416.62500,532.45100 C 1416.62500,558.35500 1497.57500,558.35500 1497.57500,532.45100 C 1497.57500,508.16600 1478.14700,506.54700 1478.14700,498.45200 C 1478.14700,487.11900 1486.24200,485.50000 1515.38400,485.50000 L 1619.00000,485.50000 L 1619.00000,971.00000 L 1295.20000,971.00000 L 1295.20000,786.53400 C 1295.20000,757.39200 1293.58100,749.29700 1282.24800,749.29700 C 1274.15300,749.29700 1272.53400,768.72500 1248.24900,768.72500 C 1222.34500,768.72500 1222.34500,687.77500 1248.24900,687.77500 C 1272.53400,687.77500 1274.15300,707.20300 1282.24800,707.20300 C 1293.58100,707.20300 1295.20000,699.10800 1295.20000,669.96600 L 1295.20000,485.50000 Z'}
-  ]},
-  {id:'panel_02',ver:2,dir:'img/panel_02/',w:1448,h:1086,ladder:[2,3,4,5,6,7,8,9,10,11,12,13],pieces:[ // v196 ST3〜ボス→ルナ→モルフォ→セトラ→オルビィ
+  {id:'panel_02',ver:2,dir:'img/panel_02/',w:1448,h:1086,// v197 12戦：1〜6 通常ステージ（ましまし強化）／7〜11 通常ステージ＋新ギミック／12 オルビィ本人
+   ladder:[{st:0},{st:1},{st:2},{st:3},{st:4},{st:5},{st:6,gk:'hour'},{st:7,gk:'mist'},{st:8,gk:'chain'},{st:8,gk:'silence'},{st:9,gk:'heavy'},{st:13}],
+   boost:{speed:0.45,diff:'master'}, // 通常ステージの相手に上乗せ（パズル中のみ）
+   pieces:[
     {id:'piece_01',x:0,y:0,w:363,h:438,path:'M 0.00000,0.00000 L 362.00000,0.00000 L 362.00000,115.84000 C 362.00000,148.42000 360.19000,157.47000 347.52000,157.47000 C 338.47000,157.47000 336.66000,135.75000 309.51000,135.75000 C 280.55000,135.75000 280.55000,226.25000 309.51000,226.25000 C 336.66000,226.25000 338.47000,204.53000 347.52000,204.53000 C 360.19000,204.53000 362.00000,213.58000 362.00000,246.16000 L 362.00000,362.00000 L 246.16000,362.00000 C 213.58000,362.00000 204.53000,363.81000 204.53000,376.48000 C 204.53000,385.53000 226.25000,387.34000 226.25000,414.49000 C 226.25000,443.45000 135.75000,443.45000 135.75000,414.49000 C 135.75000,387.34000 157.47000,385.53000 157.47000,376.48000 C 157.47000,363.81000 148.42000,362.00000 115.84000,362.00000 L 0.00000,362.00000 L 0.00000,0.00000 Z'},
     {id:'piece_02',x:287,y:0,w:513,h:363,path:'M 362.00000,0.00000 L 724.00000,0.00000 L 724.00000,115.84000 C 724.00000,148.42000 725.81000,157.47000 738.48000,157.47000 C 747.53000,157.47000 749.34000,135.75000 776.49000,135.75000 C 805.45000,135.75000 805.45000,226.25000 776.49000,226.25000 C 749.34000,226.25000 747.53000,204.53000 738.48000,204.53000 C 725.81000,204.53000 724.00000,213.58000 724.00000,246.16000 L 724.00000,362.00000 L 608.16000,362.00000 C 575.58000,362.00000 566.53000,360.19000 566.53000,347.52000 C 566.53000,338.47000 588.25000,336.66000 588.25000,309.51000 C 588.25000,280.55000 497.75000,280.55000 497.75000,309.51000 C 497.75000,336.66000 519.47000,338.47000 519.47000,347.52000 C 519.47000,360.19000 510.42000,362.00000 477.84000,362.00000 L 362.00000,362.00000 L 362.00000,246.16000 C 362.00000,213.58000 360.19000,204.53000 347.52000,204.53000 C 338.47000,204.53000 336.66000,226.25000 309.51000,226.25000 C 280.55000,226.25000 280.55000,135.75000 309.51000,135.75000 C 336.66000,135.75000 338.47000,157.47000 347.52000,157.47000 C 360.19000,157.47000 362.00000,148.42000 362.00000,115.84000 L 362.00000,0.00000 Z'},
     {id:'piece_03',x:724,y:0,w:363,h:438,path:'M 724.00000,0.00000 L 1086.00000,0.00000 L 1086.00000,115.84000 C 1086.00000,148.42000 1084.19000,157.47000 1071.52000,157.47000 C 1062.47000,157.47000 1060.66000,135.75000 1033.51000,135.75000 C 1004.55000,135.75000 1004.55000,226.25000 1033.51000,226.25000 C 1060.66000,226.25000 1062.47000,204.53000 1071.52000,204.53000 C 1084.19000,204.53000 1086.00000,213.58000 1086.00000,246.16000 L 1086.00000,362.00000 L 970.16000,362.00000 C 937.58000,362.00000 928.53000,363.81000 928.53000,376.48000 C 928.53000,385.53000 950.25000,387.34000 950.25000,414.49000 C 950.25000,443.45000 859.75000,443.45000 859.75000,414.49000 C 859.75000,387.34000 881.47000,385.53000 881.47000,376.48000 C 881.47000,363.81000 872.42000,362.00000 839.84000,362.00000 L 724.00000,362.00000 L 724.00000,246.16000 C 724.00000,213.58000 725.81000,204.53000 738.48000,204.53000 C 747.53000,204.53000 749.34000,226.25000 776.49000,226.25000 C 805.45000,226.25000 805.45000,135.75000 776.49000,135.75000 C 749.34000,135.75000 747.53000,157.47000 738.48000,157.47000 C 725.81000,157.47000 724.00000,148.42000 724.00000,115.84000 L 724.00000,0.00000 Z'},
@@ -4306,6 +4308,28 @@ function App(){
     try{resumeAC();fxBell({f:2093,v:0.08,d:1.2,bright:1.4,rev:0.85});fxTone({f:600,f2:1800,type:'sine',v:0.05,a:0.02,d:0.6,rev:0.7});}catch(e){}
   }
   function orbyRingOn(){const so=stageOptsR.current;return !!(so&&so.ability==='orbit');}
+  // v197 パズルの新ギミック
+  function gkRoundReset(rn){const g=gkR.current;g.chain=null;g.chainUntil=0;g.coolUntil=0;if(g.silenceRn!==rn)g.silenceRn=-1;if(g.heavyRn!==rn)g.heavyRn=-1;mistR.current=0;setMist(false);}
+  function attachGkRing(rn){
+    const kind=pzGkR.current;if(!kind||!GIMMICKS[kind])return;
+    const hand=dHR.current,flags=dRingR.current.slice();
+    if(flags.some(f=>typeof f==='string'&&f.indexOf('gk:')===0))return;
+    const cand=hand.map((v,i)=>(v!=null&&!flags[i])?i:-1).filter(i=>i>=0);if(!cand.length)return;
+    const k=cand[Math.floor(Math.random()*cand.length)];
+    flags[k]='gk:'+kind;setDRing(flags);dRingR.current=flags;
+    const G=GIMMICKS[kind];r2Say('星環：'+G.name,G.color);
+    try{resumeAC();fxBell({f:1397,v:0.05,d:0.8,bright:1.3,rev:0.7});}catch(e){}
+  }
+  function gkFire(rf,rn,value){
+    const kind=rf.slice(3),G=GIMMICKS[kind];if(!G)return;const g=gkR.current;
+    showSkillCustom(G.name,G.en,G.color);
+    try{resumeAC();fxBell({f:880,v:0.07,d:0.6,bright:1.4,rev:0.6});}catch(e){}
+    if(kind==='hour'){g.timeCut+=G.sec;const t=Math.max(1,timeLeftR.current-G.sec);setTimeLeft(t);timeLeftR.current=t;}
+    else if(kind==='mist'){mistR.current=Date.now()+G.ms;setMist(true);setTimeout(()=>{if(Date.now()>=mistR.current){mistR.current=0;setMist(false);}},G.ms+20);}
+    else if(kind==='chain'){g.chain=value;g.chainUntil=Date.now()+G.ms;fxLockHint('鎖：'+value+'だけ');}
+    else if(kind==='silence'){g.silenceRn=rn;}
+    else if(kind==='heavy'){g.heavyRn=rn;}
+  }
   function attachOrbyRing(rn){
     const hand=dHR.current,flags=dRingR.current.slice();
     if(flags.some(f=>f==='orby'))return;
@@ -4468,7 +4492,8 @@ function App(){
   function isTapped(f){return typeof f==='string'&&f.indexOf('tapped-')===0;}
   function isRing(f){return !!f&&!isTapped(f);}
   // v117: ルナ/レイピアの環は「付いた札は温存」だが、モルフォの環は出すために付く
-  function isHoldRing(f){return isRing(f)&&f!=='morpho'&&f!=='setra'&&f!=='orby';} // v127/v140: モルフォ・セトラ・オルビィの環は出せる
+  function isGk(f){return typeof f==='string'&&f.indexOf('gk:')===0;} // v197
+  function isHoldRing(f){return isRing(f)&&f!=='morpho'&&f!=='setra'&&f!=='orby'&&!isGk(f);} // v127/v140/v197: モルフォ・セトラ・オルビィ・ギミックの環は出せる
   function ensureDealerRefill(){
     let hand=dHR.current,rf=dRingR.current;
     if(rf.length!==hand.length){rf=hand.map((v,i)=>rf[i]||false);setDRing(rf);dRingR.current=rf;} // 環の配列がズレてたら揃える
@@ -4755,7 +4780,9 @@ function App(){
     setPhase('gameEnd');phaseR.current='gameEnd';
   }
   // v180 パズル：勝った試合ごとに1回だけ抽選（同じ試合で結果画面を何度出しても重複しない）
-  const[pzView,setPzView]=useState(0);const pzModeR=useRef(false),pzBattleR=useRef(0),pzPanelR=useRef(null); // v181 パズルモード中か／何戦目か（重複付与防止のキー）／v187 戦っているパネル
+  const[pzView,setPzView]=useState(0);const pzModeR=useRef(false),pzBattleR=useRef(0),pzPanelR=useRef(null);
+  const pzGkR=useRef(null),pzBoostR=useRef(null); // v197 パズルのギミック／上乗せ
+  const gkR=useRef({chain:null,chainUntil:0,silenceRn:-1,heavyRn:-1,coolUntil:0,timeCut:0});const[mist,setMist]=useState(false);const mistR=useRef(0); // v181 パズルモード中か／何戦目か（重複付与防止のキー）／v187 戦っているパネル
   const pzAwardedR=useRef(null);const[pzPiece,setPzPiece]=useState(null);
   useEffect(()=>{ // v186 結果画面は出さない。勝ちなら付与して保存→そのままパネルへ。負けもそのままパネルへ
     if(phase!=='gameEnd'||!pzModeR.current||!gameEndData)return;
@@ -4768,12 +4795,13 @@ function App(){
     goPuzzle();
   },[phase]);
   function pzPlaced(pn,idxs){updSave(s=>{const st=pzState(s,pn);const add=idxs.filter(i=>!st.placed.includes(i));return add.length?pzWrite(s,pn,{...st,placed:[...st.placed,...add]}):s;});}
-  function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);pzModeR.current=false;setPzPiece(null);setPhase('puzzle');phaseR.current='puzzle';}
+  function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);pzModeR.current=false;pzGkR.current=null;pzBoostR.current=null;setPzPiece(null);setPhase('puzzle');phaseR.current='puzzle';}
   function startPuzzleBattle(){ // v181 集めた数に応じてだんだん強い相手
     if(phaseR.current==='brief'||phaseR.current==='playing'||phaseR.current==='intro')return; // v185 連打で二重に始めない
     const pn=pzActive(saveR.current);pzPanelR.current=pn;
     const got=pzState(saveR.current,pn).got.length;
-    const idx=pn.ladder[Math.min(got,pn.ladder.length-1)];
+    const ent=pn.ladder[Math.min(got,pn.ladder.length-1)];const idx=typeof ent==='number'?ent:ent.st;
+    pzGkR.current=(typeof ent==='object'&&ent.gk)||null;pzBoostR.current=pn.boost||null; // v197 ギミックと上乗せ
     pzModeR.current=true;pzBattleR.current++;setPzPiece(null);stageR.current=null;stageOptsR.current=null;
     startStage(0,idx,true);
   }
@@ -4827,7 +4855,7 @@ function App(){
   }
   function finishSoulRelease(){setPhase('areaGate');phaseR.current='areaGate';}
   function startGame(diff){
-    { const so=stageR.current?(stageOptsR.current||{}):{};if(diff&&stageR.current&&!so.challenge)diff=boostDiff(diff); } // v196 通常ステージは判断力を底上げ
+    { const so=stageR.current?(stageOptsR.current||{}):{};if(diff&&stageR.current&&!so.challenge)diff=boostDiff(diff);if(pzModeR.current&&pzBoostR.current&&pzBoostR.current.diff&&!so.challenge)diff=pzBoostR.current.diff; } // v196/v197 通常ステージは判断力を底上げ
     if(diff){setDifficulty(diff);diffRef.current=diff;}
     clearTimers();lockR.current=false;
     const p=createDeck(),d=createDeck();
@@ -4895,6 +4923,7 @@ function App(){
           if(freezeActive()&&rn%5===1)setTimeout(()=>attachSetraRing(rn),500); // v136 セトラ：第1ラウンドから1枚、以降5ラウンドおき
           if(playerRingOn()&&rn%PLAYER_RING_EVERY===1)setTimeout(()=>attachPlayerRing(rn),700); // v136 プレイヤーの星環
           if(orbyRingOn()&&rn%ORBY_RING_EVERY===1)setTimeout(()=>attachOrbyRing(rn),500); // v140 オルビィの星環
+          gkRoundReset(rn);if(pzGkR.current&&Math.random()<GK_RING_RATE)setTimeout(()=>attachGkRing(rn),500); // v197 パズルのギミック星環（20%）
           if(hideLeftR.current>0&&rn>1)setHideLeft2(hideLeftR.current-1); // v140 裏返しの消化
           if(tsLeftR.current>0&&rn>1)setTsLeft2(tsLeftR.current-1); // v136 効果ラウンドを消化
           ensureDealerRefill(); // v89 保険：環付きしか残ってなければ10枚まで補充
@@ -4931,6 +4960,7 @@ function App(){
     clearInterval(timerRef.current);
     let t=(from==null)?roundSecR.current:from;setTimeLeft(t);timeLeftR.current=t;
     timerRef.current=setInterval(()=>{
+      if(gkR.current.timeCut){t=Math.max(1,t-gkR.current.timeCut);gkR.current.timeCut=0;} // v197 砂時計
       t--;setTimeLeft(t);timeLeftR.current=t;
       tickFreeze(); // v127: 凍結解除のカウントはこのタイマーと同じ歩幅で進む
       if(freezeActive())reliefIfAllFrozen(); // v136: 凍った札だけになったら配り直して詰みを回避
@@ -4999,7 +5029,7 @@ function App(){
     }
     const _canWin10=dHR.current.some(v=>canPlay(v,fieldSumR.current,fieldR.current)&&fieldSumR.current+v===10);
     d=Math.round(d*((stageOptsR.current&&stageOptsR.current.speed)||1)); // v112: 速い相手
-    if(DEALER_BOOST.enabled&&stageR.current&&!(stageOptsR.current&&stageOptsR.current.challenge))d=Math.round(d*DEALER_BOOST.speed); // v196 通常ステージは全体的に速く
+    if(DEALER_BOOST.enabled&&stageR.current&&!(stageOptsR.current&&stageOptsR.current.challenge))d=Math.round(d*(pzModeR.current&&pzBoostR.current&&pzBoostR.current.speed?pzBoostR.current.speed:DEALER_BOOST.speed)); // v196/v197 通常ステージは全体的に速く（パズル中はさらに）
     // v135 セトラ: 初手だけ人のタップより速くして「GOで4枚連打」を封じる。
     // 逆に決定打(10完成)は遅らせる。反射神経で負けるのは理不尽で面白くないため
     const so135=stageOptsR.current||{};
@@ -5322,7 +5352,7 @@ function App(){
     else{if(Math.random()<firstRate&&safe.length)chosen=safe.sort((a,b)=>a-b)[0];}
     if(!chosen){scheduleAi(rn);return;}
     let idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&isTapped(rf[i]));
-    if(idx<0)idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&(rf[i]==='morpho'||rf[i]==='setra'||rf[i]==='orby')); // v117/v127: 同じ数字なら環付きを優先して出す
+    if(idx<0)idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&(rf[i]==='morpho'||rf[i]==='setra'||rf[i]==='orby'||isGk(rf[i]))); // v117/v127/v197: 同じ数字なら環付きを優先して出す
     if(idx<0)idx=dHand.findIndex((v,i)=>eligible(i)&&v===chosen&&!rf[i]);
     if(idx<0){scheduleAi(rn);return;}
     const cardId=dIdsR.current[idx];if(cardId==null){scheduleAi(rn);return;}
@@ -5371,6 +5401,7 @@ function App(){
       if(f.rf==='morpho')startConfuse(rn); // v117: 環の札が場に出た瞬間に鱗粉の幻惑が発動
       if(f.rf==='setra'){const n=freezeHand(SETRA_FREEZE_N,SETRA_FREEZE_SEC);if(n)r2Say('氷結 '+n+'枚',"#8fe0ff");} // v127
       if(f.rf==='orby')orbyRingFire(rn); // v140
+      if(isGk(f.rf))gkFire(f.rf,rn,f.value); // v197
       if(!dHR.current.filter((v,i)=>!isHoldRing(dRingR.current[i])).length){ // 環付きだけ残った → 補充
         const keep=dHR.current,keepRf=dRingR.current;const nd=createDeck().slice(0,10-keep.length);
         setDealer([...keep,...nd],[...keepRf,...nd.map(()=>false)],[...dIdsR.current,...nd.map(()=>null)]);
@@ -5417,6 +5448,9 @@ function App(){
       return;
     }
     if(rStopR.current||eraseBusyR.current||pausedR.current)return; // v84 時間停止中は出せない / v89 削除中も / v91 一時停止中も
+    { const g=gkR.current; // v197 鎖・静寂
+      if(g.chain!=null&&Date.now()<g.chainUntil&&value!==g.chain){fxLockHint('鎖：'+g.chain+'だけ');return;}
+      if(g.silenceRn===rNum&&Date.now()<g.coolUntil){fxLockHint('静寂');return;} }
     if(pLockR.current[idx]){fxLockHint('星環ロック');return;}   // v84 ロック中
     if(cmdIdxR.current!=null&&cmdIdxR.current!==idx){fxLockHint('指名された札から');return;} // v84 指名
     if(cmdIdxR.current===idx)setCmd(null);
@@ -5446,6 +5480,7 @@ function App(){
     if(wasLink){playChronoReleaseSE();}
     if(pRingR.current===idx)activatePlayerRing(); // v136: 星環の札を出した → 効果が3ラウンド続く
     pLandAtR.current=Date.now(); // v179
+    { const g=gkR.current;if(g.chain!=null&&value===g.chain)g.chain=null;if(g.silenceRn===rNum)g.coolUntil=Date.now()+GIMMICKS.silence.cool; } // v197
     const ended=resolvePlay(value,cf,cs,'player',rNum,isSp,shifted);
     // v137: 自分が場の合計をちょうど6にしたら相手を3秒止める。
     // activatePlayerRing が先に走るので、環を出したそのターンに6になった場合も発動する
@@ -5478,7 +5513,8 @@ function App(){
     {const tf=tapFaceR.current||false;tapFaceR.current=null;setFieldRing(prev=>[...prev,tf]);} // v104/v106: レイピアがタップした環の札はその色の表面（更新関数は遅延実行されるので先に値を取る）
     if(ns>10){
       clearTimers();lockR.current=true;resolvingR.current=true;playBurstSE();setBurstAnim(true);
-      const newPP=who==='player'?Math.max(0,pPtR.current-2):pPtR.current;
+      const pen=(who==='player'&&gkR.current.heavyRn===rn)?GIMMICKS.heavy.pen:2; // v197 重罰
+      const newPP=who==='player'?Math.max(0,pPtR.current-pen):pPtR.current;
       const newDP=who==='dealer'?Math.max(0,dPtR.current-2):dPtR.current;
       setPPt(newPP);setDPt(newDP);pPtR.current=newPP;dPtR.current=newDP;
       setComboShow({id:Date.now()+Math.random(),text:'BURST',pts:-2,color:'#ff3b3b',who,burst:true,opp:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||undefined});sayChamp(who==='player'?'burstYou':'burstSelf');
@@ -5686,7 +5722,7 @@ function App(){
       h('div',{className:'gp-dealer-cards'},
         dSlots.map((id,s)=>{const i=id==null?-1:dIdsR.current.indexOf(id);if(i<0||i>=dH.length)return h('div',{key:'e'+s,className:'gp-dealer-card empty'});const v=dH[i];
           return h('div',{key:'c'+id,'data-card-id':id,className:'gp-dealer-card'+(justStolen.includes(id)?' just-stolen':'')+(hideLeft>0&&dRing[i]!=='orby'?' hidden-card':'')+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dRing[i]==='setra'?' sring':'')+(dRing[i]==='orby'?' oring':'')+(dCur.id===id?' dsel':'')},h('span',{className:'dv'},v),
-          dCur.id===id&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.id===id&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&dRing[i]!=='setra'&&dRing[i]!=='orby'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+dRing[i]:'')+(tapCardId===id?' tap':''),'data-ring-color':typeof dRing[i]==='string'?REIPIA_RINGS[dRing[i]].ringColor:undefined}));})
+          dCur.id===id&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.id===id&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&dRing[i]!=='setra'&&dRing[i]!=='orby'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+(isGk(dRing[i])?REIPIA_RINGS[GIMMICKS[dRing[i].slice(3)].ring]?dRing[i].slice(3):'':dRing[i]):'')+(tapCardId===id?' tap':''),'data-ring-color':typeof dRing[i]==='string'?(isGk(dRing[i])?REIPIA_RINGS[GIMMICKS[dRing[i].slice(3)].ring].ringColor:REIPIA_RINGS[dRing[i]].ringColor):undefined}));})
       )
     ),
     srBanner&&h('div',{className:'sr-banner'},h('b',null,'STAR RING'),'星環 ── 完成'),
@@ -5703,12 +5739,12 @@ function App(){
       h('div',{className:'field-planet'}),
 
       h('div',{className:'gp-field-cards'},
-        field.map((v,i)=>h('div',{key:i,className:eraseIdx.includes(i)?'fx-erase':undefined,style:{display:'contents'}},h(FieldCard,{value:v,by:fieldColors[i],isComplete:fieldSum===10&&i===field.length-1,isSpecial:!!fieldSp[i],shifted:!!fieldShift[i],ringed:fieldRing[i]||false})))
+        field.map((v,i)=>h('div',{key:i,className:eraseIdx.includes(i)?'fx-erase':undefined,style:{display:'contents'}},h(FieldCard,{value:mist?'?':v,by:fieldColors[i],isComplete:fieldSum===10&&i===field.length-1,isSpecial:!!fieldSp[i],shifted:!!fieldShift[i],ringed:fieldRing[i]||false}))) // v197 霧
       ),
       // FIELD SUM（場のカードの下・前の配置に戻す＋少し強化）
       h('div',{className:'gp-field-sum gp-field-sum-strong',style:{visibility:fieldSum>0?'visible':'hidden'}},
         h('div',{className:'main'},
-          h('span',{className:'num'+((fieldSum>=8&&fieldSum<10)?(fieldColors[fieldColors.length-1]==='player'?' alert-blue':' alert'):fieldSum>=5?' warn':'')},fieldSum),
+          h('span',{className:'num'+((fieldSum>=8&&fieldSum<10)?(fieldColors[fieldColors.length-1]==='player'?' alert-blue':' alert'):fieldSum>=5?' warn':'')},mist?'?':fieldSum), // v197 霧
           h('span',{className:'sep'},'/ 10')
         ),
         h('div',{className:'ato'},'あと ',h('b',null,10-fieldSum))
