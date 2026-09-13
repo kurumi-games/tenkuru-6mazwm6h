@@ -2016,6 +2016,11 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pz-btns{display:flex;flex-direction:column;gap:calc(8 * var(--u));width:min(88vw,calc(300 * var(--u)));margin-top:calc(18 * var(--u));}
 .pz-btns button{min-height:calc(42 * var(--u));border-radius:calc(14 * var(--u));font-family:inherit;font-size:calc(13 * var(--u));cursor:pointer;border:1px solid rgba(190,180,255,.35);background:transparent;color:#cfc8f0;}
 .pz-btns button.go{background:linear-gradient(160deg,#8f7dff,#5a48d8);color:#fff;border-color:transparent;font-weight:700;}
+/* v183 役完成の演出スキップ：手札エリアが薄暗くなり「タップでスキップ」 */
+.gp-hand-area{position:relative;}
+.skip-veil{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(4,6,20,.62);cursor:pointer;-webkit-tap-highlight-color:transparent;animation:fadeUp .25s ease both;border-radius:inherit;}
+.skip-veil span{font-family:'Noto Serif JP',serif;font-size:calc(15 * var(--u));letter-spacing:.25em;color:#e8ecff;text-shadow:0 0 12px rgba(140,180,255,.8);padding:calc(8 * var(--u)) calc(18 * var(--u));border:1px solid rgba(200,210,255,.45);border-radius:999px;background:rgba(10,14,40,.55);animation:skipPulse 1.4s ease-in-out infinite;}
+@keyframes skipPulse{0%,100%{opacity:.75}50%{opacity:1}}
 </style>
 </head>
 <body>
@@ -3133,7 +3138,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v182'; // v182(2026/09/13): パネルが豆粒になる不具合を修正（見送り・パズル画面に --u が無かった）
+const APP_VER='v183'; // v183(2026/09/13): 役完成の演出スキップ。完成した瞬間に手札エリアが薄暗くなり「タップでスキップ」。押すと3-2-1を飛ばしてGOから次のラウンド
+// const APP_VER='v182'; // v182(2026/09/13): パネルが豆粒になる不具合を修正（見送り・パズル画面に --u が無かった）
 // const APP_VER='v181'; // v181(2026/09/13): パズルを独立モードに。ホーム「パズル」→パネル画面→バトル。相手は集めた数でだんだん強くなる（PUZZLE_CFG.ladder）。見送りからはピースを外した
 // const APP_VER='v180'; // v180(2026/09/13): パズルのピース集め試作（1パネル10ピース）。見送りで勝つたびに未獲得ピースを1個ランダム獲得。結果画面に表示、「パネルを見る」「続けてバトル」。パネル画面で落ちてはまる演出、10個で完成
 // const APP_VER='v179'; // v179(2026/09/13): 衝突事故の救済。相手の札が落ちて0.22秒以内に出した札がバーストになるなら「衝突 セーフ」で手札に戻す（相手側も同様）。数値はCOLLISION_MS
@@ -4129,6 +4135,7 @@ function App(){
   const chronoR=useRef({armed:false,count:0,pending:false,deals:0}); // 1試合ぶんのクロノリンク状態
   const[chronoFx,setChronoFx]=useState(null); // 'in' | 'out' | null
   const[ptFly,setPtFly]=useState(null); // v175 +pt 吸い寄せ演出
+  const[skipOn,setSkipOn]=useState(false);const skipR=useRef(null); // v183 役完成の演出スキップ
   const dLandAtR=useRef(0),pLandAtR=useRef(0); // v179 相手／自分の札が場に落ちた時刻
   const[burstPos,setBurstPos]=useState({x:'50%',y:'45%'});
   const coreShiftR=useRef({active:false,used:false});
@@ -4922,7 +4929,7 @@ function App(){
     }else doCountdown(p,d,0,0,1);
   }
 
-  function doCountdown(pHand,dHand,pp,dp,rn){
+  function doCountdown(pHand,dHand,pp,dp,rn,goOnly){
     // v70: 第2形態の演出が待機中なら、ここで一旦止めて演出→終わってから続行
     if(shiftPendingR.current){
       shiftPendingR.current=false;
@@ -4933,7 +4940,7 @@ function App(){
       setShiftScene({name:so.rivalName||'',form2Name:so.form2Name||'',args:[pHand,dHand,pp,dp,rn],tok:roundTokR.current});
       return;
     }
-    const keepT=FLOW_CFG.enabled&&rn>1;rnR.current=rn; // v175 2回目以降は試合タイマーを止めない
+    const keepT=FLOW_CFG.enabled&&rn>1;rnR.current=rn;skipR.current=null;setSkipOn(false); // v175 2回目以降は試合タイマーを止めない / v183
     roundTokR.current++;    // 古い遷移予約を全部無効化
     if(keepT){clearTimeout(aiRef.current);clearTimeout(countRef.current);}else clearTimers(); // 残ってるカウントダウン/タイマーも掃除
     resolvingR.current=false;exitLink(); // v54: 時間停止の残骸を必ず解除
@@ -4944,7 +4951,7 @@ function App(){
     setFieldColors([]); // v46: 時間切れ後に前ラウンドの色記録が残って自分のカードがオレンジになるバグ修正
     setFlashMsg(null);if(!keepT)setTimeLeft(roundSecR.current);setComboShow(null);setTimeUpShow(false);setFieldShift([]);
     const skip=rn>1&&COUNT_CFG.laterSkip; // v174 区切りなし
-    let c=rn===1?COUNT_CFG.firstFrom:COUNT_CFG.laterFrom;if(!skip){setCountNum(c);countNumR.current=c;} // v173
+    let c=goOnly?0:(rn===1?COUNT_CFG.firstFrom:COUNT_CFG.laterFrom);if(!skip){setCountNum(c);countNumR.current=c;} // v173 / v183 スキップ時はGOだけ
     function tick(){
       if(!skip){setCountNum(c);countNumR.current=c;}
       // カウント中は無音（GOだけ鳴らす）
@@ -5588,9 +5595,20 @@ function App(){
       else setComboShow({id:Date.now()+Math.random(),text:pts.voice||'10達成！',pts:pts.total,color,who,opp:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||undefined});
       sayChamp(who==='player'?'scoreYou':'scoreSelf');
       const waitMs=flow?(shiftNow?1400:FLOW_CFG.tenMs):(shiftNow?1400:4000); // v75: 変身する得点の時だけ短く
-      setTimeout(()=>{setComboShow(null);if(flow)setPtFly(null);},flow?FLOW_CFG.flyMs+150:waitMs);
+      const hideT=setTimeout(()=>{setComboShow(null);if(flow)setPtFly(null);},flow?FLOW_CFG.flyMs+150:waitMs);
       const tokS=roundTokR.current;
-      setTimeout(()=>{if(tokS!==roundTokR.current)return;setResetFA(false);resetField();if(!flow&&(newPP>=winPtR.current||newDP>=winPtR.current)){endGame(newPP,newDP);return;}const nr=rn+1;setRNum(nr);doCountdown(pHR.current,dHR.current,newPP,newDP,nr);},waitMs);
+      // v183 続きを関数にして、タイマーからもスキップからも呼べるように（どちらか先に呼ばれた方だけ動く）
+      let fired=false;
+      const proceed=(skipped)=>{
+        if(fired||tokS!==roundTokR.current)return;fired=true;
+        clearTimeout(hideT);clearTimeout(waitT);skipR.current=null;setSkipOn(false);
+        setComboShow(null);if(flow)setPtFly(null);
+        setResetFA(false);resetField();
+        if(!flow&&(newPP>=winPtR.current||newDP>=winPtR.current)){endGame(newPP,newDP);return;}
+        const nr=rn+1;setRNum(nr);doCountdown(pHR.current,dHR.current,newPP,newDP,nr,skipped); // スキップ時は 3-2-1 を飛ばして GO から
+      };
+      const waitT=setTimeout(()=>proceed(false),waitMs);
+      if(!flow&&!shiftNow){skipR.current=()=>proceed(true);setSkipOn(true);}
         }
   function resetField(){setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldColors([]);colorsR.current=[];setFieldSp([]);setFieldShift([]);setFieldRing([]);}
   function endGame(pp,dp,byTime){
@@ -5781,6 +5799,7 @@ function App(){
 
     // HAND area
     h('div',{className:'gp-hand-area hand-card-area'},
+      skipOn&&h('div',{className:'skip-veil',onClick:()=>{const f=skipR.current;if(f){try{resumeAC();}catch(e){}f();}}},h('span',null,'タップでスキップ')), // v183
       r2Banner&&h('div',{className:'hand-hud'},
         h('div',{className:'sr-banner',style:{borderColor:r2Banner.color,boxShadow:'0 0 16px '+r2Banner.color}},r2Banner.text)
       ),
