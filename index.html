@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>テンクル (TEN-KURU)</title>
+<!-- v203 PWA：ホーム画面に追加するとアドレスバーなしの全画面アプリとして開く -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0d24">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="テンクル">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<link rel="icon" href="img/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@600;700;800&display=swap" rel="stylesheet">
@@ -3210,7 +3219,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v202'; // v202(2026/09/14): 勝利演出を作り直し（静止→決定打の光・WIN・アタック音・相手の札の消失を同期、画面を暗く落とす、跳ねない文字、ボスは輪と余韻）。勝利音を「鋭いアタック＋澄んだ響き＋短い余韻」に。リザルトは獲得ピース1枚を大きく出して残す（小パネル廃止、はめるのはパネル側）。完成時の四角い枠を除去。重複CSS整理
+const APP_VER='v203'; // v203(2026/09/14): PWA対応（manifest.json・アイコン・全画面表示）。ホーム画面に追加でアプリとして起動
+// const APP_VER='v202'; // v202(2026/09/14): 勝利演出を作り直し（静止→決定打の光・WIN・アタック音・相手の札の消失を同期、画面を暗く落とす、跳ねない文字、ボスは輪と余韻）。勝利音を「鋭いアタック＋澄んだ響き＋短い余韻」に。リザルトは獲得ピース1枚を大きく出して残す（小パネル廃止、はめるのはパネル側）。完成時の四角い枠を除去。重複CSS整理
 // const APP_VER='v201'; // v201(2026/09/14): セトラの仮ステージを削除。STAGE1=記憶のランタンの少女、STAGE2=オルビィ
 // const APP_VER='v200'; // v200(2026/09/14): 3ステージ構成（セトラ→記憶のランタンの少女→オルビィ）。同梱素材のランタン少女は12分割を横2枚ずつ結合して6ピース化、輪郭は透過から自動抽出。固有ギミック「ともしび」（4秒間、手札3枚だけ見える）。クリア後は「次のステージへ」
 // const APP_VER='v199'; // v199(2026/09/14): パネル二回り縮小（300→235）、額縁と板を撤去して台座の上に浮かぶ「キャラのシルエット型」パネルに（6枚の外周＝フード・袖・カード・流れる裾）。勝利は 静止→決定打が光る→WIN!→札が散る→光からピース出現→小パネルへ飛んではまる→進捗が増える の一続き。最後の1枚は召喚演出（継ぎ目に光→発光→線が消える→フラッシュ→前へ→BOSS）
