@@ -3133,7 +3133,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v180'; // v180(2026/09/13): パズルのピース集め試作（1パネル10ピース）。見送りで勝つたびに未獲得ピースを1個ランダム獲得。結果画面に表示、「パネルを見る」「続けてバトル」。パネル画面で落ちてはまる演出、10個で完成
+const APP_VER='v181'; // v181(2026/09/13): パズルを独立モードに。ホーム「パズル」→パネル画面→バトル。相手は集めた数でだんだん強くなる（PUZZLE_CFG.ladder）。見送りからはピースを外した
+// const APP_VER='v180'; // v180(2026/09/13): パズルのピース集め試作（1パネル10ピース）。見送りで勝つたびに未獲得ピースを1個ランダム獲得。結果画面に表示、「パネルを見る」「続けてバトル」。パネル画面で落ちてはまる演出、10個で完成
 // const APP_VER='v179'; // v179(2026/09/13): 衝突事故の救済。相手の札が落ちて0.22秒以内に出した札がバーストになるなら「衝突 セーフ」で手札に戻す（相手側も同様）。数値はCOLLISION_MS
 // const APP_VER='v178'; // v178(2026/09/13): ラウンド制に戻す。カウントは1R目5・2R目以降3、GOあり、10達成の演出も元通り。FLOWは enabled:false で残置
 // const APP_VER='v177'; // v177(2026/09/13): 配り直し判定を「バーストせずに出せる札が誰にもない」に変更。jsdomで自動テスト（詰み・手札切れ・60秒）を通した
@@ -3499,7 +3500,7 @@ function SkillPanel(){
     )
   );
 }
-function TitleScreen({onPlay,onVeil,onTutorial,musicOn,toggleMusic}){
+function TitleScreen({onPlay,onVeil,onPuzzle,onTutorial,musicOn,toggleMusic}){
   const btnBase={borderRadius:14,padding:'15px 0',fontSize:13,fontWeight:800,letterSpacing:2,cursor:'pointer',fontFamily:"'Inter',sans-serif",background:'rgba(255,255,255,.78)',boxShadow:'0 4px 16px rgba(70,100,150,.16), inset 0 1px 0 #fff',width:'100%'};
   return h('div',{style:{minHeight:'100vh',background:"url('img/title-bg.jpg') center/cover no-repeat, #eef2f8",display:'flex',alignItems:'center',justifyContent:'center',padding:16,position:'relative'}},
     h('div',{style:{textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:18,width:'100%',maxWidth:340,animation:'fadeUp 0.5s ease'}},
@@ -3508,6 +3509,7 @@ function TitleScreen({onPlay,onVeil,onTutorial,musicOn,toggleMusic}){
       h('div',{style:{display:'flex',flexDirection:'column',gap:12,width:'100%',marginTop:6}},
         h('button',{onClick:onPlay,style:{...btnBase,padding:'17px 0',fontSize:16,letterSpacing:6,border:'1.5px solid rgba(46,127,232,.55)',color:'#2e7fe8',boxShadow:'0 6px 20px rgba(46,127,232,.22), inset 0 1px 0 #fff'}},'遊ぶ'),
         h('button',{onClick:onVeil,style:{...btnBase,padding:'13px 0',fontSize:13,letterSpacing:4,border:'1.5px solid rgba(128,100,230,.5)',color:'#6a4fd8',boxShadow:'0 5px 18px rgba(128,100,230,.2), inset 0 1px 0 #fff'}},'見送り'), // v171 アニマ・ヴェール
+        h('button',{onClick:onPuzzle,style:{...btnBase,padding:'13px 0',fontSize:13,letterSpacing:4,border:'1.5px solid rgba(230,180,90,.5)',color:'#b07a1e',boxShadow:'0 5px 18px rgba(230,180,90,.2), inset 0 1px 0 #fff'}},'パズル'), // v181
         h('button',{onClick:onTutorial,style:{...btnBase,padding:'10px 0',fontSize:11,fontWeight:700,background:'rgba(255,255,255,.55)',border:'1.5px solid rgba(120,150,190,.35)',color:'#5a80ab',boxShadow:'0 3px 10px rgba(70,100,150,.12)'}},'✦ あそびかた')
       ),
       h(SkillPanel),
@@ -3547,7 +3549,7 @@ function veilMakeSoul(rare){
     until:rare?Date.now()+VEIL_CFG.rare.limitSec*1000:null};
 }
 function veilKind(s){return s.kind==='rare'?VEIL_CFG.rare:VEIL_CFG.kinds[s.kind];}
-function VeilScreen({souls,setSouls,sent,onBattle,onBack,onPanel,pzCount}){
+function VeilScreen({souls,setSouls,sent,onBattle,onBack}){
   const[ask,setAsk]=useState(null);
   const[now,setNow]=useState(Date.now());
   // レア魂の残り時間表示＆期限切れ／レア出現チェック
@@ -3587,7 +3589,6 @@ function VeilScreen({souls,setSouls,sent,onBattle,onBack,onPanel,pzCount}){
         left!==null&&h('div',{className:'tm'},Math.floor(left/60)+':'+String(left%60).padStart(2,'0'))
       );}),
     h('button',{className:'veil-home',onClick:onBack},'ホームへ'),
-    onPanel&&h('button',{className:'veil-home',style:{bottom:'calc(62 * var(--u))'},onClick:onPanel},'パネル '+pzCount+'/'+PZ_N), // v180
     ask&&h('div',{className:'veil-ask',onClick:()=>setAsk(null)},
       h('div',{className:'box',onClick:e=>e.stopPropagation()},
         h('img',{src:veilKind(ask).img,alt:''}),
@@ -4017,7 +4018,8 @@ function GameEndScreen({data,onRestart,onHome}){
 // ── v180 パズルのピース集め（試作）：数値はここだけで調整 ──
 // 勝つたびに未獲得ピースを1個ランダムで獲得。順番には埋まらない。完成図の正体は出さない。
 // 画像は 1000×400px（5列×2段、1ピース200×200）。img/puzzle-01.webp を差し替えれば絵が変わる
-const PUZZLE_CFG={id:'p1',img:'img/puzzle-01.webp',cols:5,rows:2,dropMs:380,gapMs:260};
+// ladder：獲得ピース数→相手（AREA_01.stages の添字）。集めるほどだんだん強くなる
+const PUZZLE_CFG={id:'p1',img:'img/puzzle-01.webp',cols:5,rows:2,dropMs:380,gapMs:260,ladder:[1,1,2,3,4,5,6,7,8,8]};
 const PZ_N=PUZZLE_CFG.cols*PUZZLE_CFG.rows;
 function pzState(save){const p=(save&&save.puzzle&&save.puzzle.id===PUZZLE_CFG.id)?save.puzzle:{id:PUZZLE_CFG.id,got:[],placed:[]};return{id:p.id,got:p.got||[],placed:p.placed||[]};}
 function pzPieceStyle(idx){const c=idx%PUZZLE_CFG.cols,r=Math.floor(idx/PUZZLE_CFG.cols);
@@ -4046,14 +4048,37 @@ function PuzzleScreen({save,onPlaced,onNext,onBack}){
     ),
     done?h('div',{className:'pz-doneTxt'},'完成！'):h('div',{className:'pz-cnt'},shown.length+' / '+PZ_N),
     h('div',{className:'pz-btns'},
-      h('button',{className:'go',onClick:onNext},'次のバトルへ'),
-      h('button',{onClick:onBack},'アニマ・ヴェールへ戻る')
+      h('button',{className:'go',onClick:onNext},shown.length?'次のバトルへ':'バトルへ'),
+      h('button',{onClick:onBack},'ホームへ')
+    )
+  );
+}
+// v181 パズルモードの結果画面：勝てばピース。「パネルを見る」「続けてバトル」
+function PuzzleEndScreen({data,piece,pzCount,onPanel,onNext,onRetry,onBack}){
+  const win=data.winner==='player';
+  return h('div',{className:'pz-screen'},
+    h('div',{className:'veil-ask',style:{position:'static',background:'transparent',animation:'fadeUp .4s ease'}},
+      h('div',{className:'box'},
+        h('div',{className:'k',style:{fontFamily:"'Cinzel',serif",fontSize:'calc(9 * var(--u))',letterSpacing:'.3em',color:'#b9a8ff'}},win?'WIN':'LOSE'),
+        h('div',{className:'nm'},win?'勝利':'敗北'),
+        h('div',{style:{display:'flex',justifyContent:'center',gap:'calc(18 * var(--u))',fontFamily:"'Fira Code',monospace",fontSize:'calc(20 * var(--u))',margin:'calc(8 * var(--u)) 0'}},
+          h('span',{style:{color:'#8ee9ff'}},data.pPt),h('span',{style:{color:'#8a86a8',fontSize:'calc(12 * var(--u))',alignSelf:'center'}},'vs'),h('span',{style:{color:'#ff9ab8'}},data.dPt)),
+        win?(piece!=null
+          ?h('div',{className:'pz-result'},h('div',{className:'lb'},'ピースを獲得'),h(PzPiece,{idx:piece}),h('div',{className:'ct'},pzCount+' / '+PZ_N))
+          :h('div',{className:'ln'},'パネルは完成している'))
+         :h('div',{className:'ln'},'ピースは減らない。何度でも挑める。'),
+        h('div',{className:'row',style:{flexDirection:'column'}},
+          win?[h('button',{key:'pn',onClick:onPanel},'パネルを見る'),h('button',{key:'nx',className:'go',onClick:onNext},'続けてバトル')]
+             :h('button',{className:'go',onClick:onRetry},'もう一度'),
+          h('button',{onClick:onBack,style:{border:0,minHeight:'calc(32 * var(--u))',fontSize:'calc(11 * var(--u))'}},'パズルを終える')
+        )
+      )
     )
   );
 }
 
 // v172 見送りの結果画面：勝ったら「次の魂へ」で画面に戻らず連戦。負けたら「もう一度」
-function VeilEndScreen({data,soul,nextSoul,sent,onNext,onRetry,onBack,piece,pzCount,onPanel}){
+function VeilEndScreen({data,soul,nextSoul,sent,onNext,onRetry,onBack}){
   const win=data.winner==='player';
   const k=veilKind(soul);
   return h('div',{className:'veil',style:{display:'flex',alignItems:'center',justifyContent:'center',padding:16}},
@@ -4065,13 +4090,11 @@ function VeilEndScreen({data,soul,nextSoul,sent,onNext,onRetry,onBack,piece,pzCo
         h('div',{className:'ln'},win?'見送った魂 '+sent+'　階級：'+veilGrade(sent):'魂はまだそこにいる。何度でも挑める。'),
         h('div',{style:{display:'flex',justifyContent:'center',gap:'calc(18 * var(--u))',fontFamily:"'Fira Code',monospace",fontSize:'calc(20 * var(--u))',marginBottom:'calc(14 * var(--u))'}},
           h('span',{style:{color:'#8ee9ff'}},data.pPt),h('span',{style:{color:'#8a86a8',fontSize:'calc(12 * var(--u))',alignSelf:'center'}},'vs'),h('span',{style:{color:'#ff9ab8'}},data.dPt)),
-        win&&piece!=null&&h('div',{className:'pz-result'},h('div',{className:'lb'},'ピースを獲得'),h(PzPiece,{idx:piece}),h('div',{className:'ct'},pzCount+' / '+PZ_N)), // v180
         h('div',{className:'row',style:{flexDirection:'column'}},
           win
-            ?[piece!=null&&h('button',{key:'pn',onClick:onPanel},'パネルを見る'),
-              nextSoul?h('button',{key:'nx',className:'go',onClick:onNext},'続けてバトル　→ '+veilKind(nextSoul).name):h('button',{key:'wt',className:'go',onClick:onBack},'次の魂を待つ')]
+            ?(nextSoul?h('button',{className:'go',onClick:onNext},'次の魂へ　→ '+veilKind(nextSoul).name):h('button',{className:'go',onClick:onBack},'次の魂を待つ'))
             :h('button',{className:'go',onClick:onRetry},'もう一度'),
-          h('button',{onClick:onBack,style:{border:0,minHeight:'calc(32 * var(--u))',fontSize:'calc(11 * var(--u))'}},'アニマ・ヴェールへ戻る')
+          h('button',{onClick:onBack},'アニマ・ヴェールへ戻る')
         )
       )
     )
@@ -4793,11 +4816,12 @@ function App(){
   function startVeilBattle(soul){veilR.current=soul.id;startStage(0,veilKind(soul).stIdx,true);}
   const veilCountedR=useRef(null); // v172 同じ試合を二重に数えない
   // v180 パズル：勝った試合ごとに1回だけ抽選（同じ試合で結果画面を何度出しても重複しない）
+  const pzModeR=useRef(false),pzBattleR=useRef(0); // v181 パズルモード中か／何戦目か（重複付与防止のキー）
   const pzAwardedR=useRef(null);const[pzPiece,setPzPiece]=useState(null);
   useEffect(()=>{
-    if(phase!=='gameEnd'||veilR.current==null||!gameEndData||gameEndData.winner!=='player')return;
-    if(pzAwardedR.current===veilR.current)return;
-    pzAwardedR.current=veilR.current;
+    if(phase!=='gameEnd'||!pzModeR.current||!gameEndData||gameEndData.winner!=='player')return;
+    if(pzAwardedR.current===pzBattleR.current)return;
+    pzAwardedR.current=pzBattleR.current;
     const st=pzState(saveR.current);
     const rest=Array.from({length:PZ_N},(_,i)=>i).filter(i=>!st.got.includes(i)); // 獲得済み（未はめ込み含む）は除外
     if(!rest.length){setPzPiece(null);return;} // 完成後は追加なし
@@ -4806,12 +4830,12 @@ function App(){
     setPzPiece(idx);
   },[phase]);
   function pzPlaced(idx){updSave(s=>{const st=pzState(s);if(!st.placed.includes(idx))s.puzzle={...st,placed:[...st.placed,idx]};return s;});}
-  function goPuzzle(){veilSettle();roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('puzzle');phaseR.current='puzzle';}
-  function veilStartAny(){ // パネル画面から次のバトルへ
-    const cand=veilSouls.filter(s=>s.state!=='out');
-    if(!cand.length){goVeil();return;}
-    veilR.current=null;stageR.current=null;stageOptsR.current=null;
-    startVeilBattle(cand[0]);
+  function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);veilR.current=null;pzModeR.current=false;setPzPiece(null);setPhase('puzzle');phaseR.current='puzzle';}
+  function startPuzzleBattle(){ // v181 集めた数に応じてだんだん強い相手
+    const got=pzState(saveR.current).got.length;
+    const idx=PUZZLE_CFG.ladder[Math.min(got,PUZZLE_CFG.ladder.length-1)];
+    pzModeR.current=true;pzBattleR.current++;setPzPiece(null);veilR.current=null;stageR.current=null;stageOptsR.current=null;
+    startStage(0,idx,true);
   }
   function veilSettle(){ // 勝っていたらその魂を見送る（消す）＋カウント
     const id=veilR.current,won=gameEndData&&gameEndData.winner==='player';
@@ -4819,7 +4843,7 @@ function App(){
   }
   function finishVeil(){veilSettle();goVeil();}
   function veilNext(){ // v172 画面に戻らず次の魂と連戦
-    veilSettle();setPzPiece(null);
+    veilSettle();
     const cur=veilR.current;
     const cand=veilSouls.filter(s=>s.id!==cur&&s.state!=='out');
     if(!cand.length){goVeil();return;}
@@ -5573,16 +5597,16 @@ function App(){
     const win=byTime?(pp>dp?'player':(pp<dp?'dealer':'draw')):(pp>=winPtR.current?'player':'dealer'); // v175 時間切れは点数比較
     let stars=0;
     const c=stageR.current;
-    if(c&&veilR.current==null){const st=STAGES.areas[c.ar].stages[c.st];stars=calcStars(pp,dp,winPtR.current);if(stars>0)updSave(s=>{s.stars[st.no]=Math.max(s.stars[st.no]||0,stars);return s;});}
+    if(c&&veilR.current==null&&!pzModeR.current){const st=STAGES.areas[c.ar].stages[c.st];stars=calcStars(pp,dp,winPtR.current);if(stars>0)updSave(s=>{s.stars[st.no]=Math.max(s.stars[st.no]||0,stars);return s;});}
     setGameEndData({pPt:pp,dPt:dp,winner:win,draw:win==='draw',diff:diffRef.current,stars,rivalName:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||null});
     setPhase('gameEnd');phaseR.current='gameEnd';exitLink();
   }
-  function goHome(){if(veilR.current!=null){goVeil();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
+  function goHome(){if(pzModeR.current){goPuzzle();return;}if(veilR.current!=null){goVeil();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
-  if(phase==='puzzle')return h(PuzzleScreen,{save,onPlaced:pzPlaced,onNext:veilStartAny,onBack:goVeil}); // v180
-  if(phase==='veil')return h(VeilScreen,{souls:veilSouls,setSouls:setVeilSouls,sent:save.veilSent||0,onBattle:startVeilBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';},onPanel:()=>{setPhase('puzzle');phaseR.current='puzzle';},pzCount:pzState(save).got.length}); // v171 / v180
-  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onVeil:goVeil,onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
+  if(phase==='puzzle')return h(PuzzleScreen,{save,onPlaced:pzPlaced,onNext:startPuzzleBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v180 / v181
+  if(phase==='veil')return h(VeilScreen,{souls:veilSouls,setSouls:setVeilSouls,sent:save.veilSent||0,onBattle:startVeilBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v171
+  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onVeil:goVeil,onPuzzle:goPuzzle,onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
   if(phase==='brief'&&curStage)return h(BriefScreen,{stage:curStage,onStart:()=>startGame(pendingDiff)}); // v119
@@ -5600,8 +5624,9 @@ function App(){
       setTimeout(()=>startStage(0,si),80);
     }});
   if(phase==='gameEnd'&&gameEndData){
+    if(pzModeR.current)return h(PuzzleEndScreen,{data:gameEndData,piece:pzPiece,pzCount:pzState(save).got.length,onPanel:goPuzzle,onNext:startPuzzleBattle,onRetry:()=>startStage(stageCtx.ar,stageCtx.st,true),onBack:()=>{goPuzzle();setPhase('menu');phaseR.current='menu';}}); // v181
     if(veilR.current!=null){const vs=veilSouls.find(s=>s.id===veilR.current)||veilSouls[0];const cand=veilSouls.filter(s=>s.id!==veilR.current&&s.state!=='out');const nx=cand.length?cand[0]:null;
-      return h(VeilEndScreen,{data:gameEndData,soul:vs,nextSoul:nx,sent:(save.veilSent||0)+((gameEndData.winner==='player'&&veilCountedR.current!==veilR.current)?1:0),onNext:veilNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st,true),onBack:finishVeil,piece:pzPiece,pzCount:pzState(save).got.length,onPanel:goPuzzle});} // v172 / v180
+      return h(VeilEndScreen,{data:gameEndData,soul:vs,nextSoul:nx,sent:(save.veilSent||0)+((gameEndData.winner==='player'&&veilCountedR.current!==veilR.current)?1:0),onNext:veilNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st,true),onBack:finishVeil});} // v172
     if(stageCtx)return h(StageEndScreen,{data:gameEndData,stage:curStage,stars:gameEndData.stars||0,onNext:stageNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st),onMap:goMap,isLast:(()=>{const nx=STAGES.areas[stageCtx.ar].stages[stageCtx.st+1];return !nx||!!nx.comingSoon||!!nx.challenge;})()});
     return h(GameEndScreen,{data:gameEndData,onRestart:startGame,onHome:goHome});
   }
