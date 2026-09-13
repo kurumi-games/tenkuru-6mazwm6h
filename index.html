@@ -1986,10 +1986,11 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .tk-complete{z-index:3;object-fit:fill;}
 .tk-piece{position:absolute;display:block;will-change:transform,opacity;}
 .tk-arrive-layer{position:absolute;inset:5px 5px 5px 5px;overflow:visible;pointer-events:none;z-index:6;} /* v191 降ってくる途中は枠の外（上）にも見える */
-.tk-piece.tk-arriving{animation:tk-arrive var(--ms) cubic-bezier(.3,0,.2,1) both;z-index:2;filter:drop-shadow(0 10px 14px rgba(0,0,0,.55));}
+.tk-piece.tk-arriving{animation:tk-arrive var(--ms) cubic-bezier(.35,0,.25,1) both;z-index:2;filter:drop-shadow(0 12px 16px rgba(0,0,0,.6));}
 @keyframes tk-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes tk-shadow{0%,100%{transform:scaleX(1);opacity:.8}50%{transform:scaleX(.92);opacity:.62}}
-@keyframes tk-arrive{0%{opacity:0;transform:translateY(-140%) scale(1.08)}12%{opacity:1}88%{transform:translateY(-6%) scale(1.03)}100%{opacity:1;transform:none}} /* v191 パネルの上の空中からゆっくり降りてきて、最後にはまる */
+/* v193 どの段のピースでも「パネルの上端よりさらに上（板の高さの55%上）」から降りてくる。top を動かすので段に関係なく同じ高さから始まる */
+@keyframes tk-arrive{0%{top:-55%;opacity:0;transform:scale(1.1)}6%{opacity:1}80%{top:calc(var(--top) - 4%);transform:scale(1.04)}100%{top:var(--top);opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.tk-float,.tk-shadow,.tk-piece.tk-arriving{animation:none!important}.tk-piece{will-change:auto}}
 .pz-doneTxt{margin-top:calc(4 * var(--u));font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.3em;color:#ffe08a;text-shadow:0 0 18px rgba(255,220,140,.8);animation:pzPop .6s cubic-bezier(.2,1.4,.4,1) both;}
 .pz-cnt{margin-top:calc(4 * var(--u));font-family:'Fira Code',monospace;font-size:calc(13 * var(--u));letter-spacing:.12em;color:#ded2b1;font-variant-numeric:tabular-nums;}
@@ -3129,7 +3130,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v192'; // v192(2026/09/13): 見送りモード（アニマ・ヴェール）を削除。ホームは「遊ぶ」「パズル」に
+const APP_VER='v193'; // v193(2026/09/13): 落下開始位置を「パネル上端より上」に固定（top を動かす方式）。下の段のピースも同じ高さから降りる
+// const APP_VER='v192'; // v192(2026/09/13): 見送りモード（アニマ・ヴェール）を削除。ホームは「遊ぶ」「パズル」に
 // const APP_VER='v191'; // v191(2026/09/13): ピースがパネルの上の空中から降りてくるように（枠の外にも見える層で1.3秒かけて降下→はまる）
 // const APP_VER='v190'; // v190(2026/09/13): ピースがはまる演出をゆっくりに（0.48→0.9秒）。降りてきて最後にトンと収まる。音は収まる瞬間に合わせたまま
 // const APP_VER='v189'; // v189(2026/09/13): ピースがはまる効果音（se/piece-snap.mp3、加工なし）。はまる瞬間に1回、先読み、次戦へ進んだら未再生分はキャンセル
@@ -3944,7 +3946,7 @@ function GameEndScreen({data,onRestart,onHome}){
 // 進行中のパネル＝順番で最初の未完成パネル。前のパネルの進捗は save.puzzles の別キーに残る
 // 素材：img/<id>/piece_NN.webp（凹凸つき透過）、complete.webp（全部そろったあとだけ表示）。絵の内容はコードに書かない
 // ladder：獲得数→相手（AREA_01.stages の添字）。集めるほどだんだん強くなる
-const PZ_TIMING={dropMs:1300,gapMs:300}; // はまる演出の長さ／間隔（v190：480→900ms、はまる瞬間を楽しめるようにゆっくり）
+const PZ_TIMING={dropMs:1500,gapMs:300}; // はまる演出の長さ／間隔（v190：480→900ms、はまる瞬間を楽しめるようにゆっくり）
 const PANELS=[
   {id:'panel_01',ver:1,dir:'img/panel_01/',w:1619,h:971,ladder:[1,1,2,3,4,5,6,7,8,8],pieces:[
     {id:'piece_01',x:0,y:0,w:325,h:553,path:'M 0.00000,0.00000 L 323.80000,0.00000 L 323.80000,184.46600 C 323.80000,213.60800 322.18100,221.70300 310.84800,221.70300 C 302.75300,221.70300 301.13400,202.27500 276.84900,202.27500 C 250.94500,202.27500 250.94500,283.22500 276.84900,283.22500 C 301.13400,283.22500 302.75300,263.79700 310.84800,263.79700 C 322.18100,263.79700 323.80000,271.89200 323.80000,301.03400 L 323.80000,485.50000 L 220.18400,485.50000 C 191.04200,485.50000 182.94700,487.11900 182.94700,498.45200 C 182.94700,506.54700 202.37500,508.16600 202.37500,532.45100 C 202.37500,558.35500 121.42500,558.35500 121.42500,532.45100 C 121.42500,508.16600 140.85300,506.54700 140.85300,498.45200 C 140.85300,487.11900 132.75800,485.50000 103.61600,485.50000 L 0.00000,485.50000 L 0.00000,0.00000 Z'},
@@ -3983,7 +3985,7 @@ function PzSlots({pn,hide,outline}){return h('svg',{className:outline?'tk-outlin
   h('g',outline?{fill:'none',stroke:'#e3d5b4',strokeWidth:1.3}:{fill:'#13172b',stroke:'#6b6386',strokeWidth:2},pn.pieces.map((p,i)=>(!outline&&hide.includes(i))?null:h('path',{key:i,d:p.path}))));}
 // 盤面上のピース：manifest の座標で重ねる（CSS grid にしない）
 function PzPiece({pn,idx,className}){const p=pn.pieces[idx],W=pn.w,H=pn.h;
-  return h('img',{className:'tk-piece'+(className?' '+className:''),src:pzImg(pn,idx),alt:'',draggable:false,style:{left:(p.x/W*100)+'%',top:(p.y/H*100)+'%',width:(p.w/W*100)+'%',height:(p.h/H*100)+'%','--ms':PZ_TIMING.dropMs+'ms'}});}
+  return h('img',{className:'tk-piece'+(className?' '+className:''),src:pzImg(pn,idx),alt:'',draggable:false,style:{left:(p.x/W*100)+'%',top:(p.y/H*100)+'%','--top':(p.y/H*100)+'%',width:(p.w/W*100)+'%',height:(p.h/H*100)+'%','--ms':PZ_TIMING.dropMs+'ms'}});}
 // パネル画面：円形の台座の上に板が浮いている。獲得済みでまだはめていないピースを1個ずつ落としてはめる
 // 「ピースを集める」は最初から押せて、押したら演出を切り上げて即次のバトル（押した後だけ無効＝二重遷移防止）
 function PuzzleScreen({save,pn,hasNext,onPlaced,onNext,onNextPanel,onBack}){
