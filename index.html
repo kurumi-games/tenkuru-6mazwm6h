@@ -2009,10 +2009,10 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .tk-outline{z-index:4;opacity:.27;}
 .tk-complete{z-index:3;object-fit:fill;}
 .tk-piece{position:absolute;display:block;will-change:transform,opacity;}
-.tk-piece.tk-arriving{animation:tk-arrive var(--ms) cubic-bezier(.18,.72,.3,1) both;z-index:2;}
+.tk-piece.tk-arriving{animation:tk-arrive var(--ms) cubic-bezier(.25,.1,.25,1) both;z-index:2;}
 @keyframes tk-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes tk-shadow{0%,100%{transform:scaleX(1);opacity:.8}50%{transform:scaleX(.92);opacity:.62}}
-@keyframes tk-arrive{from{opacity:0;transform:translateY(-32px) scale(1.045);filter:brightness(1.45)}to{opacity:1;transform:none;filter:brightness(1)}}
+@keyframes tk-arrive{0%{opacity:0;transform:translateY(-46px) scale(1.06);filter:brightness(1.5)}18%{opacity:1}80%{transform:translateY(2px) scale(1.01);filter:brightness(1.2)}100%{opacity:1;transform:none;filter:brightness(1)}} /* v190 ゆっくり降りて、最後にトンと収まる */
 @media(prefers-reduced-motion:reduce){.tk-float,.tk-shadow,.tk-piece.tk-arriving{animation:none!important}.tk-piece{will-change:auto}}
 .pz-doneTxt{margin-top:calc(4 * var(--u));font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.3em;color:#ffe08a;text-shadow:0 0 18px rgba(255,220,140,.8);animation:pzPop .6s cubic-bezier(.2,1.4,.4,1) both;}
 .pz-cnt{margin-top:calc(4 * var(--u));font-family:'Fira Code',monospace;font-size:calc(13 * var(--u));letter-spacing:.12em;color:#ded2b1;font-variant-numeric:tabular-nums;}
@@ -3152,7 +3152,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v189'; // v189(2026/09/13): ピースがはまる効果音（se/piece-snap.mp3、加工なし）。はまる瞬間に1回、先読み、次戦へ進んだら未再生分はキャンセル
+const APP_VER='v190'; // v190(2026/09/13): ピースがはまる演出をゆっくりに（0.48→0.9秒）。降りてきて最後にトンと収まる。音は収まる瞬間に合わせたまま
+// const APP_VER='v189'; // v189(2026/09/13): ピースがはまる効果音（se/piece-snap.mp3、加工なし）。はまる瞬間に1回、先読み、次戦へ進んだら未再生分はキャンセル
 // const APP_VER='v188'; // v188(2026/09/13): パズル画面の背景を img/panel-bg.webp に
 // const APP_VER='v187'; // v187(2026/09/13): 12ピースの panel_02 追加（4×3、正方形寄り）。パネルを円形台座の上に浮かぶ立体表示に（額縁・厚み・影・5秒周期の浮遊、reduced-motion対応）。panel_01 完成後は panel_02 へ
 // const APP_VER='v186'; // v186(2026/09/13): パズルモードの結果画面を完全に廃止。試合終了→即パネル（勝ちならピースが落ちてくる）
@@ -4047,7 +4048,7 @@ function GameEndScreen({data,onRestart,onHome}){
 // 進行中のパネル＝順番で最初の未完成パネル。前のパネルの進捗は save.puzzles の別キーに残る
 // 素材：img/<id>/piece_NN.webp（凹凸つき透過）、complete.webp（全部そろったあとだけ表示）。絵の内容はコードに書かない
 // ladder：獲得数→相手（AREA_01.stages の添字）。集めるほどだんだん強くなる
-const PZ_TIMING={dropMs:480,gapMs:200}; // はまる演出の長さ／間隔
+const PZ_TIMING={dropMs:900,gapMs:350}; // はまる演出の長さ／間隔（v190：480→900ms、はまる瞬間を楽しめるようにゆっくり）
 const PANELS=[
   {id:'panel_01',ver:1,dir:'img/panel_01/',w:1619,h:971,ladder:[1,1,2,3,4,5,6,7,8,8],pieces:[
     {id:'piece_01',x:0,y:0,w:325,h:553,path:'M 0.00000,0.00000 L 323.80000,0.00000 L 323.80000,184.46600 C 323.80000,213.60800 322.18100,221.70300 310.84800,221.70300 C 302.75300,221.70300 301.13400,202.27500 276.84900,202.27500 C 250.94500,202.27500 250.94500,283.22500 276.84900,283.22500 C 301.13400,283.22500 302.75300,263.79700 310.84800,263.79700 C 322.18100,263.79700 323.80000,271.89200 323.80000,301.03400 L 323.80000,485.50000 L 220.18400,485.50000 C 191.04200,485.50000 182.94700,487.11900 182.94700,498.45200 C 182.94700,506.54700 202.37500,508.16600 202.37500,532.45100 C 202.37500,558.35500 121.42500,558.35500 121.42500,532.45100 C 121.42500,508.16600 140.85300,506.54700 140.85300,498.45200 C 140.85300,487.11900 132.75800,485.50000 103.61600,485.50000 L 0.00000,485.50000 L 0.00000,0.00000 Z'},
