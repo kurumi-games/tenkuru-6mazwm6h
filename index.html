@@ -3264,7 +3264,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v205'; // v205(2026/09/14): パネル選択画面（ホーム「パズル」→好きなステージを選ぶ、進捗と獲得形が見える）。同梱素材 tenkuru_puzzle_6 を STAGE 2 として追加（3×2の1枚絵、薄い枠つき表示）
+const APP_VER='v206'; // v206(2026/09/14): 主役のピース（顔）は最後に出るように。late 指定がなければ中央上を含むピースを最後に回す
+// const APP_VER='v205'; // v205(2026/09/14): パネル選択画面（ホーム「パズル」→好きなステージを選ぶ、進捗と獲得形が見える）。同梱素材 tenkuru_puzzle_6 を STAGE 2 として追加（3×2の1枚絵、薄い枠つき表示）
 // const APP_VER='v204'; // v204(2026/09/14): v202で誤って消したパネル画面のCSS（ピース配置・落下・ボタン・BOSS表示）を復旧
 // const APP_VER='v203'; // v203(2026/09/14): PWA対応（manifest.json・アイコン・全画面表示）。ホーム画面に追加でアプリとして起動
 // const APP_VER='v202'; // v202(2026/09/14): 勝利演出を作り直し（静止→決定打の光・WIN・アタック音・相手の札の消失を同期、画面を暗く落とす、跳ねない文字、ボスは輪と余韻）。勝利音を「鋭いアタック＋澄んだ響き＋短い余韻」に。リザルトは獲得ピース1枚を大きく出して残す（小パネル廃止、はめるのはパネル側）。完成時の四角い枠を除去。重複CSS整理
@@ -4125,7 +4126,7 @@ const PANELS=[
     {id:'piece_06',x:710,y:635,w:738,h:451,path:'M 724 724 L 724 828 L 714 837 L 713 842 L 716 847 L 723 852 L 749 856 L 783 870 L 803 886 L 811 901 L 811 909 L 807 918 L 791 934 L 782 940 L 760 950 L 746 954 L 723 957 L 713 967 L 714 972 L 724 981 L 724 1085 L 1447 1085 L 1447 724 L 1343 724 L 1334 714 L 1329 713 L 1319 723 L 1314 753 L 1303 780 L 1293 795 L 1282 806 L 1271 811 L 1262 811 L 1253 807 L 1236 789 L 1223 764 L 1218 748 L 1214 723 L 1210 717 L 1204 713 L 1199 714 L 1190 724 L 981 724 L 972 734 L 967 735 L 958 727 L 956 723 L 953 700 L 939 665 L 930 652 L 921 643 L 908 637 L 901 637 L 890 642 L 881 650 L 872 662 L 859 691 L 853 724 L 843 735 L 837 734 L 828 724 Z'}
   ]},
   // v205 同梱素材 tenkuru_puzzle_6（3×2、背景付きの1枚絵）。ボス名は仮
-  {id:'panel_06',ver:1,dir:'img/panel_06/',w:1448,h:1086,bossName:'？？？',rect:true,
+  {id:'panel_06',ver:1,dir:'img/panel_06/',w:1448,h:1086,bossName:'？？？',rect:true,late:[1], // 上段中央（顔）は最後
    ladder:[{st:2},{st:3,gk:'hour'},{st:4,gk:'mist'},{st:5,gk:'chain'},{st:6,gk:'silence'},{st:7,gk:'heavy'}],
    boss:{st:8,gk:'mix',rate:0.35,boost:{speed:0.55,diff:'master'}},
    boost:{speed:0.65,diff:'master'},
@@ -4159,6 +4160,8 @@ function pzState(save,pn){const p=(save&&save.puzzles&&save.puzzles[pzKey(pn)])|
 function pzWrite(s,pn,st){s.puzzles={...(s.puzzles||{}),[pzKey(pn)]:st};return s;}
 function pzActive(save){const sel=save&&save.pzSel&&PANELS.find(pn=>pn.id===save.pzSel);if(sel)return sel;return PANELS.find(pn=>!pzState(save,pn).cleared)||PANELS[PANELS.length-1];} // v205 選んだパネル優先。なければ最初の未クリア
 function pzImg(pn,i){return pn.dir+pn.pieces[i].id+'.webp';}
+// v206 「主役のピース」は最後まで残す：パネルに late:[添字] があればそれ、なければ画面の中央上（顔が来やすい位置）を含むピース
+function pzLate(pn){if(pn.late)return pn.late;const cx=pn.w/2,cy=pn.h*0.35;return pn.pieces.map((p,i)=>(cx>=p.x&&cx<=p.x+p.w&&cy>=p.y&&cy<=p.y+p.h)?i:-1).filter(i=>i>=0);}
 // 未獲得スロット：絵を含まない形だけ（暗い塗り＋控えめな線）。outline=完成後の薄い輪郭
 function PzSlots({pn,hide,outline}){return h('svg',{className:outline?'tk-outline':'tk-slots',viewBox:'0 0 '+pn.w+' '+pn.h,xmlns:'http://www.w3.org/2000/svg'},
   h('g',outline?{fill:'none',stroke:'#e3d5b4',strokeWidth:1.3}:{fill:'#13172b',stroke:'#6b6386',strokeWidth:2},pn.pieces.map((p,i)=>(!outline&&hide.includes(i))?null:h('path',{key:i,d:p.path}))));}
@@ -5035,7 +5038,8 @@ function App(){
       const pn=pzPanelR.current||pzActive(saveR.current),st=pzState(saveR.current,pn);
       if(pzBossR.current){updSave(s=>pzWrite(s,pn,{...st,cleared:true}));setPzPiece(null);}
       else{const rest=Array.from({length:pn.pieces.length},(_,i)=>i).filter(i=>!st.got.includes(i));
-        if(rest.length){const idx=rest[Math.floor(Math.random()*rest.length)];updSave(s=>pzWrite(s,pn,{...st,got:[...st.got,idx]}));setPzPiece(idx);}else setPzPiece(null);}
+        const late=pzLate(pn),early=rest.filter(i=>!late.includes(i));const pool=early.length?early:rest; // v206 主役ピースは他が全部そろってから
+        if(rest.length){const idx=pool[Math.floor(Math.random()*pool.length)];updSave(s=>pzWrite(s,pn,{...st,got:[...st.got,idx]}));setPzPiece(idx);}else setPzPiece(null);}
     }
   },[phase]);
   function pzPlaced(pn,idxs){updSave(s=>{const st=pzState(s,pn);const add=idxs.filter(i=>!st.placed.includes(i));return add.length?pzWrite(s,pn,{...st,placed:[...st.placed,...add]}):s;});}
