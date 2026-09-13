@@ -2093,6 +2093,29 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pz-boss .n{font-size:calc(18 * var(--u));font-weight:700;letter-spacing:.14em;color:#fff3cf;text-shadow:0 0 16px #ffb347;}
 .pz-boss .d{font-size:calc(11 * var(--u));color:#d9cfb0;margin-top:calc(2 * var(--u));}
 .pz-btns button.gold{background:linear-gradient(115deg,#ffd27a,#d98b2a);color:#3a2408;font-weight:700;border-color:transparent;box-shadow:0 6px 22px rgba(255,180,80,.3);letter-spacing:.1em;}
+/* v205 パネル選択 */
+.pz-sel{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#0a0d24 url('img/panel-bg.webp') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;padding:calc(18 * var(--u)) calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#e6ecfa;overflow:hidden;}
+.pz-sel::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,30,.6),rgba(6,8,30,.82));pointer-events:none;}
+.pz-sel>*{position:relative;z-index:1;}
+.pz-sel .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#b9a8ff;}
+.pz-sel .t{font-size:calc(16 * var(--u));font-weight:700;letter-spacing:.14em;margin:calc(2 * var(--u)) 0 calc(12 * var(--u));}
+.pz-sel .list{width:min(92vw,calc(330 * var(--u)));flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:calc(10 * var(--u));padding-bottom:calc(8 * var(--u));}
+.pz-card{display:flex;align-items:center;gap:calc(12 * var(--u));padding:calc(10 * var(--u));border-radius:calc(16 * var(--u));background:rgba(16,14,48,.72);border:1px solid rgba(190,180,255,.28);cursor:pointer;-webkit-tap-highlight-color:transparent;text-align:left;color:inherit;font-family:inherit;width:100%;}
+.pz-card:active{transform:scale(.985);}
+.pz-card.cur{border-color:#ffd27a;box-shadow:0 0 18px rgba(255,200,110,.25);}
+.pz-card .th{position:relative;width:calc(92 * var(--u));height:calc(92 * var(--u));flex:none;display:flex;align-items:center;justify-content:center;}
+.pz-card .th svg,.pz-card .th img{max-width:100%;max-height:100%;display:block;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5));}
+.pz-card .th svg path{fill:#0f1330;stroke:rgba(190,180,255,.45);stroke-width:4;}
+.pz-card .th svg path.got{fill:#3a3570;}
+.pz-card .info{flex:1;min-width:0;}
+.pz-card .n{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
+.pz-card .b{font-size:calc(14 * var(--u));font-weight:700;letter-spacing:.08em;margin:calc(2 * var(--u)) 0;}
+.pz-card .p{font-family:'Fira Code',monospace;font-size:calc(12 * var(--u));color:#ded2b1;}
+.pz-card .cl{display:inline-block;margin-left:calc(6 * var(--u));font-size:calc(10 * var(--u));letter-spacing:.2em;color:#ffe08a;}
+.pz-sel .home{margin-top:calc(8 * var(--u));min-height:calc(40 * var(--u));padding:0 calc(22 * var(--u));border-radius:999px;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.65);color:#d6cfff;font-family:inherit;font-size:calc(13 * var(--u));cursor:pointer;}
+/* v205 長方形の1枚絵パネル：薄い枠だけ */
+.tk-surface.rect{background:rgba(8,10,30,.5);outline:1px solid rgba(190,180,255,.28);outline-offset:2px;border-radius:2px;}
+.tk-surface.rect .tk-slots path{stroke-width:2.2;}
 /* v200 ともしび：灯りの当たっていない札 */
 .card-stage.lantern-dark{filter:brightness(.28) saturate(.4);transition:filter .3s;}
 .card-stage.lantern-dark .cs-num,.card-stage.lantern-dark .num{color:#6b6f8a!important;text-shadow:none!important;}
@@ -3241,7 +3264,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v204'; // v204(2026/09/14): v202で誤って消したパネル画面のCSS（ピース配置・落下・ボタン・BOSS表示）を復旧
+const APP_VER='v205'; // v205(2026/09/14): パネル選択画面（ホーム「パズル」→好きなステージを選ぶ、進捗と獲得形が見える）。同梱素材 tenkuru_puzzle_6 を STAGE 2 として追加（3×2の1枚絵、薄い枠つき表示）
+// const APP_VER='v204'; // v204(2026/09/14): v202で誤って消したパネル画面のCSS（ピース配置・落下・ボタン・BOSS表示）を復旧
 // const APP_VER='v203'; // v203(2026/09/14): PWA対応（manifest.json・アイコン・全画面表示）。ホーム画面に追加でアプリとして起動
 // const APP_VER='v202'; // v202(2026/09/14): 勝利演出を作り直し（静止→決定打の光・WIN・アタック音・相手の札の消失を同期、画面を暗く落とす、跳ねない文字、ボスは輪と余韻）。勝利音を「鋭いアタック＋澄んだ響き＋短い余韻」に。リザルトは獲得ピース1枚を大きく出して残す（小パネル廃止、はめるのはパネル側）。完成時の四角い枠を除去。重複CSS整理
 // const APP_VER='v201'; // v201(2026/09/14): セトラの仮ステージを削除。STAGE1=記憶のランタンの少女、STAGE2=オルビィ
@@ -4088,7 +4112,7 @@ function GameEndScreen({data,onRestart,onHome}){
 const PZ_TIMING={dropMs:1500,gapMs:300}; // はまる演出の長さ／間隔（v190：480→900ms、はまる瞬間を楽しめるようにゆっくり）
 const PANELS=[
   // v200/v201 順番＝STAGE1 記憶のランタンの少女（同梱素材）→ STAGE2 オルビィ（セトラの仮ステージは v201 で削除）
-  {id:'panel_05',ver:1,dir:'img/panel_05/',w:1448,h:1086,bossName:'記憶のランタンの少女',
+  {id:'panel_05',ver:1,dir:'img/panel_05/',w:1448,h:1086,bossName:'記憶のランタンの少女',rect:true,
    ladder:[{st:3,gk:'mist'},{st:4,gk:'chain'},{st:5,gk:'silence'},{st:6,gk:'heavy'},{st:7,gk:'lantern'},{st:8,gk:'lantern'}],
    boss:{st:8,gk:'lantern',rate:0.4,boost:{speed:0.5,diff:'master'}}, // 固有ギミック「ともしび」を高頻度で。通常AIの最強設定＋速さ
    boost:{speed:0.6,diff:'master'},
@@ -4099,6 +4123,19 @@ const PANELS=[
     {id:'piece_04',x:634,y:273,w:814,h:541,path:'M 1447 362 L 1343 362 L 1334 372 L 1329 373 L 1320 365 L 1318 361 L 1315 338 L 1301 303 L 1292 290 L 1283 281 L 1270 275 L 1263 275 L 1252 280 L 1243 288 L 1234 300 L 1221 329 L 1215 362 L 1205 373 L 1199 372 L 1190 362 L 981 362 L 972 352 L 967 351 L 957 361 L 952 391 L 941 418 L 931 433 L 920 444 L 909 449 L 900 449 L 891 445 L 874 427 L 861 402 L 856 386 L 852 361 L 848 355 L 842 351 L 837 352 L 828 362 L 724 362 L 724 466 L 734 475 L 735 480 L 732 485 L 724 491 L 688 498 L 658 513 L 641 529 L 637 539 L 637 547 L 643 559 L 652 568 L 667 578 L 697 590 L 724 594 L 735 605 L 734 610 L 724 619 L 724 723 L 828 723 L 837 733 L 843 734 L 852 725 L 858 692 L 872 661 L 890 641 L 901 636 L 908 636 L 923 644 L 938 662 L 951 691 L 957 724 L 966 734 L 973 733 L 981 723 L 1191 723 L 1198 714 L 1204 712 L 1215 723 L 1220 753 L 1227 772 L 1236 788 L 1253 806 L 1262 810 L 1271 810 L 1282 805 L 1300 784 L 1313 754 L 1318 724 L 1327 713 L 1334 713 L 1343 723 L 1447 723 Z'},
     {id:'piece_05',x:0,y:635,w:814,h:451,path:'M 0 724 L 0 1085 L 723 1085 L 723 981 L 713 972 L 713 965 L 723 956 L 747 953 L 770 945 L 784 938 L 805 920 L 810 910 L 810 900 L 807 892 L 788 874 L 776 867 L 756 859 L 723 853 L 713 844 L 712 840 L 714 836 L 723 828 L 723 724 L 619 724 L 610 714 L 605 713 L 595 723 L 590 753 L 579 780 L 569 795 L 558 806 L 547 811 L 538 811 L 529 807 L 512 789 L 499 764 L 494 748 L 490 723 L 486 717 L 480 713 L 475 714 L 466 724 L 257 724 L 248 734 L 243 735 L 234 727 L 232 723 L 229 700 L 215 665 L 206 652 L 197 643 L 184 637 L 177 637 L 166 642 L 157 650 L 148 662 L 135 691 L 129 724 L 119 735 L 113 734 L 104 724 Z'},
     {id:'piece_06',x:710,y:635,w:738,h:451,path:'M 724 724 L 724 828 L 714 837 L 713 842 L 716 847 L 723 852 L 749 856 L 783 870 L 803 886 L 811 901 L 811 909 L 807 918 L 791 934 L 782 940 L 760 950 L 746 954 L 723 957 L 713 967 L 714 972 L 724 981 L 724 1085 L 1447 1085 L 1447 724 L 1343 724 L 1334 714 L 1329 713 L 1319 723 L 1314 753 L 1303 780 L 1293 795 L 1282 806 L 1271 811 L 1262 811 L 1253 807 L 1236 789 L 1223 764 L 1218 748 L 1214 723 L 1210 717 L 1204 713 L 1199 714 L 1190 724 L 981 724 L 972 734 L 967 735 L 958 727 L 956 723 L 953 700 L 939 665 L 930 652 L 921 643 L 908 637 L 901 637 L 890 642 L 881 650 L 872 662 L 859 691 L 853 724 L 843 735 L 837 734 L 828 724 Z'}
+  ]},
+  // v205 同梱素材 tenkuru_puzzle_6（3×2、背景付きの1枚絵）。ボス名は仮
+  {id:'panel_06',ver:1,dir:'img/panel_06/',w:1448,h:1086,bossName:'？？？',rect:true,
+   ladder:[{st:2},{st:3,gk:'hour'},{st:4,gk:'mist'},{st:5,gk:'chain'},{st:6,gk:'silence'},{st:7,gk:'heavy'}],
+   boss:{st:8,gk:'mix',rate:0.35,boost:{speed:0.55,diff:'master'}},
+   boost:{speed:0.65,diff:'master'},
+   pieces:[
+    {id:'piece_01',x:0,y:0,w:583,h:545,path:'M 0 0 L 0 542 L 219 542 L 217 535 L 201 515 L 198 503 L 199 490 L 205 476 L 212 468 L 226 460 L 235 458 L 252 459 L 264 464 L 276 475 L 282 488 L 283 508 L 281 514 L 275 524 L 264 536 L 262 542 L 482 542 L 482 293 L 486 292 L 510 310 L 516 312 L 534 312 L 547 307 L 557 298 L 562 290 L 566 274 L 565 261 L 561 250 L 550 237 L 538 231 L 516 230 L 502 237 L 490 248 L 486 250 L 482 249 L 482 0 Z'},
+    {id:'piece_02',x:480,y:0,w:488,h:643,path:'M 483 0 L 483 249 L 490 247 L 510 231 L 516 229 L 534 229 L 547 234 L 558 244 L 563 252 L 567 268 L 566 281 L 562 292 L 550 306 L 538 312 L 516 313 L 510 311 L 490 295 L 483 293 L 483 542 L 702 542 L 703 545 L 700 551 L 689 563 L 684 572 L 682 579 L 682 591 L 685 602 L 690 611 L 702 621 L 717 626 L 730 626 L 745 621 L 757 611 L 762 602 L 765 591 L 764 575 L 758 563 L 747 551 L 744 545 L 745 542 L 964 542 L 964 293 L 957 295 L 937 311 L 931 313 L 913 313 L 897 306 L 889 298 L 884 290 L 880 274 L 881 261 L 885 250 L 897 236 L 909 230 L 931 229 L 937 231 L 957 247 L 964 249 L 964 0 Z'},
+    {id:'piece_03',x:865,y:0,w:583,h:545,path:'M 965 0 L 965 249 L 961 250 L 937 232 L 931 230 L 913 230 L 900 235 L 890 244 L 885 252 L 881 268 L 882 281 L 886 292 L 897 305 L 909 311 L 931 312 L 945 305 L 957 294 L 961 292 L 965 293 L 965 542 L 1185 542 L 1183 536 L 1172 524 L 1166 514 L 1164 508 L 1164 492 L 1169 478 L 1180 466 L 1189 461 L 1200 458 L 1217 459 L 1231 465 L 1239 472 L 1247 486 L 1249 503 L 1246 515 L 1230 535 L 1228 542 L 1447 542 L 1447 0 Z'},
+    {id:'piece_04',x:0,y:443,w:485,h:643,path:'M 0 543 L 0 1085 L 482 1085 L 482 836 L 476 837 L 465 847 L 452 855 L 431 856 L 416 850 L 407 842 L 401 832 L 398 822 L 398 806 L 403 792 L 412 781 L 424 774 L 431 772 L 452 773 L 461 778 L 476 791 L 482 792 L 482 543 L 262 543 L 261 541 L 263 536 L 274 524 L 280 514 L 282 508 L 282 492 L 277 478 L 267 467 L 258 462 L 247 459 L 230 460 L 216 466 L 209 472 L 201 486 L 199 497 L 200 509 L 207 523 L 218 535 L 220 539 L 219 543 Z'},
+    {id:'piece_05',x:382,y:541,w:684,h:545,path:'M 483 543 L 483 792 L 476 792 L 465 782 L 452 774 L 431 773 L 416 779 L 408 786 L 402 796 L 399 806 L 399 822 L 404 836 L 412 846 L 424 853 L 431 855 L 452 854 L 461 849 L 476 836 L 483 836 L 483 1085 L 964 1085 L 964 836 L 971 836 L 982 846 L 995 854 L 1016 855 L 1031 849 L 1039 842 L 1045 832 L 1048 822 L 1048 806 L 1043 792 L 1035 782 L 1023 775 L 1016 773 L 995 774 L 986 779 L 971 792 L 964 792 L 964 543 L 745 543 L 748 551 L 759 563 L 764 572 L 766 579 L 766 591 L 763 602 L 757 612 L 745 622 L 730 627 L 717 627 L 702 622 L 689 611 L 684 602 L 681 591 L 682 575 L 688 563 L 699 551 L 702 543 Z'},
+    {id:'piece_06',x:963,y:443,w:485,h:643,path:'M 965 543 L 965 792 L 971 791 L 982 781 L 995 773 L 1016 772 L 1031 778 L 1040 786 L 1046 796 L 1049 806 L 1049 822 L 1044 836 L 1035 847 L 1023 854 L 1016 856 L 995 855 L 986 850 L 971 837 L 965 836 L 965 1085 L 1447 1085 L 1447 543 L 1228 543 L 1227 539 L 1245 515 L 1248 503 L 1247 490 L 1241 476 L 1235 469 L 1221 461 L 1212 459 L 1195 460 L 1183 465 L 1172 475 L 1166 488 L 1165 508 L 1167 514 L 1173 524 L 1184 536 L 1186 541 L 1185 543 Z'}
   ]},
   // v198 1ステージ＝道中6戦（ピース6枚）＋ボス1戦。絵に描かれたキャラがボス
   // v199 ver2：ピースの形を作り直した（6枚の外周がキャラのシルエット：大きなフード／横に広がる袖／片手のカード／煙のように流れる裾）
@@ -4120,7 +4157,7 @@ const PANELS=[
 function pzKey(pn){return pn.id+'-v'+pn.ver;}
 function pzState(save,pn){const p=(save&&save.puzzles&&save.puzzles[pzKey(pn)])||{got:[],placed:[]};return{got:p.got||[],placed:p.placed||[],cleared:!!p.cleared};}
 function pzWrite(s,pn,st){s.puzzles={...(s.puzzles||{}),[pzKey(pn)]:st};return s;}
-function pzActive(save){return PANELS.find(pn=>!pzState(save,pn).cleared)||PANELS[PANELS.length-1];} // 最初の未クリア。全部クリアなら最後
+function pzActive(save){const sel=save&&save.pzSel&&PANELS.find(pn=>pn.id===save.pzSel);if(sel)return sel;return PANELS.find(pn=>!pzState(save,pn).cleared)||PANELS[PANELS.length-1];} // v205 選んだパネル優先。なければ最初の未クリア
 function pzImg(pn,i){return pn.dir+pn.pieces[i].id+'.webp';}
 // 未獲得スロット：絵を含まない形だけ（暗い塗り＋控えめな線）。outline=完成後の薄い輪郭
 function PzSlots({pn,hide,outline}){return h('svg',{className:outline?'tk-outline':'tk-slots',viewBox:'0 0 '+pn.w+' '+pn.h,xmlns:'http://www.w3.org/2000/svg'},
@@ -4161,6 +4198,24 @@ function PuzzleResult({data,pn,piece,count,boss,onNext,onPanel,onRetry}){
         (!win||(win&&!boss&&!last))&&h('button',{className:'sm',onClick:once(onPanel)},'パネルへ戻る')
       )
     )
+  );
+}
+// v205 パネル選択：どのステージ（パネル）を進めるか自由に選ぶ。未獲得は暗い形、獲得済みは少し明るい形。クリア済みは完成絵の小さな表示
+function PanelSelect({save,onPick,onBack}){
+  const cur=pzActive(save);
+  return h('div',{className:'pz-sel'},
+    h('div',{className:'k'},'PANEL SELECT'),h('div',{className:'t'},'パネルを選ぶ'),
+    h('div',{className:'list'},PANELS.map((pn,i)=>{const st=pzState(save,pn),N=pn.pieces.length;
+      return h('button',{key:pn.id,className:'pz-card'+(pn===cur?' cur':''),onClick:()=>onPick(pn)},
+        h('div',{className:'th'},st.cleared
+          ?h('img',{src:pn.dir+'complete.webp',alt:'',draggable:false})
+          :h('svg',{viewBox:'0 0 '+pn.w+' '+pn.h,xmlns:'http://www.w3.org/2000/svg'},pn.pieces.map((p,j)=>h('path',{key:j,d:p.path,className:st.got.includes(j)?'got':''})))),
+        h('div',{className:'info'},
+          h('div',{className:'n'},'STAGE '+(i+1)),
+          h('div',{className:'b'},st.cleared?pn.bossName:'BOSS ？？？'),
+          h('div',{className:'p'},st.got.length+' / '+N,st.cleared&&h('span',{className:'cl'},'CLEAR'))
+        ));})),
+    h('button',{className:'home',onClick:onBack},'ホームへ')
   );
 }
 // パネル画面：円形の台座の上に板が浮いている。獲得済みでまだはめていないピースを1個ずつ落としてはめる（はまる瞬間に音と光）
@@ -4207,7 +4262,7 @@ function PuzzleScreen({save,pn,onPlaced,onNext,onBack,onReset,onNextStage,hasNex
       h('div',{className:'tk-shadow'}),
       h('div',{className:'tk-float'},h('div',{className:'tk-board'},
         h('div',{className:'tk-glow'}),
-        h('div',{className:'tk-surface',style:{'--ar':pn.w+' / '+pn.h}},
+        h('div',{className:'tk-surface'+(pn.rect?' rect':''),style:{'--ar':pn.w+' / '+pn.h}},
           h(PzSlots,{pn,hide:visible}),
           shown.map(i=>h(PzPiece,{key:i,pn,idx:i})),
           (shown.length>=N)&&h('img',{className:'tk-complete',src:pn.dir+'complete.webp',alt:'',draggable:false,style:sm.indexOf('sm-reveal')<0&&sm!=='summoned'?{opacity:0}:undefined}),
@@ -4221,8 +4276,8 @@ function PuzzleScreen({save,pn,onPlaced,onNext,onBack,onReset,onNextStage,hasNex
       :h('div',{className:'pz-cnt'},shown.length+' / '+N),
     h('div',{className:'pz-btns'},
       (st.cleared&&hasNext)?h('button',{className:'gold',onClick:onNextStage},'次のステージへ'):h('button',{className:complete?'gold':'go',disabled:went,onClick:next},label), // v200 クリア済みで次があれば次のステージへ
-      st.cleared&&h('button',{className:'sm',onClick:onReset},hasNext?'このステージをやり直す':'最初からやり直す'),
-      h('button',{className:'sm',onClick:onBack},'ホームへ')
+      st.cleared&&h('button',{className:'sm',onClick:onReset},'このステージをやり直す'),
+      h('button',{className:'sm',onClick:onBack},'パネル選択へ')
     )
   );
 }
@@ -5782,11 +5837,12 @@ function App(){
   function goHome(){if(pzModeR.current){goPuzzle();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
+  if(phase==='pzselect')return h(PanelSelect,{save,onPick:pn=>{updSave(s=>{s.pzSel=pn.id;return s;});pzPanelR.current=pn;setPzView(v=>v+1);setPhase('puzzle');phaseR.current='puzzle';},onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v205
   if(phase==='puzzle'){const pn=pzPanelR.current||pzActive(save);
-    return h(PuzzleScreen,{key:pzKey(pn)+'-'+pzBattleR.current+'-'+pzView,save,pn,onPlaced:pzPlaced,onNext:startPuzzleBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';},
-      hasNext:PANELS.indexOf(pn)<PANELS.length-1,onNextStage:()=>{pzPanelR.current=null;setPzView(v=>v+1);},
+    return h(PuzzleScreen,{key:pzKey(pn)+'-'+pzBattleR.current+'-'+pzView,save,pn,onPlaced:pzPlaced,onNext:startPuzzleBattle,onBack:()=>{setPhase('pzselect');phaseR.current='pzselect';},
+      hasNext:PANELS.indexOf(pn)<PANELS.length-1,onNextStage:()=>{const nx=PANELS[PANELS.indexOf(pn)+1];updSave(s=>{s.pzSel=nx.id;return s;});pzPanelR.current=nx;setPzView(v=>v+1);},
       onReset:()=>{updSave(s=>pzWrite(s,pn,{got:[],placed:[],cleared:false}));pzPanelR.current=null;setPzView(v=>v+1);}});} // v180 / v198 / v200
-  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzle:()=>{pzPanelR.current=null;goPuzzle();},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
+  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzle:()=>{pzPanelR.current=null;setPhase('pzselect');phaseR.current='pzselect';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
   if(phase==='brief'&&curStage)return h(BriefScreen,{stage:curStage,onStart:()=>startGame(pendingDiff)}); // v119
