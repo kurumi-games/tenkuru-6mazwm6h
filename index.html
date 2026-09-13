@@ -2000,6 +2000,56 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pz-btns button.go:active{transform:translateY(1px);}
 .pz-btns button.go:disabled{opacity:.65;cursor:default;}
 .pz-btns button.sm{border:0;min-height:calc(30 * var(--u));font-size:calc(11 * var(--u));color:#9f9ac0;}
+/* ── v198 勝敗の瞬間（WIN/LOSE）＋リザルト ── */
+.pz-fx{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;pointer-events:none;--u:min(calc(100vw / 360),calc(100dvh / 640));}
+.pz-fx .big{font-family:'Cinzel',serif;font-weight:900;font-size:calc(64 * var(--u));letter-spacing:.12em;color:#fff;animation:pzBig .55s cubic-bezier(.2,1.5,.4,1) both;}
+.pz-fx.win .big{text-shadow:0 0 18px #8ee9ff,0 0 48px #5aa7ff,0 6px 0 #1f3a7a;}
+.pz-fx.boss .big{font-size:calc(46 * var(--u));text-shadow:0 0 18px #ffe08a,0 0 56px #ffb347,0 6px 0 #7a4a1f;}
+.pz-fx.lose .big{color:#ffd0d8;text-shadow:0 0 18px #ff5c7a,0 0 40px #b0102e,0 6px 0 #4a0a18;}
+.pz-fx .flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.55),transparent 60%);animation:pzFlash .6s ease-out both;}
+.pz-fx.lose .flash{background:radial-gradient(circle at 50% 45%,rgba(180,20,50,.45),transparent 60%);}
+@keyframes pzBig{0%{opacity:0;transform:scale(.3) rotate(-6deg)}60%{opacity:1;transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes pzFlash{from{opacity:1}to{opacity:0}}
+.gp-dealer-cards.defeated .gp-dealer-card{animation:pzDefeat .7s ease-in both;filter:grayscale(1) brightness(.5);}
+.gp-dealer-cards.defeated .gp-dealer-card:nth-child(2n){animation-delay:.06s}.gp-dealer-cards.defeated .gp-dealer-card:nth-child(3n){animation-delay:.12s}
+@keyframes pzDefeat{0%{transform:none}30%{transform:translateY(-6px) rotate(-4deg)}100%{transform:translateY(60px) rotate(12deg);opacity:0}}
+.gp-screen.pz-shake{animation:pzShake .5s ease-out both;}
+@keyframes pzShake{0%,100%{transform:none}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,1px)}80%{transform:translate(2px,-1px)}}
+.pz-res{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#0a0d24 url('img/panel-bg.webp') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(18 * var(--u)) calc(18 * var(--u)) calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#e6ecfa;overflow:hidden;}
+.pz-res::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,30,.55),rgba(6,8,30,.75));pointer-events:none;}
+.pz-res>*{position:relative;z-index:1;}
+.pz-res .hd{font-family:'Cinzel',serif;font-weight:900;font-size:calc(40 * var(--u));letter-spacing:.14em;text-shadow:0 0 14px #8ee9ff,0 0 36px #5aa7ff;animation:pzBig .45s cubic-bezier(.2,1.5,.4,1) both;}
+.pz-res.lose .hd{color:#ffd0d8;text-shadow:0 0 14px #ff5c7a,0 0 36px #b0102e;}
+.pz-res.clear .hd{font-size:calc(30 * var(--u));color:#fff3cf;text-shadow:0 0 14px #ffe08a,0 0 40px #ffb347;}
+.pz-res .sub{font-size:calc(11 * var(--u));letter-spacing:.3em;color:#b9a8ff;margin-top:calc(2 * var(--u));}
+.pz-res .mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:0;}
+.pz-res .piece{height:min(38vh,calc(230 * var(--u)));width:auto;max-width:86vw;object-fit:contain;filter:drop-shadow(0 16px 22px rgba(0,0,0,.6));animation:pzSlam .7s cubic-bezier(.2,.9,.3,1.2) both;}
+@keyframes pzSlam{0%{opacity:0;transform:translateY(-70vh) scale(1.25)}55%{opacity:1;transform:translateY(0) scale(.96)}75%{transform:translateY(-6px) scale(1.03)}100%{transform:none}}
+.pz-res .piece-ring{position:absolute;width:calc(200 * var(--u));height:calc(200 * var(--u));border-radius:50%;border:3px solid rgba(255,255,255,.7);animation:pzRing .7s ease-out .5s both;pointer-events:none;}
+@keyframes pzRing{from{transform:scale(.4);opacity:.9}to{transform:scale(1.8);opacity:0}}
+.pz-res .prog{margin-top:calc(10 * var(--u));font-size:calc(14 * var(--u));letter-spacing:.14em;color:#ffe3a3;font-variant-numeric:tabular-nums;}
+.pz-res .prog b{font-family:'Fira Code',monospace;font-size:calc(18 * var(--u));}
+.pz-res .score{display:flex;align-items:center;justify-content:center;gap:calc(16 * var(--u));margin:calc(8 * var(--u)) 0 calc(12 * var(--u));font-family:'Fira Code',monospace;font-variant-numeric:tabular-nums;}
+.pz-res .score .v{font-size:calc(34 * var(--u));font-weight:900;line-height:1;}
+.pz-res .score .you{color:#8ee9ff;text-shadow:0 0 12px rgba(80,180,255,.6);}
+.pz-res .score .foe{color:#ff9ab8;text-shadow:0 0 12px rgba(255,80,120,.5);}
+.pz-res .score .l{font-family:'Noto Serif JP',serif;font-size:calc(9 * var(--u));letter-spacing:.2em;color:#aeb6d6;text-align:center;margin-top:calc(4 * var(--u));}
+.pz-res .score .vs{font-size:calc(12 * var(--u));color:#8a86a8;}
+.pz-res .btns{width:min(88vw,calc(300 * var(--u)));display:flex;flex-direction:column;gap:calc(8 * var(--u));}
+.pz-res .btns button{min-height:calc(54 * var(--u));border-radius:calc(16 * var(--u));font-family:inherit;font-size:calc(16 * var(--u));cursor:pointer;border:1px solid #c4b8ff50;background:rgba(20,16,50,.5);color:#cfc8f0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.pz-res .btns button.go{background:linear-gradient(115deg,#9a84ff,#6752da);box-shadow:inset 0 1px #eee5,0 6px 22px #4d3cb52b;color:#fff;font-weight:700;letter-spacing:.1em;border-color:transparent;}
+.pz-res .btns button.gold{background:linear-gradient(115deg,#ffd27a,#d98b2a);color:#3a2408;font-weight:700;border-color:transparent;box-shadow:0 6px 22px rgba(255,180,80,.3);}
+.pz-res .btns button.sm{min-height:calc(40 * var(--u));font-size:calc(13 * var(--u));background:transparent;}
+.pz-res .btns button:active{transform:translateY(1px);}
+.pz-res .btns button:disabled{opacity:.6;}
+/* パネル完成→ボス登場 */
+.tk-stage.celebrate .tk-board{animation:pzCelebrate 1.2s ease-out both;box-shadow:0 0 0 2px #fff8,0 0 60px #ffe08a,0 13px 0 #0d1121,0 23px 28px #01041380;}
+@keyframes pzCelebrate{0%{filter:brightness(1)}20%{filter:brightness(1.9)}100%{filter:brightness(1)}}
+.pz-boss{margin-top:calc(8 * var(--u));text-align:center;animation:pzBig .6s cubic-bezier(.2,1.5,.4,1) .3s both;}
+.pz-boss .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#ffb347;}
+.pz-boss .n{font-size:calc(18 * var(--u));font-weight:700;letter-spacing:.14em;color:#fff3cf;text-shadow:0 0 16px #ffb347;}
+.pz-boss .d{font-size:calc(11 * var(--u));color:#d9cfb0;margin-top:calc(2 * var(--u));}
+.pz-btns button.gold{background:linear-gradient(115deg,#ffd27a,#d98b2a);color:#3a2408;font-weight:700;border-color:transparent;box-shadow:0 6px 22px rgba(255,180,80,.3);letter-spacing:.1em;}
 /* v183 役完成の演出スキップ：手札エリアが薄暗くなり「タップでスキップ」 */
 .gp-hand-area{position:relative;}
 .skip-veil{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(4,6,20,.62);cursor:pointer;-webkit-tap-highlight-color:transparent;animation:fadeUp .25s ease both;border-radius:inherit;}
@@ -2175,6 +2225,10 @@ function playSnapSE(){ // 読み込み前なら鳴らさず待たない
   try{if(!SNAP_SE.buf)return null;resumeAC();const src=AC.createBufferSource();src.buffer=SNAP_SE.buf;const g=AC.createGain();g.gain.value=1;src.connect(g);fxOut(g,0);src.start();return src;}catch(e){return null;}
 }
 setTimeout(loadSnapSE,800); // 起動直後に先読み
+// v198 勝利の音：上昇する3連ベル＋余韻。ボス撃破はもう1段上に伸ばす
+function playWinSE(boss){try{resumeAC();const base=boss?[784,988,1175,1568,1976]:[880,1109,1319,1760];base.forEach((f,i)=>fxBell({f,v:0.085,d:boss?1.6:1.1,bright:1.3,rev:0.8,t:i*(boss?0.11:0.09)}));fxTone({f:220,f2:440,type:'triangle',v:0.08,a:0.01,d:boss?0.9:0.5,rev:0.5});}catch(e){}}
+function playLoseSE(){try{resumeAC();fxTone({f:440,f2:180,type:'sawtooth',v:0.09,a:0.01,d:0.7,rev:0.4});fxTone({f:330,f2:140,type:'triangle',v:0.08,a:0.02,d:0.9,t:0.12,rev:0.4});}catch(e){}}
+function playCompleteSE(){try{resumeAC();[523,659,784,1047,1319,1568].forEach((f,i)=>fxBell({f,v:0.07,d:1.8,bright:1.2,rev:0.9,t:i*0.08}));}catch(e){}}
 // ドライ＋リバーブセンドの2系統出力
 function fxOut(node,rev){
   node.connect(AC.destination);
@@ -3131,7 +3185,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v197'; // v197(2026/09/13): パネル1削除、パネル2を12戦の本気構成に（1〜6通常ましまし、7〜11新ギミック：砂時計・霧・鎖・静寂・重罰、12オルビィ）。相手の星環は毎ラウンド20%。プレイヤーのクロノリンク廃止
+const APP_VER='v198'; // v198(2026/09/13): パズルを「道中6戦＋ボス1戦」に。決着の瞬間に WIN!/LOSE（音＋相手の札が崩れる）→リザルト（獲得ピースがドーン）。6枚完成→ボス登場→撃破でSTAGE CLEAR。仮素材：オルビィ立ち絵を6分割
+// const APP_VER='v197'; // v197(2026/09/13): パネル1削除、パネル2を12戦の本気構成に（1〜6通常ましまし、7〜11新ギミック：砂時計・霧・鎖・静寂・重罰、12オルビィ）。相手の星環は毎ラウンド20%。プレイヤーのクロノリンク廃止
 // const APP_VER='v196'; // v196(2026/09/13): 通常ステージのディーラー全体強化（DEALER_BOOST：判断+2段階、速さ0.6倍）。パズルの相手は通常ステージ順に戻した（強化が乗る）
 // const APP_VER='v195'; // v195(2026/09/13): パズルの進捗リセット（保存キー ver2）。相手を大幅に強化：panel_01=ST6→ST9→BOSS→ルナ→モルフォ→セトラ→オルビィ、panel_02はさらに上寄せ
 // const APP_VER='v194'; // v194(2026/09/13): カウントダウン（5-4-3-2-1／3-2-1）中も手札エリアをタップで即GO
@@ -3969,28 +4024,24 @@ function GameEndScreen({data,onRestart,onHome}){
 // ladder：獲得数→相手（AREA_01.stages の添字）。集めるほどだんだん強くなる
 const PZ_TIMING={dropMs:1500,gapMs:300}; // はまる演出の長さ／間隔（v190：480→900ms、はまる瞬間を楽しめるようにゆっくり）
 const PANELS=[
-  {id:'panel_02',ver:2,dir:'img/panel_02/',w:1448,h:1086,// v197 12戦：1〜6 通常ステージ（ましまし強化）／7〜11 通常ステージ＋新ギミック／12 オルビィ本人
-   ladder:[{st:0},{st:1},{st:2},{st:3},{st:4},{st:5},{st:6,gk:'hour'},{st:7,gk:'mist'},{st:8,gk:'chain'},{st:8,gk:'silence'},{st:9,gk:'heavy'},{st:13}],
-   boost:{speed:0.45,diff:'master'}, // 通常ステージの相手に上乗せ（パズル中のみ）
+  // v198 1ステージ＝道中6戦（ピース6枚）＋ボス1戦。絵に描かれたキャラがボス。仮素材：既存のオルビィ立ち絵を6分割
+  {id:'panel_03',ver:1,dir:'img/panel_03/',w:520,h:926,bossName:'オルビィ',
+   ladder:[{st:3},{st:4,gk:'hour'},{st:5,gk:'mist'},{st:6,gk:'chain'},{st:7,gk:'silence'},{st:8,gk:'heavy'}], // 道中6戦（速さは極端に上げない）
+   boss:{st:13,gk:'mix'}, // ボス：道中で覚えたギミックがランダムに来る
+   boost:{speed:0.6,diff:'master'},
    pieces:[
-    {id:'piece_01',x:0,y:0,w:363,h:438,path:'M 0.00000,0.00000 L 362.00000,0.00000 L 362.00000,115.84000 C 362.00000,148.42000 360.19000,157.47000 347.52000,157.47000 C 338.47000,157.47000 336.66000,135.75000 309.51000,135.75000 C 280.55000,135.75000 280.55000,226.25000 309.51000,226.25000 C 336.66000,226.25000 338.47000,204.53000 347.52000,204.53000 C 360.19000,204.53000 362.00000,213.58000 362.00000,246.16000 L 362.00000,362.00000 L 246.16000,362.00000 C 213.58000,362.00000 204.53000,363.81000 204.53000,376.48000 C 204.53000,385.53000 226.25000,387.34000 226.25000,414.49000 C 226.25000,443.45000 135.75000,443.45000 135.75000,414.49000 C 135.75000,387.34000 157.47000,385.53000 157.47000,376.48000 C 157.47000,363.81000 148.42000,362.00000 115.84000,362.00000 L 0.00000,362.00000 L 0.00000,0.00000 Z'},
-    {id:'piece_02',x:287,y:0,w:513,h:363,path:'M 362.00000,0.00000 L 724.00000,0.00000 L 724.00000,115.84000 C 724.00000,148.42000 725.81000,157.47000 738.48000,157.47000 C 747.53000,157.47000 749.34000,135.75000 776.49000,135.75000 C 805.45000,135.75000 805.45000,226.25000 776.49000,226.25000 C 749.34000,226.25000 747.53000,204.53000 738.48000,204.53000 C 725.81000,204.53000 724.00000,213.58000 724.00000,246.16000 L 724.00000,362.00000 L 608.16000,362.00000 C 575.58000,362.00000 566.53000,360.19000 566.53000,347.52000 C 566.53000,338.47000 588.25000,336.66000 588.25000,309.51000 C 588.25000,280.55000 497.75000,280.55000 497.75000,309.51000 C 497.75000,336.66000 519.47000,338.47000 519.47000,347.52000 C 519.47000,360.19000 510.42000,362.00000 477.84000,362.00000 L 362.00000,362.00000 L 362.00000,246.16000 C 362.00000,213.58000 360.19000,204.53000 347.52000,204.53000 C 338.47000,204.53000 336.66000,226.25000 309.51000,226.25000 C 280.55000,226.25000 280.55000,135.75000 309.51000,135.75000 C 336.66000,135.75000 338.47000,157.47000 347.52000,157.47000 C 360.19000,157.47000 362.00000,148.42000 362.00000,115.84000 L 362.00000,0.00000 Z'},
-    {id:'piece_03',x:724,y:0,w:363,h:438,path:'M 724.00000,0.00000 L 1086.00000,0.00000 L 1086.00000,115.84000 C 1086.00000,148.42000 1084.19000,157.47000 1071.52000,157.47000 C 1062.47000,157.47000 1060.66000,135.75000 1033.51000,135.75000 C 1004.55000,135.75000 1004.55000,226.25000 1033.51000,226.25000 C 1060.66000,226.25000 1062.47000,204.53000 1071.52000,204.53000 C 1084.19000,204.53000 1086.00000,213.58000 1086.00000,246.16000 L 1086.00000,362.00000 L 970.16000,362.00000 C 937.58000,362.00000 928.53000,363.81000 928.53000,376.48000 C 928.53000,385.53000 950.25000,387.34000 950.25000,414.49000 C 950.25000,443.45000 859.75000,443.45000 859.75000,414.49000 C 859.75000,387.34000 881.47000,385.53000 881.47000,376.48000 C 881.47000,363.81000 872.42000,362.00000 839.84000,362.00000 L 724.00000,362.00000 L 724.00000,246.16000 C 724.00000,213.58000 725.81000,204.53000 738.48000,204.53000 C 747.53000,204.53000 749.34000,226.25000 776.49000,226.25000 C 805.45000,226.25000 805.45000,135.75000 776.49000,135.75000 C 749.34000,135.75000 747.53000,157.47000 738.48000,157.47000 C 725.81000,157.47000 724.00000,148.42000 724.00000,115.84000 L 724.00000,0.00000 Z'},
-    {id:'piece_04',x:1011,y:0,w:437,h:363,path:'M 1086.00000,0.00000 L 1448.00000,0.00000 L 1448.00000,362.00000 L 1332.16000,362.00000 C 1299.58000,362.00000 1290.53000,360.19000 1290.53000,347.52000 C 1290.53000,338.47000 1312.25000,336.66000 1312.25000,309.51000 C 1312.25000,280.55000 1221.75000,280.55000 1221.75000,309.51000 C 1221.75000,336.66000 1243.47000,338.47000 1243.47000,347.52000 C 1243.47000,360.19000 1234.42000,362.00000 1201.84000,362.00000 L 1086.00000,362.00000 L 1086.00000,246.16000 C 1086.00000,213.58000 1084.19000,204.53000 1071.52000,204.53000 C 1062.47000,204.53000 1060.66000,226.25000 1033.51000,226.25000 C 1004.55000,226.25000 1004.55000,135.75000 1033.51000,135.75000 C 1060.66000,135.75000 1062.47000,157.47000 1071.52000,157.47000 C 1084.19000,157.47000 1086.00000,148.42000 1086.00000,115.84000 L 1086.00000,0.00000 Z'},
-    {id:'piece_05',x:0,y:362,w:438,h:438,path:'M 0.00000,362.00000 L 115.84000,362.00000 C 148.42000,362.00000 157.47000,363.81000 157.47000,376.48000 C 157.47000,385.53000 135.75000,387.34000 135.75000,414.49000 C 135.75000,443.45000 226.25000,443.45000 226.25000,414.49000 C 226.25000,387.34000 204.53000,385.53000 204.53000,376.48000 C 204.53000,363.81000 213.58000,362.00000 246.16000,362.00000 L 362.00000,362.00000 L 362.00000,477.84000 C 362.00000,510.42000 363.81000,519.47000 376.48000,519.47000 C 385.53000,519.47000 387.34000,497.75000 414.49000,497.75000 C 443.45000,497.75000 443.45000,588.25000 414.49000,588.25000 C 387.34000,588.25000 385.53000,566.53000 376.48000,566.53000 C 363.81000,566.53000 362.00000,575.58000 362.00000,608.16000 L 362.00000,724.00000 L 246.16000,724.00000 C 213.58000,724.00000 204.53000,725.81000 204.53000,738.48000 C 204.53000,747.53000 226.25000,749.34000 226.25000,776.49000 C 226.25000,805.45000 135.75000,805.45000 135.75000,776.49000 C 135.75000,749.34000 157.47000,747.53000 157.47000,738.48000 C 157.47000,725.81000 148.42000,724.00000 115.84000,724.00000 L 0.00000,724.00000 L 0.00000,362.00000 Z'},
-    {id:'piece_06',x:362,y:287,w:363,h:438,path:'M 362.00000,362.00000 L 477.84000,362.00000 C 510.42000,362.00000 519.47000,360.19000 519.47000,347.52000 C 519.47000,338.47000 497.75000,336.66000 497.75000,309.51000 C 497.75000,280.55000 588.25000,280.55000 588.25000,309.51000 C 588.25000,336.66000 566.53000,338.47000 566.53000,347.52000 C 566.53000,360.19000 575.58000,362.00000 608.16000,362.00000 L 724.00000,362.00000 L 724.00000,477.84000 C 724.00000,510.42000 722.19000,519.47000 709.52000,519.47000 C 700.47000,519.47000 698.66000,497.75000 671.51000,497.75000 C 642.55000,497.75000 642.55000,588.25000 671.51000,588.25000 C 698.66000,588.25000 700.47000,566.53000 709.52000,566.53000 C 722.19000,566.53000 724.00000,575.58000 724.00000,608.16000 L 724.00000,724.00000 L 608.16000,724.00000 C 575.58000,724.00000 566.53000,722.19000 566.53000,709.52000 C 566.53000,700.47000 588.25000,698.66000 588.25000,671.51000 C 588.25000,642.55000 497.75000,642.55000 497.75000,671.51000 C 497.75000,698.66000 519.47000,700.47000 519.47000,709.52000 C 519.47000,722.19000 510.42000,724.00000 477.84000,724.00000 L 362.00000,724.00000 L 362.00000,608.16000 C 362.00000,575.58000 363.81000,566.53000 376.48000,566.53000 C 385.53000,566.53000 387.34000,588.25000 414.49000,588.25000 C 443.45000,588.25000 443.45000,497.75000 414.49000,497.75000 C 387.34000,497.75000 385.53000,519.47000 376.48000,519.47000 C 363.81000,519.47000 362.00000,510.42000 362.00000,477.84000 L 362.00000,362.00000 Z'},
-    {id:'piece_07',x:649,y:362,w:513,h:438,path:'M 724.00000,362.00000 L 839.84000,362.00000 C 872.42000,362.00000 881.47000,363.81000 881.47000,376.48000 C 881.47000,385.53000 859.75000,387.34000 859.75000,414.49000 C 859.75000,443.45000 950.25000,443.45000 950.25000,414.49000 C 950.25000,387.34000 928.53000,385.53000 928.53000,376.48000 C 928.53000,363.81000 937.58000,362.00000 970.16000,362.00000 L 1086.00000,362.00000 L 1086.00000,477.84000 C 1086.00000,510.42000 1087.81000,519.47000 1100.48000,519.47000 C 1109.53000,519.47000 1111.34000,497.75000 1138.49000,497.75000 C 1167.45000,497.75000 1167.45000,588.25000 1138.49000,588.25000 C 1111.34000,588.25000 1109.53000,566.53000 1100.48000,566.53000 C 1087.81000,566.53000 1086.00000,575.58000 1086.00000,608.16000 L 1086.00000,724.00000 L 970.16000,724.00000 C 937.58000,724.00000 928.53000,725.81000 928.53000,738.48000 C 928.53000,747.53000 950.25000,749.34000 950.25000,776.49000 C 950.25000,805.45000 859.75000,805.45000 859.75000,776.49000 C 859.75000,749.34000 881.47000,747.53000 881.47000,738.48000 C 881.47000,725.81000 872.42000,724.00000 839.84000,724.00000 L 724.00000,724.00000 L 724.00000,608.16000 C 724.00000,575.58000 722.19000,566.53000 709.52000,566.53000 C 700.47000,566.53000 698.66000,588.25000 671.51000,588.25000 C 642.55000,588.25000 642.55000,497.75000 671.51000,497.75000 C 698.66000,497.75000 700.47000,519.47000 709.52000,519.47000 C 722.19000,519.47000 724.00000,510.42000 724.00000,477.84000 L 724.00000,362.00000 Z'},
-    {id:'piece_08',x:1086,y:287,w:362,h:438,path:'M 1086.00000,362.00000 L 1201.84000,362.00000 C 1234.42000,362.00000 1243.47000,360.19000 1243.47000,347.52000 C 1243.47000,338.47000 1221.75000,336.66000 1221.75000,309.51000 C 1221.75000,280.55000 1312.25000,280.55000 1312.25000,309.51000 C 1312.25000,336.66000 1290.53000,338.47000 1290.53000,347.52000 C 1290.53000,360.19000 1299.58000,362.00000 1332.16000,362.00000 L 1448.00000,362.00000 L 1448.00000,724.00000 L 1332.16000,724.00000 C 1299.58000,724.00000 1290.53000,722.19000 1290.53000,709.52000 C 1290.53000,700.47000 1312.25000,698.66000 1312.25000,671.51000 C 1312.25000,642.55000 1221.75000,642.55000 1221.75000,671.51000 C 1221.75000,698.66000 1243.47000,700.47000 1243.47000,709.52000 C 1243.47000,722.19000 1234.42000,724.00000 1201.84000,724.00000 L 1086.00000,724.00000 L 1086.00000,608.16000 C 1086.00000,575.58000 1087.81000,566.53000 1100.48000,566.53000 C 1109.53000,566.53000 1111.34000,588.25000 1138.49000,588.25000 C 1167.45000,588.25000 1167.45000,497.75000 1138.49000,497.75000 C 1111.34000,497.75000 1109.53000,519.47000 1100.48000,519.47000 C 1087.81000,519.47000 1086.00000,510.42000 1086.00000,477.84000 L 1086.00000,362.00000 Z'},
-    {id:'piece_09',x:0,y:724,w:363,h:362,path:'M 0.00000,724.00000 L 115.84000,724.00000 C 148.42000,724.00000 157.47000,725.81000 157.47000,738.48000 C 157.47000,747.53000 135.75000,749.34000 135.75000,776.49000 C 135.75000,805.45000 226.25000,805.45000 226.25000,776.49000 C 226.25000,749.34000 204.53000,747.53000 204.53000,738.48000 C 204.53000,725.81000 213.58000,724.00000 246.16000,724.00000 L 362.00000,724.00000 L 362.00000,839.84000 C 362.00000,872.42000 360.19000,881.47000 347.52000,881.47000 C 338.47000,881.47000 336.66000,859.75000 309.51000,859.75000 C 280.55000,859.75000 280.55000,950.25000 309.51000,950.25000 C 336.66000,950.25000 338.47000,928.53000 347.52000,928.53000 C 360.19000,928.53000 362.00000,937.58000 362.00000,970.16000 L 362.00000,1086.00000 L 0.00000,1086.00000 L 0.00000,724.00000 Z'},
-    {id:'piece_10',x:287,y:649,w:513,h:437,path:'M 362.00000,724.00000 L 477.84000,724.00000 C 510.42000,724.00000 519.47000,722.19000 519.47000,709.52000 C 519.47000,700.47000 497.75000,698.66000 497.75000,671.51000 C 497.75000,642.55000 588.25000,642.55000 588.25000,671.51000 C 588.25000,698.66000 566.53000,700.47000 566.53000,709.52000 C 566.53000,722.19000 575.58000,724.00000 608.16000,724.00000 L 724.00000,724.00000 L 724.00000,839.84000 C 724.00000,872.42000 725.81000,881.47000 738.48000,881.47000 C 747.53000,881.47000 749.34000,859.75000 776.49000,859.75000 C 805.45000,859.75000 805.45000,950.25000 776.49000,950.25000 C 749.34000,950.25000 747.53000,928.53000 738.48000,928.53000 C 725.81000,928.53000 724.00000,937.58000 724.00000,970.16000 L 724.00000,1086.00000 L 362.00000,1086.00000 L 362.00000,970.16000 C 362.00000,937.58000 360.19000,928.53000 347.52000,928.53000 C 338.47000,928.53000 336.66000,950.25000 309.51000,950.25000 C 280.55000,950.25000 280.55000,859.75000 309.51000,859.75000 C 336.66000,859.75000 338.47000,881.47000 347.52000,881.47000 C 360.19000,881.47000 362.00000,872.42000 362.00000,839.84000 L 362.00000,724.00000 Z'},
-    {id:'piece_11',x:724,y:724,w:363,h:362,path:'M 724.00000,724.00000 L 839.84000,724.00000 C 872.42000,724.00000 881.47000,725.81000 881.47000,738.48000 C 881.47000,747.53000 859.75000,749.34000 859.75000,776.49000 C 859.75000,805.45000 950.25000,805.45000 950.25000,776.49000 C 950.25000,749.34000 928.53000,747.53000 928.53000,738.48000 C 928.53000,725.81000 937.58000,724.00000 970.16000,724.00000 L 1086.00000,724.00000 L 1086.00000,839.84000 C 1086.00000,872.42000 1084.19000,881.47000 1071.52000,881.47000 C 1062.47000,881.47000 1060.66000,859.75000 1033.51000,859.75000 C 1004.55000,859.75000 1004.55000,950.25000 1033.51000,950.25000 C 1060.66000,950.25000 1062.47000,928.53000 1071.52000,928.53000 C 1084.19000,928.53000 1086.00000,937.58000 1086.00000,970.16000 L 1086.00000,1086.00000 L 724.00000,1086.00000 L 724.00000,970.16000 C 724.00000,937.58000 725.81000,928.53000 738.48000,928.53000 C 747.53000,928.53000 749.34000,950.25000 776.49000,950.25000 C 805.45000,950.25000 805.45000,859.75000 776.49000,859.75000 C 749.34000,859.75000 747.53000,881.47000 738.48000,881.47000 C 725.81000,881.47000 724.00000,872.42000 724.00000,839.84000 L 724.00000,724.00000 Z'},
-    {id:'piece_12',x:1011,y:649,w:437,h:437,path:'M 1086.00000,724.00000 L 1201.84000,724.00000 C 1234.42000,724.00000 1243.47000,722.19000 1243.47000,709.52000 C 1243.47000,700.47000 1221.75000,698.66000 1221.75000,671.51000 C 1221.75000,642.55000 1312.25000,642.55000 1312.25000,671.51000 C 1312.25000,698.66000 1290.53000,700.47000 1290.53000,709.52000 C 1290.53000,722.19000 1299.58000,724.00000 1332.16000,724.00000 L 1448.00000,724.00000 L 1448.00000,1086.00000 L 1086.00000,1086.00000 L 1086.00000,970.16000 C 1086.00000,937.58000 1084.19000,928.53000 1071.52000,928.53000 C 1062.47000,928.53000 1060.66000,950.25000 1033.51000,950.25000 C 1004.55000,950.25000 1004.55000,859.75000 1033.51000,859.75000 C 1060.66000,859.75000 1062.47000,881.47000 1071.52000,881.47000 C 1084.19000,881.47000 1086.00000,872.42000 1086.00000,839.84000 L 1086.00000,724.00000 Z'}
+    {id:'piece_01',x:0,y:0,w:328,h:377,path:'M 0.0 0.0 L 260.0 0.0 L 260.0 114.2 C 260.0 135.8 236.6 123.5 223.6 108.0 C 195.0 74.1 195.0 234.6 223.6 200.6 C 236.6 185.2 260.0 172.9 260.0 194.5 L 260.0 308.7 L 163.8 308.7 C 145.6 308.7 156.0 332.1 169.0 345.1 C 197.6 373.7 62.4 373.7 91.0 345.1 C 104.0 332.1 114.4 308.7 96.2 308.7 L 0.0 308.7 L 0.0 0.0 Z'},
+    {id:'piece_02',x:192,y:0,w:328,h:377,path:'M 260.0 0.0 L 520.0 0.0 L 520.0 308.7 L 423.8 308.7 C 405.6 308.7 416.0 332.1 429.0 345.1 C 457.6 373.7 322.4 373.7 351.0 345.1 C 364.0 332.1 374.4 308.7 356.2 308.7 L 260.0 308.7 L 260.0 194.5 C 260.0 172.9 236.6 185.2 223.6 200.6 C 195.0 234.6 195.0 74.1 223.6 108.0 C 236.6 123.5 260.0 135.8 260.0 114.2 L 260.0 0.0 Z'},
+    {id:'piece_03',x:0,y:241,w:328,h:444,path:'M 0.0 308.7 L 96.2 308.7 C 114.4 308.7 104.0 332.1 91.0 345.1 C 62.4 373.7 197.6 373.7 169.0 345.1 C 156.0 332.1 145.6 308.7 163.8 308.7 L 260.0 308.7 L 260.0 422.9 C 260.0 444.5 236.6 432.1 223.6 416.7 C 195.0 382.7 195.0 543.3 223.6 509.3 C 236.6 493.9 260.0 481.5 260.0 503.1 L 260.0 617.3 L 163.8 617.3 C 145.6 617.3 156.0 593.9 169.0 580.9 C 197.6 552.3 62.4 552.3 91.0 580.9 C 104.0 593.9 114.4 617.3 96.2 617.3 L 0.0 617.3 L 0.0 308.7 Z'},
+    {id:'piece_04',x:192,y:241,w:328,h:444,path:'M 260.0 308.7 L 356.2 308.7 C 374.4 308.7 364.0 332.1 351.0 345.1 C 322.4 373.7 457.6 373.7 429.0 345.1 C 416.0 332.1 405.6 308.7 423.8 308.7 L 520.0 308.7 L 520.0 617.3 L 423.8 617.3 C 405.6 617.3 416.0 593.9 429.0 580.9 C 457.6 552.3 322.4 552.3 351.0 580.9 C 364.0 593.9 374.4 617.3 356.2 617.3 L 260.0 617.3 L 260.0 503.1 C 260.0 481.5 236.6 493.9 223.6 509.3 C 195.0 543.3 195.0 382.7 223.6 416.7 C 236.6 432.1 260.0 444.5 260.0 422.9 L 260.0 308.7 Z'},
+    {id:'piece_05',x:0,y:549,w:328,h:377,path:'M 0.0 617.3 L 96.2 617.3 C 114.4 617.3 104.0 593.9 91.0 580.9 C 62.4 552.3 197.6 552.3 169.0 580.9 C 156.0 593.9 145.6 617.3 163.8 617.3 L 260.0 617.3 L 260.0 731.5 C 260.0 753.1 283.4 740.8 296.4 725.4 C 325.0 691.4 325.0 851.9 296.4 818.0 C 283.4 802.5 260.0 790.2 260.0 811.8 L 260.0 926.0 L 0.0 926.0 L 0.0 617.3 Z'},
+    {id:'piece_06',x:192,y:549,w:328,h:377,path:'M 260.0 617.3 L 356.2 617.3 C 374.4 617.3 364.0 593.9 351.0 580.9 C 322.4 552.3 457.6 552.3 429.0 580.9 C 416.0 593.9 405.6 617.3 423.8 617.3 L 520.0 617.3 L 520.0 926.0 L 260.0 926.0 L 260.0 811.8 C 260.0 790.2 283.4 802.5 296.4 818.0 C 325.0 851.9 325.0 691.4 296.4 725.4 C 283.4 740.8 260.0 753.1 260.0 731.5 L 260.0 617.3 Z'}
   ]},
 ];
 function pzKey(pn){return pn.id+'-v'+pn.ver;}
-function pzState(save,pn){const p=(save&&save.puzzles&&save.puzzles[pzKey(pn)])||{got:[],placed:[]};return{got:p.got||[],placed:p.placed||[]};}
+function pzState(save,pn){const p=(save&&save.puzzles&&save.puzzles[pzKey(pn)])||{got:[],placed:[]};return{got:p.got||[],placed:p.placed||[],cleared:!!p.cleared};}
 function pzWrite(s,pn,st){s.puzzles={...(s.puzzles||{}),[pzKey(pn)]:st};return s;}
-function pzActive(save){return PANELS.find(pn=>pzState(save,pn).got.length<pn.pieces.length)||PANELS[PANELS.length-1];} // 最初の未完成。全部完成なら最後のパネル
+function pzActive(save){return PANELS.find(pn=>!pzState(save,pn).cleared)||PANELS[PANELS.length-1];} // 最初の未クリア。全部クリアなら最後
 function pzImg(pn,i){return pn.dir+pn.pieces[i].id+'.webp';}
 // 未獲得スロット：絵を含まない形だけ（暗い塗り＋控えめな線）。outline=完成後の薄い輪郭
 function PzSlots({pn,hide,outline}){return h('svg',{className:outline?'tk-outline':'tk-slots',viewBox:'0 0 '+pn.w+' '+pn.h,xmlns:'http://www.w3.org/2000/svg'},
@@ -3998,32 +4049,69 @@ function PzSlots({pn,hide,outline}){return h('svg',{className:outline?'tk-outlin
 // 盤面上のピース：manifest の座標で重ねる（CSS grid にしない）
 function PzPiece({pn,idx,className}){const p=pn.pieces[idx],W=pn.w,H=pn.h;
   return h('img',{className:'tk-piece'+(className?' '+className:''),src:pzImg(pn,idx),alt:'',draggable:false,style:{left:(p.x/W*100)+'%',top:(p.y/H*100)+'%','--top':(p.y/H*100)+'%',width:(p.w/W*100)+'%',height:(p.h/H*100)+'%','--ms':PZ_TIMING.dropMs+'ms'}});}
-// パネル画面：円形の台座の上に板が浮いている。獲得済みでまだはめていないピースを1個ずつ落としてはめる
-// 「ピースを集める」は最初から押せて、押したら演出を切り上げて即次のバトル（押した後だけ無効＝二重遷移防止）
-function PuzzleScreen({save,pn,hasNext,onPlaced,onNext,onNextPanel,onBack}){
+// v198 リザルト：上 WIN!／上半分 獲得ピース（上からドーン）／進捗／下半分 最終点数／大きな「次の対戦へ」＋「パネルへ戻る」
+function PuzzleResult({data,pn,piece,count,boss,onNext,onPanel,onRetry}){
+  const N=pn.pieces.length,win=data.winner==='player',full=count>=N;
+  const wentR=useRef(false);const once=f=>()=>{if(wentR.current)return;wentR.current=true;f();};
+  const cls='pz-res'+(win?(boss?' clear':''):' lose');
+  return h('div',{className:cls},
+    h('div',{style:{textAlign:'center'}},
+      h('div',{className:'hd'},win?(boss?'STAGE CLEAR':'WIN!'):'LOSE'),
+      h('div',{className:'sub'},win?(boss?'ボスを倒した':(full?'すべてのピースがそろった':'ピースを手に入れた')):(boss?'ボスに敗れた　ピースは失わない':'ピースは失わない'))
+    ),
+    h('div',{className:'mid'},
+      win&&!boss&&piece!=null&&[h('div',{key:'r',className:'piece-ring'}),h('img',{key:'p',className:'piece',src:pzImg(pn,piece),alt:'',draggable:false})],
+      win&&!boss&&h('div',{className:'prog'},'獲得ピース ',h('b',null,count),' / ',h('b',null,N)),
+      win&&boss&&h('div',{className:'prog',style:{fontSize:'calc(16 * var(--u))'}},pn.bossName+' 撃破'),
+      !win&&h('div',{className:'prog',style:{color:'#c9c2e8'}},boss?'ギミックを見切って、もう一度':'獲得ピース '+count+' / '+N)
+    ),
+    h('div',{style:{width:'100%',textAlign:'center'}},
+      h('div',{className:'score'},
+        h('div',null,h('div',{className:'v you'},data.pPt),h('div',{className:'l'},'YOU')),
+        h('div',{className:'vs'},'vs'),
+        h('div',null,h('div',{className:'v foe'},data.dPt),h('div',{className:'l'},(data.rivalName||'DEALER').toUpperCase()))
+      ),
+      h('div',{className:'btns'},
+        win?(boss
+            ?h('button',{className:'gold',onClick:once(onPanel)},'パネルへ戻る')
+            :(full?h('button',{className:'gold',onClick:once(onPanel)},'パネルを完成させる')
+                  :h('button',{className:'go',onClick:once(onNext)},'次の対戦へ')))
+          :h('button',{className:'go',onClick:once(onRetry)},'再挑戦'),
+        (!win||(win&&!boss&&!full))&&h('button',{className:'sm',onClick:once(onPanel)},'パネルへ戻る')
+      )
+    )
+  );
+}
+// パネル画面：円形の台座の上に板が浮いている。獲得済みでまだはめていないピースを1個ずつ落としてはめる（はまる瞬間に音と光）
+// 6枚そろったら完成の音と光→絵のキャラがボスとして登場→「ボスに挑む」
+function PuzzleScreen({save,pn,onPlaced,onNext,onBack,onReset}){
   const N=pn.pieces.length,st=pzState(save,pn);
   const[shown,setShown]=useState(()=>st.placed.slice());
   const[dropping,setDropping]=useState(null);
   const[done,setDone]=useState(st.placed.length>=N);
+  const[celeb,setCeleb]=useState(false);
   const[went,setWent]=useState(false);
   const pendingR=useRef(st.got.filter(i=>!st.placed.includes(i)));
-  const wentR=useRef(false);
+  const wentR=useRef(false);const doneAtMountR=useRef(st.placed.length>=N);
   useEffect(()=>{
     const pending=st.got.filter(i=>!st.placed.includes(i)&&!shown.includes(i));pendingR.current=pending;
-    if(!pending.length){if(shown.length>=N&&!done){const t=setTimeout(()=>setDone(true),120);return()=>clearTimeout(t);}return;}
+    if(!pending.length){
+      if(shown.length>=N&&!done){const t=setTimeout(()=>{setDone(true);setCeleb(true);playCompleteSE();},150);return()=>clearTimeout(t);} // 最後の1枚がはまってから完成演出（音は完成側で1回だけ）
+      return;
+    }
     const idx=pending[0];
     const t1=setTimeout(()=>{setDropping(idx);},PZ_TIMING.gapMs);
-    const tSnap=setTimeout(()=>{playSnapSE();},Math.max(0,PZ_TIMING.gapMs+PZ_TIMING.dropMs-SNAP_SE.onsetMs)); // v189 はまる瞬間に立ち上がりを合わせる
+    const tSnap=setTimeout(()=>{playSnapSE();},Math.max(0,PZ_TIMING.gapMs+PZ_TIMING.dropMs-SNAP_SE.onsetMs)); // はまる瞬間に立ち上がりを合わせる
     const t2=setTimeout(()=>{setDropping(null);setShown(s=>[...s,idx]);onPlaced(pn,[idx]);},PZ_TIMING.gapMs+PZ_TIMING.dropMs);
-    return()=>{clearTimeout(t1);clearTimeout(tSnap);clearTimeout(t2);}; // 離脱時に古いタイマーを止める（未再生の音もここで消える）
+    return()=>{clearTimeout(t1);clearTimeout(tSnap);clearTimeout(t2);};
   },[shown]);
   const visible=[...shown,...(dropping!=null?[dropping]:[])];
-  const next=()=>{if(wentR.current)return;wentR.current=true;setWent(true);if(pendingR.current.length)onPlaced(pn,pendingR.current);onNext();}; // 演出を飛ばしても獲得・配置は保存
+  const next=()=>{if(wentR.current)return;wentR.current=true;setWent(true);if(pendingR.current.length)onPlaced(pn,pendingR.current);onNext();};
   const complete=done&&shown.length>=N;
-  const pIdx=PANELS.indexOf(pn);
+  const label=complete?(st.cleared?'もう一度ボスに挑む':'ボスに挑む'):'次の対戦へ';
   return h('div',{className:'pz-screen'},
-    h('div',{className:'k'},'PANEL '+String(pIdx+1).padStart(2,'0')),
-    h('div',{className:'tk-stage'},
+    h('div',{className:'k'},st.cleared?'STAGE CLEARED':'PANEL'),
+    h('div',{className:'tk-stage'+(celeb?' celebrate':'')},
       h('div',{className:'tk-aura'}),h('div',{className:'tk-beam'}),
       h('img',{className:'tk-pedestal',src:'img/pedestal.svg',alt:'',draggable:false}),
       h('div',{className:'tk-shadow'}),
@@ -4031,17 +4119,18 @@ function PuzzleScreen({save,pn,hasNext,onPlaced,onNext,onNextPanel,onBack}){
         h('div',{className:'tk-surface',style:{'--ar':pn.w+' / '+pn.h}},
           h(PzSlots,{pn,hide:visible}),
           shown.map(i=>h(PzPiece,{key:i,pn,idx:i})),
-          complete&&h('img',{className:'tk-complete',src:pn.dir+'complete.webp',alt:'',draggable:false}), // 全部そろったあとだけ、同じ枠の中で完成画像に差し替え（継ぎ目対策）
+          complete&&h('img',{className:'tk-complete',src:pn.dir+'complete.webp',alt:'',draggable:false}),
           complete&&h(PzSlots,{pn,hide:[],outline:true})
         ),
-        dropping!=null&&h('div',{className:'tk-arrive-layer'},h(PzPiece,{key:'a'+dropping,pn,idx:dropping,className:'tk-arriving'})) // v191 降下中は枠に隠れない層で描く
+        dropping!=null&&h('div',{className:'tk-arrive-layer'},h(PzPiece,{key:'a'+dropping,pn,idx:dropping,className:'tk-arriving'}))
       ))
     ),
-    complete?h('div',{className:'pz-doneTxt'},'完成！'):h('div',{className:'pz-cnt'},shown.length+' / '+N),
+    complete
+      ?h('div',{className:'pz-boss'},h('div',{className:'k'},'BOSS'),h('div',{className:'n'},pn.bossName),h('div',{className:'d'},st.cleared?'撃破済み。何度でも挑める':'絵のキャラクターが、ボスとして立ちはだかる'))
+      :h('div',{className:'pz-cnt'},shown.length+' / '+N),
     h('div',{className:'pz-btns'},
-      (st.got.length>=N&&hasNext)
-        ?h('button',{className:'go',onClick:onNextPanel},'次のパネルへ')
-        :h('button',{className:'go',disabled:went,onClick:next},st.got.length>=N?'もう一戦':'ピースを集める'),
+      h('button',{className:complete?'gold':'go',disabled:went,onClick:next},label),
+      st.cleared&&h('button',{className:'sm',onClick:onReset},'最初からやり直す'),
       h('button',{className:'sm',onClick:onBack},'ホームへ')
     )
   );
@@ -4311,7 +4400,8 @@ function App(){
   // v197 パズルの新ギミック
   function gkRoundReset(rn){const g=gkR.current;g.chain=null;g.chainUntil=0;g.coolUntil=0;if(g.silenceRn!==rn)g.silenceRn=-1;if(g.heavyRn!==rn)g.heavyRn=-1;mistR.current=0;setMist(false);}
   function attachGkRing(rn){
-    const kind=pzGkR.current;if(!kind||!GIMMICKS[kind])return;
+    let kind=pzGkR.current;if(kind==='mix'){const ks=Object.keys(GIMMICKS);kind=ks[Math.floor(Math.random()*ks.length)];} // v198 ボスは道中のギミックからランダム
+    if(!kind||!GIMMICKS[kind])return;
     const hand=dHR.current,flags=dRingR.current.slice();
     if(flags.some(f=>typeof f==='string'&&f.indexOf('gk:')===0))return;
     const cand=hand.map((v,i)=>(v!=null&&!flags[i])?i:-1).filter(i=>i>=0);if(!cand.length)return;
@@ -4782,26 +4872,28 @@ function App(){
   // v180 パズル：勝った試合ごとに1回だけ抽選（同じ試合で結果画面を何度出しても重複しない）
   const[pzView,setPzView]=useState(0);const pzModeR=useRef(false),pzBattleR=useRef(0),pzPanelR=useRef(null);
   const pzGkR=useRef(null),pzBoostR=useRef(null); // v197 パズルのギミック／上乗せ
+  const pzBossR=useRef(false);const[pzFx,setPzFx]=useState(null);const pzFxDoneR=useRef(false); // v198 ボス戦か／勝敗の瞬間演出
   const gkR=useRef({chain:null,chainUntil:0,silenceRn:-1,heavyRn:-1,coolUntil:0,timeCut:0});const[mist,setMist]=useState(false);const mistR=useRef(0); // v181 パズルモード中か／何戦目か（重複付与防止のキー）／v187 戦っているパネル
   const pzAwardedR=useRef(null);const[pzPiece,setPzPiece]=useState(null);
-  useEffect(()=>{ // v186 結果画面は出さない。勝ちなら付与して保存→そのままパネルへ。負けもそのままパネルへ
+  useEffect(()=>{ // v198 勝利確定時に1回だけ：道中なら未獲得ピースを1枚（即保存）、ボスならクリア保存。リザルトはこのあと表示
     if(phase!=='gameEnd'||!pzModeR.current||!gameEndData)return;
     if(gameEndData.winner==='player'&&pzAwardedR.current!==pzBattleR.current){
       pzAwardedR.current=pzBattleR.current;
-      const pn=pzPanelR.current||pzActive(saveR.current),st=pzState(saveR.current,pn); // v187 戦った時のパネルに付与
-      const rest=Array.from({length:pn.pieces.length},(_,i)=>i).filter(i=>!st.got.includes(i)); // 獲得済み（未はめ込み含む）は除外
-      if(rest.length){const idx=rest[Math.floor(Math.random()*rest.length)];updSave(s=>pzWrite(s,pn,{...st,got:[...st.got,idx]}));} // 演出より先に保存（完成後は追加なし）
+      const pn=pzPanelR.current||pzActive(saveR.current),st=pzState(saveR.current,pn);
+      if(pzBossR.current){updSave(s=>pzWrite(s,pn,{...st,cleared:true}));setPzPiece(null);}
+      else{const rest=Array.from({length:pn.pieces.length},(_,i)=>i).filter(i=>!st.got.includes(i));
+        if(rest.length){const idx=rest[Math.floor(Math.random()*rest.length)];updSave(s=>pzWrite(s,pn,{...st,got:[...st.got,idx]}));setPzPiece(idx);}else setPzPiece(null);}
     }
-    goPuzzle();
   },[phase]);
   function pzPlaced(pn,idxs){updSave(s=>{const st=pzState(s,pn);const add=idxs.filter(i=>!st.placed.includes(i));return add.length?pzWrite(s,pn,{...st,placed:[...st.placed,...add]}):s;});}
-  function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);pzModeR.current=false;pzGkR.current=null;pzBoostR.current=null;setPzPiece(null);setPhase('puzzle');phaseR.current='puzzle';}
+  function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);pzModeR.current=false;pzGkR.current=null;pzBoostR.current=null;pzBossR.current=false;setPzFx(null);pzFxDoneR.current=false;setPzPiece(null);setPhase('puzzle');phaseR.current='puzzle';}
   function startPuzzleBattle(){ // v181 集めた数に応じてだんだん強い相手
     if(phaseR.current==='brief'||phaseR.current==='playing'||phaseR.current==='intro')return; // v185 連打で二重に始めない
     const pn=pzActive(saveR.current);pzPanelR.current=pn;
     const got=pzState(saveR.current,pn).got.length;
-    const ent=pn.ladder[Math.min(got,pn.ladder.length-1)];const idx=typeof ent==='number'?ent:ent.st;
-    pzGkR.current=(typeof ent==='object'&&ent.gk)||null;pzBoostR.current=pn.boost||null; // v197 ギミックと上乗せ
+    const boss=got>=pn.pieces.length;pzBossR.current=boss; // v198 6枚そろっていればボス戦
+    const ent=boss?pn.boss:pn.ladder[Math.min(got,pn.ladder.length-1)];const idx=typeof ent==='number'?ent:ent.st;
+    pzGkR.current=(typeof ent==='object'&&ent.gk)||null;pzBoostR.current=boss?null:(pn.boost||null); // v197 ギミックと上乗せ（ボスは本人の調整のまま）
     pzModeR.current=true;pzBattleR.current++;setPzPiece(null);stageR.current=null;stageOptsR.current=null;
     startStage(0,idx,true);
   }
@@ -5570,9 +5662,17 @@ function App(){
       if(!flow&&!shiftNow){skipR.current=()=>proceed(true);setSkipOn(true);}
         }
   function resetField(){setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldColors([]);colorsR.current=[];setFieldSp([]);setFieldShift([]);setFieldRing([]);}
-  function endGame(pp,dp,byTime){
-    roundTokR.current++;stopBGM();
+  function endGame(pp,dp,byTime,afterFx){
     const win=byTime?(pp>dp?'player':(pp<dp?'dealer':'draw')):(pp>=winPtR.current?'player':'dealer'); // v175 時間切れは点数比較
+    if(pzModeR.current&&!afterFx){ // v198 決着の瞬間：進行と操作を止めて WIN/LOSE を見せてからリザルトへ
+      if(pzFxDoneR.current)return;pzFxDoneR.current=true;
+      roundTokR.current++;clearTimers();lockR.current=true;resolvingR.current=true;exitLink();stopBGM();
+      const won=win==='player',boss=pzBossR.current;
+      setPzFx({winner:win,boss});if(won)playWinSE(boss);else playLoseSE();
+      setTimeout(()=>{pzFxDoneR.current=false;setPzFx(null);endGame(pp,dp,byTime,true);},won?(boss?1900:1150):1000);
+      return;
+    }
+    roundTokR.current++;stopBGM();
     let stars=0;
     const c=stageR.current;
     if(c&&!pzModeR.current){const st=STAGES.areas[c.ar].stages[c.st];stars=calcStars(pp,dp,winPtR.current);if(stars>0)updSave(s=>{s.stars[st.no]=Math.max(s.stars[st.no]||0,stars);return s;});}
@@ -5582,8 +5682,9 @@ function App(){
   function goHome(){if(pzModeR.current){goPuzzle();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
-  if(phase==='puzzle'){const pn=pzPanelR.current||pzActive(save);const hasNext=PANELS.indexOf(pn)<PANELS.length-1;
-    return h(PuzzleScreen,{key:pzKey(pn)+'-'+pzBattleR.current+'-'+pzView,save,pn,hasNext,onPlaced:pzPlaced,onNext:startPuzzleBattle,onNextPanel:()=>{pzPanelR.current=null;setPzView(v=>v+1);},onBack:()=>{setPhase('menu');phaseR.current='menu';}});} // v180 / v187 戦い終えたパネルを表示。完成して次があれば「次のパネルへ」
+  if(phase==='puzzle'){const pn=pzPanelR.current||pzActive(save);
+    return h(PuzzleScreen,{key:pzKey(pn)+'-'+pzBattleR.current+'-'+pzView,save,pn,onPlaced:pzPlaced,onNext:startPuzzleBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';},
+      onReset:()=>{updSave(s=>pzWrite(s,pn,{got:[],placed:[],cleared:false}));pzPanelR.current=null;setPzView(v=>v+1);}});} // v180 / v198
   if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzle:()=>{pzPanelR.current=null;goPuzzle();},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
@@ -5602,7 +5703,9 @@ function App(){
       setTimeout(()=>startStage(0,si),80);
     }});
   if(phase==='gameEnd'&&gameEndData){
-    if(pzModeR.current)return h('div',{className:'pz-screen'}); // v186 結果画面なし。直後の effect でパネルへ（一瞬の空画面）
+    if(pzModeR.current){const pn=pzPanelR.current||pzActive(save),st=pzState(save,pn);
+      return h(PuzzleResult,{key:'r'+pzBattleR.current,data:gameEndData,pn,piece:pzPiece,count:st.got.length,boss:pzBossR.current,
+        onNext:startPuzzleBattle,onPanel:goPuzzle,onRetry:()=>{pzFxDoneR.current=false;startStage(stageCtx.ar,stageCtx.st,true);}});} // v198
     if(stageCtx)return h(StageEndScreen,{data:gameEndData,stage:curStage,stars:gameEndData.stars||0,onNext:stageNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st),onMap:goMap,isLast:(()=>{const nx=STAGES.areas[stageCtx.ar].stages[stageCtx.st+1];return !nx||!!nx.comingSoon||!!nx.challenge;})()});
     return h(GameEndScreen,{data:gameEndData,onRestart:startGame,onHome:goHome});
   }
@@ -5646,6 +5749,7 @@ function App(){
     chronoFx==='in'&&h('div',{className:'chrono-title',style:{top:burstPos.y}},CHRONO_TEXT.en),
     chronoFx==='out'&&h('div',{className:'chrono-flash'}),
     linkMode&&h('div',{className:'link-banner'},h('b',null,CHRONO_TEXT.en),CHRONO_TEXT.hint),
+    pzFx&&h('div',{key:'pzfx',className:'pz-fx '+(pzFx.winner==='player'?(pzFx.boss?'win boss':'win'):'lose')},h('div',{className:'flash'}),h('div',{className:'big'},pzFx.winner==='player'?(pzFx.boss?'BOSS DOWN':'WIN!'):'LOSE')), // v198
     ptFly&&h('div',{key:'pf_'+ptFly.id,className:'ptfly',style:{'--ms':FLOW_CFG.flyMs+'ms','--c':ptFly.color,'--tx':ptFly.who==='player'?'14%':'86%','--ty':'9%'}},h('div',{className:'role'},ptFly.text),h('div',{className:'pt'},'+'+ptFly.pts)), // v175
     comboShow&&h(CyberComboDisplay,{key:'c_'+comboShow.id,combo:comboShow}), // v88: keyにDate.now()を使うと再描画のたびに演出が再発火してた
     timeUpShow&&h(TimeUpDisplay,{key:'tu_'+Date.now(),show:true}),
@@ -5719,7 +5823,7 @@ function App(){
     // DEALER 手札
     h('div',{className:'gp-dealer-area'},
       h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
-      h('div',{className:'gp-dealer-cards'},
+      h('div',{className:'gp-dealer-cards'+(pzFx&&pzFx.winner==='player'?' defeated':'')}, // v198 相手の敗北
         dSlots.map((id,s)=>{const i=id==null?-1:dIdsR.current.indexOf(id);if(i<0||i>=dH.length)return h('div',{key:'e'+s,className:'gp-dealer-card empty'});const v=dH[i];
           return h('div',{key:'c'+id,'data-card-id':id,className:'gp-dealer-card'+(justStolen.includes(id)?' just-stolen':'')+(hideLeft>0&&dRing[i]!=='orby'?' hidden-card':'')+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dRing[i]==='setra'?' sring':'')+(dRing[i]==='orby'?' oring':'')+(dCur.id===id?' dsel':'')},h('span',{className:'dv'},v),
           dCur.id===id&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.id===id&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&dRing[i]!=='setra'&&dRing[i]!=='orby'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+(isGk(dRing[i])?REIPIA_RINGS[GIMMICKS[dRing[i].slice(3)].ring]?dRing[i].slice(3):'':dRing[i]):'')+(tapCardId===id?' tap':''),'data-ring-color':typeof dRing[i]==='string'?(isGk(dRing[i])?REIPIA_RINGS[GIMMICKS[dRing[i].slice(3)].ring].ringColor:REIPIA_RINGS[dRing[i]].ringColor):undefined}));})
