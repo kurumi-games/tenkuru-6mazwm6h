@@ -1962,7 +1962,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
   .a1-st,.a1-core,.a1-core::before,.a1-nd .glow,.a1-nd.sel .sel-ring,.card-stage .sv,.card-stage.link-pick .card{animation:none !important;}
 }
 /* ── v171 見送り（アニマ・ヴェール）：1枚の背景に魂が迷い込む ── */
-.veil{position:fixed;inset:0;background:#0b0a1c url('img/veil-bg.webp') center/cover no-repeat;overflow:hidden;font-family:'Noto Serif JP',serif;color:#dbe4f5;}
+.veil{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#0b0a1c url('img/veil-bg.webp') center/cover no-repeat;overflow:hidden;font-family:'Noto Serif JP',serif;color:#dbe4f5;}
 .veil-top{position:absolute;top:0;left:0;right:0;padding:calc(12 * var(--u)) calc(14 * var(--u));display:flex;justify-content:space-between;align-items:center;z-index:5;}
 .veil-top .k{font-family:'Cinzel',serif;font-size:calc(9 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
 .veil-top .t{font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.1em;}
@@ -1986,7 +1986,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .veil-ask button{flex:1;min-height:calc(42 * var(--u));border-radius:calc(14 * var(--u));font-family:inherit;font-size:calc(13 * var(--u));cursor:pointer;border:1px solid rgba(190,180,255,.35);background:transparent;color:#cfc8f0;}
 .veil-ask button.go{background:linear-gradient(160deg,#8f7dff,#5a48d8);color:#fff;border-color:transparent;font-weight:700;}
 /* v175 +pt が各プレイヤーの点まで吸い寄せられる */
-.ptfly{position:fixed;left:50%;top:44%;z-index:210;pointer-events:none;transform:translate(-50%,-50%);text-align:center;animation:ptFly var(--ms) cubic-bezier(.4,0,.2,1) both;}
+.ptfly{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;left:50%;top:44%;z-index:210;pointer-events:none;transform:translate(-50%,-50%);text-align:center;animation:ptFly var(--ms) cubic-bezier(.4,0,.2,1) both;}
 .ptfly .role{font-family:'Noto Serif JP',serif;font-size:calc(13 * var(--u));letter-spacing:.15em;color:#fff;text-shadow:0 0 12px var(--c);opacity:.9;}
 .ptfly .pt{font-family:'Fira Code',monospace;font-size:calc(40 * var(--u));font-weight:900;color:var(--c);text-shadow:0 0 18px var(--c),0 0 40px var(--c);line-height:1;}
 @keyframes ptFly{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}45%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;left:var(--tx);top:var(--ty);transform:translate(-50%,-50%) scale(.35)}}
@@ -1999,10 +1999,10 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pz-result .pz-piece{width:calc(96 * var(--u));height:calc(96 * var(--u));margin:0 auto;animation:pzPop .5s cubic-bezier(.2,1.4,.4,1) both;}
 .pz-result .ct{font-family:'Fira Code',monospace;font-size:calc(12 * var(--u));color:#c9c2e8;margin-top:calc(6 * var(--u));}
 @keyframes pzPop{from{opacity:0;transform:scale(.4) rotate(-12deg)}to{opacity:1;transform:none}}
-.pz-screen{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 20%,#1b1747 0%,#07061a 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#dbe4f5;}
+.pz-screen{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:radial-gradient(ellipse at 50% 20%,#1b1747 0%,#07061a 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#dbe4f5;}
 .pz-screen .k{font-family:'Cinzel',serif;font-size:calc(9 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
 .pz-screen .t{font-size:calc(16 * var(--u));font-weight:700;letter-spacing:.1em;margin:calc(4 * var(--u)) 0 calc(14 * var(--u));}
-.pz-board{position:relative;width:min(92vw,calc(340 * var(--u)));aspect-ratio:var(--cols) / var(--rows);display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);gap:2px;padding:4px;border-radius:calc(12 * var(--u));background:rgba(255,255,255,.06);border:1px solid rgba(190,180,255,.25);}
+.pz-board{position:relative;width:min(92vw,calc(340 * var(--u)));height:calc(min(92vw,calc(340 * var(--u))) * var(--rows) / var(--cols));display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);gap:2px;padding:4px;border-radius:calc(12 * var(--u));background:rgba(255,255,255,.06);border:1px solid rgba(190,180,255,.25);}
 .pz-slot{position:relative;border-radius:calc(4 * var(--u));background:rgba(0,0,0,.55);overflow:visible;}
 .pz-slot .pz-piece{position:absolute;inset:0;border-radius:calc(4 * var(--u));box-shadow:none;}
 .pz-slot .pz-piece.drop{animation:pzDrop .38s cubic-bezier(.3,1.3,.5,1) both;z-index:2;}
@@ -3133,7 +3133,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v181'; // v181(2026/09/13): パズルを独立モードに。ホーム「パズル」→パネル画面→バトル。相手は集めた数でだんだん強くなる（PUZZLE_CFG.ladder）。見送りからはピースを外した
+const APP_VER='v182'; // v182(2026/09/13): パネルが豆粒になる不具合を修正（見送り・パズル画面に --u が無かった）
+// const APP_VER='v181'; // v181(2026/09/13): パズルを独立モードに。ホーム「パズル」→パネル画面→バトル。相手は集めた数でだんだん強くなる（PUZZLE_CFG.ladder）。見送りからはピースを外した
 // const APP_VER='v180'; // v180(2026/09/13): パズルのピース集め試作（1パネル10ピース）。見送りで勝つたびに未獲得ピースを1個ランダム獲得。結果画面に表示、「パネルを見る」「続けてバトル」。パネル画面で落ちてはまる演出、10個で完成
 // const APP_VER='v179'; // v179(2026/09/13): 衝突事故の救済。相手の札が落ちて0.22秒以内に出した札がバーストになるなら「衝突 セーフ」で手札に戻す（相手側も同様）。数値はCOLLISION_MS
 // const APP_VER='v178'; // v178(2026/09/13): ラウンド制に戻す。カウントは1R目5・2R目以降3、GOあり、10達成の演出も元通り。FLOWは enabled:false で残置
