@@ -1991,6 +1991,31 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .ptfly .pt{font-family:'Fira Code',monospace;font-size:calc(40 * var(--u));font-weight:900;color:var(--c);text-shadow:0 0 18px var(--c),0 0 40px var(--c);line-height:1;}
 @keyframes ptFly{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}45%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;left:var(--tx);top:var(--ty);transform:translate(-50%,-50%) scale(.35)}}
 .ptfly.burst .pt{color:#ff8fa3;}
+/* ── v180 パズルのピース集め（試作） ── */
+.pz-piece{position:relative;overflow:hidden;background-image:var(--pz);background-repeat:no-repeat;background-size:calc(var(--cols) * 100%) calc(var(--rows) * 100%);border-radius:calc(6 * var(--u));box-shadow:0 4px 14px rgba(0,0,0,.45);}
+.pz-piece::after{content:'';position:absolute;inset:0;border:1px solid rgba(255,255,255,.35);border-radius:inherit;pointer-events:none;}
+.pz-result{margin:calc(10 * var(--u)) 0 calc(14 * var(--u));text-align:center;}
+.pz-result .lb{font-size:calc(11 * var(--u));letter-spacing:.2em;color:#ffd98a;margin-bottom:calc(6 * var(--u));}
+.pz-result .pz-piece{width:calc(96 * var(--u));height:calc(96 * var(--u));margin:0 auto;animation:pzPop .5s cubic-bezier(.2,1.4,.4,1) both;}
+.pz-result .ct{font-family:'Fira Code',monospace;font-size:calc(12 * var(--u));color:#c9c2e8;margin-top:calc(6 * var(--u));}
+@keyframes pzPop{from{opacity:0;transform:scale(.4) rotate(-12deg)}to{opacity:1;transform:none}}
+.pz-screen{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 20%,#1b1747 0%,#07061a 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#dbe4f5;}
+.pz-screen .k{font-family:'Cinzel',serif;font-size:calc(9 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
+.pz-screen .t{font-size:calc(16 * var(--u));font-weight:700;letter-spacing:.1em;margin:calc(4 * var(--u)) 0 calc(14 * var(--u));}
+.pz-board{position:relative;width:min(92vw,calc(340 * var(--u)));aspect-ratio:var(--cols) / var(--rows);display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);gap:2px;padding:4px;border-radius:calc(12 * var(--u));background:rgba(255,255,255,.06);border:1px solid rgba(190,180,255,.25);}
+.pz-slot{position:relative;border-radius:calc(4 * var(--u));background:rgba(0,0,0,.55);overflow:visible;}
+.pz-slot .pz-piece{position:absolute;inset:0;border-radius:calc(4 * var(--u));box-shadow:none;}
+.pz-slot .pz-piece.drop{animation:pzDrop .38s cubic-bezier(.3,1.3,.5,1) both;z-index:2;}
+@keyframes pzDrop{0%{opacity:0;transform:translateY(calc(-60 * var(--u))) scale(1.25)}60%{opacity:1;transform:translateY(0) scale(1.05)}100%{transform:none}}
+.pz-slot .pz-piece.drop::before{content:'';position:absolute;inset:-6px;border-radius:inherit;box-shadow:0 0 0 2px #fff,0 0 20px #fff;animation:pzFlash .5s ease-out .3s both;pointer-events:none;}
+@keyframes pzFlash{from{opacity:1}to{opacity:0}}
+.pz-board.done{animation:pzDone 1.2s ease-out both;box-shadow:0 0 40px rgba(255,220,140,.6);}
+@keyframes pzDone{0%{transform:scale(1)}30%{transform:scale(1.04)}100%{transform:scale(1)}}
+.pz-doneTxt{margin-top:calc(14 * var(--u));font-size:calc(18 * var(--u));font-weight:700;letter-spacing:.3em;color:#ffe08a;text-shadow:0 0 18px rgba(255,220,140,.8);animation:pzPop .6s cubic-bezier(.2,1.4,.4,1) both;}
+.pz-cnt{margin-top:calc(10 * var(--u));font-family:'Fira Code',monospace;font-size:calc(12 * var(--u));color:#c9c2e8;}
+.pz-btns{display:flex;flex-direction:column;gap:calc(8 * var(--u));width:min(88vw,calc(300 * var(--u)));margin-top:calc(18 * var(--u));}
+.pz-btns button{min-height:calc(42 * var(--u));border-radius:calc(14 * var(--u));font-family:inherit;font-size:calc(13 * var(--u));cursor:pointer;border:1px solid rgba(190,180,255,.35);background:transparent;color:#cfc8f0;}
+.pz-btns button.go{background:linear-gradient(160deg,#8f7dff,#5a48d8);color:#fff;border-color:transparent;font-weight:700;}
 </style>
 </head>
 <body>
@@ -3108,7 +3133,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v179'; // v179(2026/09/13): 衝突事故の救済。相手の札が落ちて0.22秒以内に出した札がバーストになるなら「衝突 セーフ」で手札に戻す（相手側も同様）。数値はCOLLISION_MS
+const APP_VER='v180'; // v180(2026/09/13): パズルのピース集め試作（1パネル10ピース）。見送りで勝つたびに未獲得ピースを1個ランダム獲得。結果画面に表示、「パネルを見る」「続けてバトル」。パネル画面で落ちてはまる演出、10個で完成
+// const APP_VER='v179'; // v179(2026/09/13): 衝突事故の救済。相手の札が落ちて0.22秒以内に出した札がバーストになるなら「衝突 セーフ」で手札に戻す（相手側も同様）。数値はCOLLISION_MS
 // const APP_VER='v178'; // v178(2026/09/13): ラウンド制に戻す。カウントは1R目5・2R目以降3、GOあり、10達成の演出も元通り。FLOWは enabled:false で残置
 // const APP_VER='v177'; // v177(2026/09/13): 配り直し判定を「バーストせずに出せる札が誰にもない」に変更。jsdomで自動テスト（詰み・手札切れ・60秒）を通した
 // const APP_VER='v176'; // v176(2026/09/13): FLOWで手札を使い切っても補充されない不具合を修正。相手側も空なら補充
@@ -3521,7 +3547,7 @@ function veilMakeSoul(rare){
     until:rare?Date.now()+VEIL_CFG.rare.limitSec*1000:null};
 }
 function veilKind(s){return s.kind==='rare'?VEIL_CFG.rare:VEIL_CFG.kinds[s.kind];}
-function VeilScreen({souls,setSouls,sent,onBattle,onBack}){
+function VeilScreen({souls,setSouls,sent,onBattle,onBack,onPanel,pzCount}){
   const[ask,setAsk]=useState(null);
   const[now,setNow]=useState(Date.now());
   // レア魂の残り時間表示＆期限切れ／レア出現チェック
@@ -3561,6 +3587,7 @@ function VeilScreen({souls,setSouls,sent,onBattle,onBack}){
         left!==null&&h('div',{className:'tm'},Math.floor(left/60)+':'+String(left%60).padStart(2,'0'))
       );}),
     h('button',{className:'veil-home',onClick:onBack},'ホームへ'),
+    onPanel&&h('button',{className:'veil-home',style:{bottom:'calc(62 * var(--u))'},onClick:onPanel},'パネル '+pzCount+'/'+PZ_N), // v180
     ask&&h('div',{className:'veil-ask',onClick:()=>setAsk(null)},
       h('div',{className:'box',onClick:e=>e.stopPropagation()},
         h('img',{src:veilKind(ask).img,alt:''}),
@@ -3987,8 +4014,46 @@ function GameEndScreen({data,onRestart,onHome}){
   );
 }
 
+// ── v180 パズルのピース集め（試作）：数値はここだけで調整 ──
+// 勝つたびに未獲得ピースを1個ランダムで獲得。順番には埋まらない。完成図の正体は出さない。
+// 画像は 1000×400px（5列×2段、1ピース200×200）。img/puzzle-01.webp を差し替えれば絵が変わる
+const PUZZLE_CFG={id:'p1',img:'img/puzzle-01.webp',cols:5,rows:2,dropMs:380,gapMs:260};
+const PZ_N=PUZZLE_CFG.cols*PUZZLE_CFG.rows;
+function pzState(save){const p=(save&&save.puzzle&&save.puzzle.id===PUZZLE_CFG.id)?save.puzzle:{id:PUZZLE_CFG.id,got:[],placed:[]};return{id:p.id,got:p.got||[],placed:p.placed||[]};}
+function pzPieceStyle(idx){const c=idx%PUZZLE_CFG.cols,r=Math.floor(idx/PUZZLE_CFG.cols);
+  const px=PUZZLE_CFG.cols>1?(c/(PUZZLE_CFG.cols-1))*100:0,py=PUZZLE_CFG.rows>1?(r/(PUZZLE_CFG.rows-1))*100:0;
+  return{'--pz':"url('"+PUZZLE_CFG.img+"')",'--cols':PUZZLE_CFG.cols,'--rows':PUZZLE_CFG.rows,backgroundPosition:px+'% '+py+'%'};}
+function PzPiece({idx,className,style}){return h('div',{className:'pz-piece'+(className?' '+className:''),style:{...pzPieceStyle(idx),...(style||{})}});}
+// パネル画面：獲得済みでまだはめていないピースを1個ずつ落としてはめる
+function PuzzleScreen({save,onPlaced,onNext,onBack}){
+  const st=pzState(save);
+  const[shown,setShown]=useState(()=>st.placed.slice()); // 画面に見えているピース
+  const[dropping,setDropping]=useState(null);
+  const[done,setDone]=useState(st.placed.length>=PZ_N);
+  useEffect(()=>{
+    const pending=st.got.filter(i=>!st.placed.includes(i)&&!shown.includes(i));
+    if(!pending.length){if(shown.length>=PZ_N&&!done)setTimeout(()=>setDone(true),200);return;}
+    const idx=pending[0];
+    const t1=setTimeout(()=>{setDropping(idx);try{resumeAC();fxBell({f:1046,v:0.05,d:0.5,bright:1.1,rev:0.5});}catch(e){}},PUZZLE_CFG.gapMs);
+    const t2=setTimeout(()=>{setDropping(null);setShown(s=>[...s,idx]);onPlaced(idx);},PUZZLE_CFG.gapMs+PUZZLE_CFG.dropMs);
+    return()=>{clearTimeout(t1);clearTimeout(t2);};
+  },[shown]);
+  const visible=[...shown,...(dropping!=null?[dropping]:[])];
+  return h('div',{className:'pz-screen'},
+    h('div',{className:'k'},'PANEL'),h('div',{className:'t'},'パネル'),
+    h('div',{className:'pz-board'+(done?' done':''),style:{'--cols':PUZZLE_CFG.cols,'--rows':PUZZLE_CFG.rows}},
+      Array.from({length:PZ_N},(_,i)=>h('div',{key:i,className:'pz-slot'},visible.includes(i)&&h(PzPiece,{idx:i,className:dropping===i?'drop':''})))
+    ),
+    done?h('div',{className:'pz-doneTxt'},'完成！'):h('div',{className:'pz-cnt'},shown.length+' / '+PZ_N),
+    h('div',{className:'pz-btns'},
+      h('button',{className:'go',onClick:onNext},'次のバトルへ'),
+      h('button',{onClick:onBack},'アニマ・ヴェールへ戻る')
+    )
+  );
+}
+
 // v172 見送りの結果画面：勝ったら「次の魂へ」で画面に戻らず連戦。負けたら「もう一度」
-function VeilEndScreen({data,soul,nextSoul,sent,onNext,onRetry,onBack}){
+function VeilEndScreen({data,soul,nextSoul,sent,onNext,onRetry,onBack,piece,pzCount,onPanel}){
   const win=data.winner==='player';
   const k=veilKind(soul);
   return h('div',{className:'veil',style:{display:'flex',alignItems:'center',justifyContent:'center',padding:16}},
@@ -4000,11 +4065,13 @@ function VeilEndScreen({data,soul,nextSoul,sent,onNext,onRetry,onBack}){
         h('div',{className:'ln'},win?'見送った魂 '+sent+'　階級：'+veilGrade(sent):'魂はまだそこにいる。何度でも挑める。'),
         h('div',{style:{display:'flex',justifyContent:'center',gap:'calc(18 * var(--u))',fontFamily:"'Fira Code',monospace",fontSize:'calc(20 * var(--u))',marginBottom:'calc(14 * var(--u))'}},
           h('span',{style:{color:'#8ee9ff'}},data.pPt),h('span',{style:{color:'#8a86a8',fontSize:'calc(12 * var(--u))',alignSelf:'center'}},'vs'),h('span',{style:{color:'#ff9ab8'}},data.dPt)),
+        win&&piece!=null&&h('div',{className:'pz-result'},h('div',{className:'lb'},'ピースを獲得'),h(PzPiece,{idx:piece}),h('div',{className:'ct'},pzCount+' / '+PZ_N)), // v180
         h('div',{className:'row',style:{flexDirection:'column'}},
           win
-            ?(nextSoul?h('button',{className:'go',onClick:onNext},'次の魂へ　→ '+veilKind(nextSoul).name):h('button',{className:'go',onClick:onBack},'次の魂を待つ'))
+            ?[piece!=null&&h('button',{key:'pn',onClick:onPanel},'パネルを見る'),
+              nextSoul?h('button',{key:'nx',className:'go',onClick:onNext},'続けてバトル　→ '+veilKind(nextSoul).name):h('button',{key:'wt',className:'go',onClick:onBack},'次の魂を待つ')]
             :h('button',{className:'go',onClick:onRetry},'もう一度'),
-          h('button',{onClick:onBack},'アニマ・ヴェールへ戻る')
+          h('button',{onClick:onBack,style:{border:0,minHeight:'calc(32 * var(--u))',fontSize:'calc(11 * var(--u))'}},'アニマ・ヴェールへ戻る')
         )
       )
     )
@@ -4725,13 +4792,34 @@ function App(){
   function goVeil(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);veilR.current=null;setPhase('veil');phaseR.current='veil';}
   function startVeilBattle(soul){veilR.current=soul.id;startStage(0,veilKind(soul).stIdx,true);}
   const veilCountedR=useRef(null); // v172 同じ試合を二重に数えない
+  // v180 パズル：勝った試合ごとに1回だけ抽選（同じ試合で結果画面を何度出しても重複しない）
+  const pzAwardedR=useRef(null);const[pzPiece,setPzPiece]=useState(null);
+  useEffect(()=>{
+    if(phase!=='gameEnd'||veilR.current==null||!gameEndData||gameEndData.winner!=='player')return;
+    if(pzAwardedR.current===veilR.current)return;
+    pzAwardedR.current=veilR.current;
+    const st=pzState(saveR.current);
+    const rest=Array.from({length:PZ_N},(_,i)=>i).filter(i=>!st.got.includes(i)); // 獲得済み（未はめ込み含む）は除外
+    if(!rest.length){setPzPiece(null);return;} // 完成後は追加なし
+    const idx=rest[Math.floor(Math.random()*rest.length)];
+    updSave(s=>{s.puzzle={...st,got:[...st.got,idx]};return s;});
+    setPzPiece(idx);
+  },[phase]);
+  function pzPlaced(idx){updSave(s=>{const st=pzState(s);if(!st.placed.includes(idx))s.puzzle={...st,placed:[...st.placed,idx]};return s;});}
+  function goPuzzle(){veilSettle();roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('puzzle');phaseR.current='puzzle';}
+  function veilStartAny(){ // パネル画面から次のバトルへ
+    const cand=veilSouls.filter(s=>s.state!=='out');
+    if(!cand.length){goVeil();return;}
+    veilR.current=null;stageR.current=null;stageOptsR.current=null;
+    startVeilBattle(cand[0]);
+  }
   function veilSettle(){ // 勝っていたらその魂を見送る（消す）＋カウント
     const id=veilR.current,won=gameEndData&&gameEndData.winner==='player';
     if(id!=null&&won&&veilCountedR.current!==id){veilCountedR.current=id;setVeilSouls(ss=>ss.map(s=>s.id===id?{...s,state:'out'}:s));updSave(s=>{s.veilSent=(s.veilSent||0)+1;return s;});}
   }
   function finishVeil(){veilSettle();goVeil();}
   function veilNext(){ // v172 画面に戻らず次の魂と連戦
-    veilSettle();
+    veilSettle();setPzPiece(null);
     const cur=veilR.current;
     const cand=veilSouls.filter(s=>s.id!==cur&&s.state!=='out');
     if(!cand.length){goVeil();return;}
@@ -5492,7 +5580,8 @@ function App(){
   function goHome(){if(veilR.current!=null){goVeil();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
-  if(phase==='veil')return h(VeilScreen,{souls:veilSouls,setSouls:setVeilSouls,sent:save.veilSent||0,onBattle:startVeilBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v171
+  if(phase==='puzzle')return h(PuzzleScreen,{save,onPlaced:pzPlaced,onNext:veilStartAny,onBack:goVeil}); // v180
+  if(phase==='veil')return h(VeilScreen,{souls:veilSouls,setSouls:setVeilSouls,sent:save.veilSent||0,onBattle:startVeilBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';},onPanel:()=>{setPhase('puzzle');phaseR.current='puzzle';},pzCount:pzState(save).got.length}); // v171 / v180
   if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onVeil:goVeil,onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
@@ -5512,7 +5601,7 @@ function App(){
     }});
   if(phase==='gameEnd'&&gameEndData){
     if(veilR.current!=null){const vs=veilSouls.find(s=>s.id===veilR.current)||veilSouls[0];const cand=veilSouls.filter(s=>s.id!==veilR.current&&s.state!=='out');const nx=cand.length?cand[0]:null;
-      return h(VeilEndScreen,{data:gameEndData,soul:vs,nextSoul:nx,sent:(save.veilSent||0)+((gameEndData.winner==='player'&&veilCountedR.current!==veilR.current)?1:0),onNext:veilNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st,true),onBack:finishVeil});} // v172
+      return h(VeilEndScreen,{data:gameEndData,soul:vs,nextSoul:nx,sent:(save.veilSent||0)+((gameEndData.winner==='player'&&veilCountedR.current!==veilR.current)?1:0),onNext:veilNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st,true),onBack:finishVeil,piece:pzPiece,pzCount:pzState(save).got.length,onPanel:goPuzzle});} // v172 / v180
     if(stageCtx)return h(StageEndScreen,{data:gameEndData,stage:curStage,stars:gameEndData.stars||0,onNext:stageNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st),onMap:goMap,isLast:(()=>{const nx=STAGES.areas[stageCtx.ar].stages[stageCtx.st+1];return !nx||!!nx.comingSoon||!!nx.challenge;})()});
     return h(GameEndScreen,{data:gameEndData,onRestart:startGame,onHome:goHome});
   }
