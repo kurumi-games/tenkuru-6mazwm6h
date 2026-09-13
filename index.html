@@ -1991,31 +1991,28 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .ptfly .pt{font-family:'Fira Code',monospace;font-size:calc(40 * var(--u));font-weight:900;color:var(--c);text-shadow:0 0 18px var(--c),0 0 40px var(--c);line-height:1;}
 @keyframes ptFly{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}45%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;left:var(--tx);top:var(--ty);transform:translate(-50%,-50%) scale(.35)}}
 .ptfly.burst .pt{color:#ff8fa3;}
-/* ── v180 パズルのピース集め（試作） ── */
-.pz-piece{position:relative;overflow:hidden;background-image:var(--pz);background-repeat:no-repeat;background-size:calc(var(--cols) * 100%) calc(var(--rows) * 100%);border-radius:calc(6 * var(--u));box-shadow:0 4px 14px rgba(0,0,0,.45);}
-.pz-piece::after{content:'';position:absolute;inset:0;border:1px solid rgba(255,255,255,.35);border-radius:inherit;pointer-events:none;}
-.pz-result{margin:calc(10 * var(--u)) 0 calc(14 * var(--u));text-align:center;}
+/* ── v184 パズル（ジグソー形） ── */
+.pz-result{margin:calc(10 * var(--u)) 0 calc(8 * var(--u));text-align:center;}
 .pz-result .lb{font-size:calc(11 * var(--u));letter-spacing:.2em;color:#ffd98a;margin-bottom:calc(6 * var(--u));}
-.pz-result .pz-piece{width:calc(96 * var(--u));height:calc(96 * var(--u));margin:0 auto;animation:pzPop .5s cubic-bezier(.2,1.4,.4,1) both;}
+.pz-result svg{width:calc(120 * var(--u));height:calc(120 * var(--u));display:block;margin:0 auto;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));animation:pzPop .5s cubic-bezier(.2,1.4,.4,1) both;}
 .pz-result .ct{font-family:'Fira Code',monospace;font-size:calc(12 * var(--u));color:#c9c2e8;margin-top:calc(6 * var(--u));}
+.pz-result .hint{font-size:calc(10 * var(--u));color:#8f8ab0;margin-top:calc(8 * var(--u));}
 @keyframes pzPop{from{opacity:0;transform:scale(.4) rotate(-12deg)}to{opacity:1;transform:none}}
 .pz-screen{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:radial-gradient(ellipse at 50% 20%,#1b1747 0%,#07061a 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#dbe4f5;}
 .pz-screen .k{font-family:'Cinzel',serif;font-size:calc(9 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
 .pz-screen .t{font-size:calc(16 * var(--u));font-weight:700;letter-spacing:.1em;margin:calc(4 * var(--u)) 0 calc(14 * var(--u));}
-.pz-board{position:relative;width:min(92vw,calc(340 * var(--u)));height:calc(min(92vw,calc(340 * var(--u))) * var(--rows) / var(--cols));display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);gap:2px;padding:4px;border-radius:calc(12 * var(--u));background:rgba(255,255,255,.06);border:1px solid rgba(190,180,255,.25);}
-.pz-slot{position:relative;border-radius:calc(4 * var(--u));background:rgba(0,0,0,.55);overflow:visible;}
-.pz-slot .pz-piece{position:absolute;inset:0;border-radius:calc(4 * var(--u));box-shadow:none;}
-.pz-slot .pz-piece.drop{animation:pzDrop .38s cubic-bezier(.3,1.3,.5,1) both;z-index:2;}
-@keyframes pzDrop{0%{opacity:0;transform:translateY(calc(-60 * var(--u))) scale(1.25)}60%{opacity:1;transform:translateY(0) scale(1.05)}100%{transform:none}}
-.pz-slot .pz-piece.drop::before{content:'';position:absolute;inset:-6px;border-radius:inherit;box-shadow:0 0 0 2px #fff,0 0 20px #fff;animation:pzFlash .5s ease-out .3s both;pointer-events:none;}
-@keyframes pzFlash{from{opacity:1}to{opacity:0}}
+.pz-board{position:relative;width:min(92vw,calc(340 * var(--u)));height:calc(min(92vw,calc(340 * var(--u))) * var(--rows) / var(--cols));border-radius:calc(10 * var(--u));background:rgba(0,0,0,.6);border:1px solid rgba(190,180,255,.25);overflow:visible;}
+.pz-board svg.pz-p{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.pz-board svg.pz-p.drop{animation:pzDrop .38s cubic-bezier(.3,1.3,.5,1) both;z-index:2;filter:drop-shadow(0 0 10px #fff);}
+@keyframes pzDrop{0%{opacity:0;transform:translateY(calc(-60 * var(--u))) scale(1.15)}60%{opacity:1;transform:translateY(0) scale(1.03)}100%{transform:none;filter:none}}
 .pz-board.done{animation:pzDone 1.2s ease-out both;box-shadow:0 0 40px rgba(255,220,140,.6);}
 @keyframes pzDone{0%{transform:scale(1)}30%{transform:scale(1.04)}100%{transform:scale(1)}}
 .pz-doneTxt{margin-top:calc(14 * var(--u));font-size:calc(18 * var(--u));font-weight:700;letter-spacing:.3em;color:#ffe08a;text-shadow:0 0 18px rgba(255,220,140,.8);animation:pzPop .6s cubic-bezier(.2,1.4,.4,1) both;}
 .pz-cnt{margin-top:calc(10 * var(--u));font-family:'Fira Code',monospace;font-size:calc(12 * var(--u));color:#c9c2e8;}
 .pz-btns{display:flex;flex-direction:column;gap:calc(8 * var(--u));width:min(88vw,calc(300 * var(--u)));margin-top:calc(18 * var(--u));}
-.pz-btns button{min-height:calc(42 * var(--u));border-radius:calc(14 * var(--u));font-family:inherit;font-size:calc(13 * var(--u));cursor:pointer;border:1px solid rgba(190,180,255,.35);background:transparent;color:#cfc8f0;}
-.pz-btns button.go{background:linear-gradient(160deg,#8f7dff,#5a48d8);color:#fff;border-color:transparent;font-weight:700;}
+.pz-btns button{min-height:calc(46 * var(--u));border-radius:calc(14 * var(--u));font-family:inherit;font-size:calc(14 * var(--u));cursor:pointer;border:1px solid rgba(190,180,255,.35);background:transparent;color:#cfc8f0;-webkit-tap-highlight-color:transparent;}
+.pz-btns button.go{background:linear-gradient(160deg,#8f7dff,#5a48d8);color:#fff;border-color:transparent;font-weight:700;letter-spacing:.1em;}
+.pz-btns button.sm{border:0;min-height:calc(32 * var(--u));font-size:calc(11 * var(--u));color:#9f9ac0;}
 /* v183 役完成の演出スキップ：手札エリアが薄暗くなり「タップでスキップ」 */
 .gp-hand-area{position:relative;}
 .skip-veil{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(4,6,20,.62);cursor:pointer;-webkit-tap-highlight-color:transparent;animation:fadeUp .25s ease both;border-radius:inherit;}
@@ -3138,7 +3135,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v183'; // v183(2026/09/13): 役完成の演出スキップ。完成した瞬間に手札エリアが薄暗くなり「タップでスキップ」。押すと3-2-1を飛ばしてGOから次のラウンド
+const APP_VER='v184'; // v184(2026/09/13): パズルをジグソー形（凸凹）に。結果→自動でパネルへ、「ピースを集める」は演出中から押せて即次のバトル。飛ばしても配置は保存。素材は img/panel_01.webp
+// const APP_VER='v183'; // v183(2026/09/13): 役完成の演出スキップ。完成した瞬間に手札エリアが薄暗くなり「タップでスキップ」。押すと3-2-1を飛ばしてGOから次のラウンド
 // const APP_VER='v182'; // v182(2026/09/13): パネルが豆粒になる不具合を修正（見送り・パズル画面に --u が無かった）
 // const APP_VER='v181'; // v181(2026/09/13): パズルを独立モードに。ホーム「パズル」→パネル画面→バトル。相手は集めた数でだんだん強くなる（PUZZLE_CFG.ladder）。見送りからはピースを外した
 // const APP_VER='v180'; // v180(2026/09/13): パズルのピース集め試作（1パネル10ピース）。見送りで勝つたびに未獲得ピースを1個ランダム獲得。結果画面に表示、「パネルを見る」「続けてバトル」。パネル画面で落ちてはまる演出、10個で完成
@@ -4022,61 +4020,91 @@ function GameEndScreen({data,onRestart,onHome}){
   );
 }
 
-// ── v180 パズルのピース集め（試作）：数値はここだけで調整 ──
-// 勝つたびに未獲得ピースを1個ランダムで獲得。順番には埋まらない。完成図の正体は出さない。
-// 画像は 1000×400px（5列×2段、1ピース200×200）。img/puzzle-01.webp を差し替えれば絵が変わる
+// ── v184 パズル：数値はここだけで調整 ──
+// 1枚の絵を 5列×2段＝10ピースのジグソー形に分割。勝つたびに未獲得ピースを1個ランダム獲得（ダブリなし）
+// 画像は 1000×400px。img/panel_01.webp を差し替えれば絵が変わる（絵の内容はコードに書かない）
 // ladder：獲得ピース数→相手（AREA_01.stages の添字）。集めるほどだんだん強くなる
-const PUZZLE_CFG={id:'p1',img:'img/puzzle-01.webp',cols:5,rows:2,dropMs:380,gapMs:260,ladder:[1,1,2,3,4,5,6,7,8,8]};
+const PUZZLE_CFG={id:'p1',img:'img/panel_01.webp',w:1000,h:400,cols:5,rows:2,tab:0.22,dropMs:380,gapMs:220,resultMs:1200,ladder:[1,1,2,3,4,5,6,7,8,8],seed:7};
 const PZ_N=PUZZLE_CFG.cols*PUZZLE_CFG.rows;
 function pzState(save){const p=(save&&save.puzzle&&save.puzzle.id===PUZZLE_CFG.id)?save.puzzle:{id:PUZZLE_CFG.id,got:[],placed:[]};return{id:p.id,got:p.got||[],placed:p.placed||[]};}
-function pzPieceStyle(idx){const c=idx%PUZZLE_CFG.cols,r=Math.floor(idx/PUZZLE_CFG.cols);
-  const px=PUZZLE_CFG.cols>1?(c/(PUZZLE_CFG.cols-1))*100:0,py=PUZZLE_CFG.rows>1?(r/(PUZZLE_CFG.rows-1))*100:0;
-  return{'--pz':"url('"+PUZZLE_CFG.img+"')",'--cols':PUZZLE_CFG.cols,'--rows':PUZZLE_CFG.rows,backgroundPosition:px+'% '+py+'%'};}
-function PzPiece({idx,className,style}){return h('div',{className:'pz-piece'+(className?' '+className:''),style:{...pzPieceStyle(idx),...(style||{})}});}
-// パネル画面：獲得済みでまだはめていないピースを1個ずつ落としてはめる
+// 凸凹の向きは固定（seed）。隣り合うピースは同じ境界線を共有するので、完成時にズレも隙間も出ない
+const PZ_EDGES=(()=>{let x=PUZZLE_CFG.seed;const rnd=()=>{x=(x*1103515245+12345)&0x7fffffff;return x/0x7fffffff;};
+  const {cols,rows}=PUZZLE_CFG;const hT=[],vT=[]; // hT[r][c]: (c,r)と(c+1,r)の境界。+1=左のピースが右へ凸 / vT[r][c]: (c,r)と(c,r+1)の境界。+1=上のピースが下へ凸
+  for(let r=0;r<rows;r++){hT[r]=[];vT[r]=[];for(let c=0;c<cols;c++){hT[r][c]=rnd()<.5?1:-1;vT[r][c]=rnd()<.5?1:-1;}}
+  return{hT,vT};})();
+// A→B の辺を、外向き法線 n、凸凹 t(+1=外へ凸/-1=内へ凹/0=直線) で描く
+function pzEdge(ax,ay,bx,by,nx,ny,t){
+  const L=Math.hypot(bx-ax,by-ay),ux=(bx-ax)/L,uy=(by-ay)/L;
+  const P=(x,y)=>(ax+ux*x+nx*y).toFixed(1)+' '+(ay+uy*x+ny*y).toFixed(1);
+  if(!t)return 'L '+P(L,0);
+  const k=PUZZLE_CFG.tab*L*t;
+  return 'L '+P(0.37*L,0)+' C '+P(0.44*L,0)+' '+P(0.40*L,k*0.45)+' '+P(0.35*L,k*0.7)
+   +' C '+P(0.24*L,k*1.25)+' '+P(0.76*L,k*1.25)+' '+P(0.65*L,k*0.7)
+   +' C '+P(0.60*L,k*0.45)+' '+P(0.56*L,0)+' '+P(0.63*L,0)+' L '+P(L,0);
+}
+function pzPath(idx){
+  const {cols,rows,w:pw,h:ph}=PUZZLE_CFG,cw=pw/cols,ch=ph/rows,c=idx%cols,r=Math.floor(idx/cols),x0=c*cw,y0=r*ch,x1=x0+cw,y1=y0+ch;
+  const top=r>0?-PZ_EDGES.vT[r-1][c]:0,right=c<cols-1?PZ_EDGES.hT[r][c]:0,bottom=r<rows-1?PZ_EDGES.vT[r][c]:0,left=c>0?-PZ_EDGES.hT[r][c-1]:0;
+  return 'M '+x0+' '+y0+' '+pzEdge(x0,y0,x1,y0,0,-1,top)+' '+pzEdge(x1,y0,x1,y1,1,0,right)+' '+pzEdge(x1,y1,x0,y1,0,1,bottom)+' '+pzEdge(x0,y1,x0,y0,-1,0,left)+' Z';
+}
+// ピース1個。board=盤面いっぱいのSVG（絵は共通座標なのでピッタリ合う） / solo=そのピースだけ切り抜いて表示
+function PzPiece({idx,className,solo}){
+  const {w:pw,h:ph,cols,rows,tab}=PUZZLE_CFG,cw=pw/cols,ch=ph/rows,c=idx%cols,r=Math.floor(idx/cols); // ※ h は React の h と被るので pw/ph
+  const m=tab*Math.max(cw,ch)*1.3;
+  const vb=solo?[c*cw-m,r*ch-m,cw+2*m,ch+2*m].map(v=>v.toFixed(1)).join(' '):'0 0 '+pw+' '+ph;
+  const id='pzc'+idx+(solo?'s':'b');
+  return h('svg',{className:'pz-p'+(className?' '+className:''),viewBox:vb,xmlns:'http://www.w3.org/2000/svg',preserveAspectRatio:'xMidYMid meet'},
+    h('defs',null,h('clipPath',{id},h('path',{d:pzPath(idx)}))),
+    h('image',{href:PUZZLE_CFG.img,x:0,y:0,width:pw,height:ph,preserveAspectRatio:'none',clipPath:'url(#'+id+')'}),
+    h('path',{d:pzPath(idx),fill:'none',stroke:'rgba(255,255,255,.45)',strokeWidth:2})
+  );
+}
+// パネル画面：獲得済みでまだはめていないピースを1個ずつ落としてはめる。「ピースを集める」は最初から押せて、押したら演出を切り上げて次のバトルへ
 function PuzzleScreen({save,onPlaced,onNext,onBack}){
   const st=pzState(save);
-  const[shown,setShown]=useState(()=>st.placed.slice()); // 画面に見えているピース
+  const[shown,setShown]=useState(()=>st.placed.slice());
   const[dropping,setDropping]=useState(null);
   const[done,setDone]=useState(st.placed.length>=PZ_N);
+  const pendingR=useRef(st.got.filter(i=>!st.placed.includes(i)));
   useEffect(()=>{
-    const pending=st.got.filter(i=>!st.placed.includes(i)&&!shown.includes(i));
+    const pending=st.got.filter(i=>!st.placed.includes(i)&&!shown.includes(i));pendingR.current=pending;
     if(!pending.length){if(shown.length>=PZ_N&&!done)setTimeout(()=>setDone(true),200);return;}
     const idx=pending[0];
     const t1=setTimeout(()=>{setDropping(idx);try{resumeAC();fxBell({f:1046,v:0.05,d:0.5,bright:1.1,rev:0.5});}catch(e){}},PUZZLE_CFG.gapMs);
-    const t2=setTimeout(()=>{setDropping(null);setShown(s=>[...s,idx]);onPlaced(idx);},PUZZLE_CFG.gapMs+PUZZLE_CFG.dropMs);
+    const t2=setTimeout(()=>{setDropping(null);setShown(s=>[...s,idx]);onPlaced([idx]);},PUZZLE_CFG.gapMs+PUZZLE_CFG.dropMs);
     return()=>{clearTimeout(t1);clearTimeout(t2);};
   },[shown]);
   const visible=[...shown,...(dropping!=null?[dropping]:[])];
+  const next=()=>{if(pendingR.current.length)onPlaced(pendingR.current);onNext();}; // 演出を飛ばしても獲得・配置は保存
   return h('div',{className:'pz-screen'},
     h('div',{className:'k'},'PANEL'),h('div',{className:'t'},'パネル'),
     h('div',{className:'pz-board'+(done?' done':''),style:{'--cols':PUZZLE_CFG.cols,'--rows':PUZZLE_CFG.rows}},
-      Array.from({length:PZ_N},(_,i)=>h('div',{key:i,className:'pz-slot'},visible.includes(i)&&h(PzPiece,{idx:i,className:dropping===i?'drop':''})))
+      visible.map(i=>h(PzPiece,{key:i,idx:i,className:dropping===i?'drop':''}))
     ),
     done?h('div',{className:'pz-doneTxt'},'完成！'):h('div',{className:'pz-cnt'},shown.length+' / '+PZ_N),
     h('div',{className:'pz-btns'},
-      h('button',{className:'go',onClick:onNext},shown.length?'次のバトルへ':'バトルへ'),
-      h('button',{onClick:onBack},'ホームへ')
+      h('button',{className:'go',onClick:next},'ピースを集める'),
+      h('button',{className:'sm',onClick:onBack},'ホームへ')
     )
   );
 }
-// v181 パズルモードの結果画面：勝てばピース。「パネルを見る」「続けてバトル」
+// パズルモードの結果画面：勝てばピースを見せて、自動でパネルへ（タップで即）
 function PuzzleEndScreen({data,piece,pzCount,onPanel,onNext,onRetry,onBack}){
   const win=data.winner==='player';
-  return h('div',{className:'pz-screen'},
+  useEffect(()=>{if(!win)return;const t=setTimeout(onPanel,PUZZLE_CFG.resultMs);return()=>clearTimeout(t);},[]);
+  return h('div',{className:'pz-screen',onClick:win?onPanel:undefined},
     h('div',{className:'veil-ask',style:{position:'static',background:'transparent',animation:'fadeUp .4s ease'}},
-      h('div',{className:'box'},
+      h('div',{className:'box',onClick:e=>{if(!win)e.stopPropagation();}},
         h('div',{className:'k',style:{fontFamily:"'Cinzel',serif",fontSize:'calc(9 * var(--u))',letterSpacing:'.3em',color:'#b9a8ff'}},win?'WIN':'LOSE'),
         h('div',{className:'nm'},win?'勝利':'敗北'),
         h('div',{style:{display:'flex',justifyContent:'center',gap:'calc(18 * var(--u))',fontFamily:"'Fira Code',monospace",fontSize:'calc(20 * var(--u))',margin:'calc(8 * var(--u)) 0'}},
           h('span',{style:{color:'#8ee9ff'}},data.pPt),h('span',{style:{color:'#8a86a8',fontSize:'calc(12 * var(--u))',alignSelf:'center'}},'vs'),h('span',{style:{color:'#ff9ab8'}},data.dPt)),
         win?(piece!=null
-          ?h('div',{className:'pz-result'},h('div',{className:'lb'},'ピースを獲得'),h(PzPiece,{idx:piece}),h('div',{className:'ct'},pzCount+' / '+PZ_N))
+          ?h('div',{className:'pz-result'},h('div',{className:'lb'},'ピースを獲得'),h(PzPiece,{idx:piece,solo:true}),h('div',{className:'ct'},pzCount+' / '+PZ_N),h('div',{className:'hint'},'タップでパネルへ'))
           :h('div',{className:'ln'},'パネルは完成している'))
          :h('div',{className:'ln'},'ピースは減らない。何度でも挑める。'),
-        h('div',{className:'row',style:{flexDirection:'column'}},
-          win?[h('button',{key:'pn',onClick:onPanel},'パネルを見る'),h('button',{key:'nx',className:'go',onClick:onNext},'続けてバトル')]
-             :h('button',{className:'go',onClick:onRetry},'もう一度'),
+        !win&&h('div',{className:'row',style:{flexDirection:'column'}},
+          h('button',{className:'go',onClick:onRetry},'もう一度'),
           h('button',{onClick:onBack,style:{border:0,minHeight:'calc(32 * var(--u))',fontSize:'calc(11 * var(--u))'}},'パズルを終える')
         )
       )
@@ -4837,7 +4865,7 @@ function App(){
     updSave(s=>{s.puzzle={...st,got:[...st.got,idx]};return s;});
     setPzPiece(idx);
   },[phase]);
-  function pzPlaced(idx){updSave(s=>{const st=pzState(s);if(!st.placed.includes(idx))s.puzzle={...st,placed:[...st.placed,idx]};return s;});}
+  function pzPlaced(idxs){updSave(s=>{const st=pzState(s);const add=(Array.isArray(idxs)?idxs:[idxs]).filter(i=>!st.placed.includes(i));if(add.length)s.puzzle={...st,placed:[...st.placed,...add]};return s;});}
   function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);veilR.current=null;pzModeR.current=false;setPzPiece(null);setPhase('puzzle');phaseR.current='puzzle';}
   function startPuzzleBattle(){ // v181 集めた数に応じてだんだん強い相手
     const got=pzState(saveR.current).got.length;
