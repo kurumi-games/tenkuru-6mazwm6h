@@ -2071,6 +2071,28 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* パネル完成：四角い枠・板の影は出さない（透過キャラが台座に浮く） */
 .tk-stage.celebrate .tk-surface{animation:pzCelebrate 1.2s ease-out both;}
 @keyframes pzCelebrate{0%{filter:brightness(1)}20%{filter:brightness(1.9) drop-shadow(0 0 30px #ffe08a)}100%{filter:brightness(1)}}
+/* v204 復旧：v202のCSS整理で誤って消えていた指定（ピースの絶対配置・落下・ボタン・BOSS表示） */
+.tk-piece{position:absolute;display:block;will-change:transform,opacity;}
+.tk-arrive-layer{position:absolute;inset:5px 5px 5px 5px;overflow:visible;pointer-events:none;z-index:6;} /* v191 降ってくる途中は枠の外（上）にも見える */
+.tk-piece.tk-arriving{animation:tk-arrive var(--ms) cubic-bezier(.35,0,.25,1) both;z-index:2;filter:drop-shadow(0 12px 16px rgba(0,0,0,.6));}
+@keyframes tk-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes tk-shadow{0%,100%{transform:scaleX(1);opacity:.8}50%{transform:scaleX(.92);opacity:.62}}
+/* v193 どの段のピースでも「パネルの上端よりさらに上（板の高さの55%上）」から降りてくる。top を動かすので段に関係なく同じ高さから始まる */
+@keyframes tk-arrive{0%{top:-55%;opacity:0;transform:scale(1.1)}6%{opacity:1}80%{top:calc(var(--top) - 4%);transform:scale(1.04)}100%{top:var(--top);opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.tk-float,.tk-shadow,.tk-piece.tk-arriving{animation:none!important}.tk-piece{will-change:auto}}
+.pz-doneTxt{margin-top:calc(4 * var(--u));font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.3em;color:#ffe08a;text-shadow:0 0 18px rgba(255,220,140,.8);animation:pzPop .6s cubic-bezier(.2,1.4,.4,1) both;}
+.pz-cnt{margin-top:calc(4 * var(--u));font-family:'Fira Code',monospace;font-size:calc(13 * var(--u));letter-spacing:.12em;color:#ded2b1;font-variant-numeric:tabular-nums;}
+.pz-btns{display:flex;flex-direction:column;gap:calc(8 * var(--u));width:min(88vw,calc(300 * var(--u)));margin-top:calc(12 * var(--u));position:relative;z-index:10;}
+.pz-btns button{min-height:calc(50 * var(--u));border-radius:calc(16 * var(--u));font-family:inherit;font-size:calc(15 * var(--u));cursor:pointer;border:1px solid #c4b8ff50;background:transparent;color:#cfc8f0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.pz-btns button.go{background:linear-gradient(115deg,#9a84ff,#6752da);box-shadow:inset 0 1px #eee5,0 6px 22px #4d3cb52b;color:#fff;font-weight:700;letter-spacing:.08em;border-color:transparent;}
+.pz-btns button.go:active{transform:translateY(1px);}
+.pz-btns button.go:disabled{opacity:.65;cursor:default;}
+.pz-btns button.sm{border:0;min-height:calc(30 * var(--u));font-size:calc(11 * var(--u));color:#9f9ac0;}
+.pz-boss{margin-top:calc(8 * var(--u));text-align:center;animation:pzBigIn .3s cubic-bezier(.2,1.5,.4,1) .3s both;}
+.pz-boss .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#ffb347;}
+.pz-boss .n{font-size:calc(18 * var(--u));font-weight:700;letter-spacing:.14em;color:#fff3cf;text-shadow:0 0 16px #ffb347;}
+.pz-boss .d{font-size:calc(11 * var(--u));color:#d9cfb0;margin-top:calc(2 * var(--u));}
+.pz-btns button.gold{background:linear-gradient(115deg,#ffd27a,#d98b2a);color:#3a2408;font-weight:700;border-color:transparent;box-shadow:0 6px 22px rgba(255,180,80,.3);letter-spacing:.1em;}
 /* v200 ともしび：灯りの当たっていない札 */
 .card-stage.lantern-dark{filter:brightness(.28) saturate(.4);transition:filter .3s;}
 .card-stage.lantern-dark .cs-num,.card-stage.lantern-dark .num{color:#6b6f8a!important;text-shadow:none!important;}
@@ -3219,7 +3241,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v203'; // v203(2026/09/14): PWA対応（manifest.json・アイコン・全画面表示）。ホーム画面に追加でアプリとして起動
+const APP_VER='v204'; // v204(2026/09/14): v202で誤って消したパネル画面のCSS（ピース配置・落下・ボタン・BOSS表示）を復旧
+// const APP_VER='v203'; // v203(2026/09/14): PWA対応（manifest.json・アイコン・全画面表示）。ホーム画面に追加でアプリとして起動
 // const APP_VER='v202'; // v202(2026/09/14): 勝利演出を作り直し（静止→決定打の光・WIN・アタック音・相手の札の消失を同期、画面を暗く落とす、跳ねない文字、ボスは輪と余韻）。勝利音を「鋭いアタック＋澄んだ響き＋短い余韻」に。リザルトは獲得ピース1枚を大きく出して残す（小パネル廃止、はめるのはパネル側）。完成時の四角い枠を除去。重複CSS整理
 // const APP_VER='v201'; // v201(2026/09/14): セトラの仮ステージを削除。STAGE1=記憶のランタンの少女、STAGE2=オルビィ
 // const APP_VER='v200'; // v200(2026/09/14): 3ステージ構成（セトラ→記憶のランタンの少女→オルビィ）。同梱素材のランタン少女は12分割を横2枚ずつ結合して6ピース化、輪郭は透過から自動抽出。固有ギミック「ともしび」（4秒間、手札3枚だけ見える）。クリア後は「次のステージへ」
