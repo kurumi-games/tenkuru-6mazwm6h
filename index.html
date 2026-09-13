@@ -2088,6 +2088,9 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pz-boss .n{font-size:calc(18 * var(--u));font-weight:700;letter-spacing:.14em;color:#fff3cf;text-shadow:0 0 16px #ffb347;}
 .pz-boss .d{font-size:calc(11 * var(--u));color:#d9cfb0;margin-top:calc(2 * var(--u));}
 .pz-btns button.gold{background:linear-gradient(115deg,#ffd27a,#d98b2a);color:#3a2408;font-weight:700;border-color:transparent;box-shadow:0 6px 22px rgba(255,180,80,.3);letter-spacing:.1em;}
+/* v200 ともしび：灯りの当たっていない札 */
+.card-stage.lantern-dark{filter:brightness(.28) saturate(.4);transition:filter .3s;}
+.card-stage.lantern-dark .cs-num,.card-stage.lantern-dark .num{color:#6b6f8a!important;text-shadow:none!important;}
 /* v183 役完成の演出スキップ：手札エリアが薄暗くなり「タップでスキップ」 */
 .gp-hand-area{position:relative;}
 .skip-veil{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(4,6,20,.62);cursor:pointer;-webkit-tap-highlight-color:transparent;animation:fadeUp .25s ease both;border-radius:inherit;}
@@ -2829,7 +2832,7 @@ function renderCardOverlay(){
   ];
 }
 
-function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,linkPick,rLock,rCmd,rWait,confused,frozen,justFrozen,pRing,shuffling,marked}){
+function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,linkPick,rLock,rCmd,rWait,confused,frozen,justFrozen,pRing,shuffling,marked,dark}){
   const[pressed,setPressed]=useState(false);
   const[shaking,setShaking]=useState(false);
   const isBlue=cardRole==='player'||cardRole==='host';
@@ -2837,7 +2840,7 @@ function SlideCard({value,onPlay,disabled,cardRole,cardState,onLocked,isSpecial,
   const locked=cardState==='locked';
   const stateClass=cardState?' cs-'+cardState:'';
   return h('div',{
-    className:'card-stage '+colorClass+' n'+value+stateClass+(frozen!=null?' frozen':'')+(justFrozen?' just-frz':'')+(pRing?' p-ring':'')+(shuffling?' shuf-fx':'')+(marked?' mark-fx':'')+(shaking?' cs-shake':'')+(isSpecial?' sv-card sv-born':'')+(linkPick?' link-pick':'')+(rLock?' rl-locked':'')+(rCmd?' rl-cmd':'')+(rWait?' rl-wait':'')+(confused?' confused':''),
+    className:'card-stage '+colorClass+' n'+value+stateClass+(dark?' lantern-dark':'')+(frozen!=null?' frozen':'')+(justFrozen?' just-frz':'')+(pRing?' p-ring':'')+(shuffling?' shuf-fx':'')+(marked?' mark-fx':'')+(shaking?' cs-shake':'')+(isSpecial?' sv-card sv-born':'')+(linkPick?' link-pick':'')+(rLock?' rl-locked':'')+(rCmd?' rl-cmd':'')+(rWait?' rl-wait':'')+(confused?' confused':''),
     style:{
       opacity:(disabled&&!locked)?0.3:undefined, // lockedの見た目はCSSに任せる(カウントダウン中等の無効はここで薄く)
       animation:'dealIn 0.22s cubic-bezier(0.2,1.3,0.5,1) both',
@@ -3223,7 +3226,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v199'; // v199(2026/09/14): パネル二回り縮小（300→235）、額縁と板を撤去して台座の上に浮かぶ「キャラのシルエット型」パネルに（6枚の外周＝フード・袖・カード・流れる裾）。勝利は 静止→決定打が光る→WIN!→札が散る→光からピース出現→小パネルへ飛んではまる→進捗が増える の一続き。最後の1枚は召喚演出（継ぎ目に光→発光→線が消える→フラッシュ→前へ→BOSS）
+const APP_VER='v200'; // v200(2026/09/14): 3ステージ構成（セトラ→記憶のランタンの少女→オルビィ）。同梱素材のランタン少女は12分割を横2枚ずつ結合して6ピース化、輪郭は透過から自動抽出。固有ギミック「ともしび」（4秒間、手札3枚だけ見える）。クリア後は「次のステージへ」
+// const APP_VER='v199'; // v199(2026/09/14): パネル二回り縮小（300→235）、額縁と板を撤去して台座の上に浮かぶ「キャラのシルエット型」パネルに（6枚の外周＝フード・袖・カード・流れる裾）。勝利は 静止→決定打が光る→WIN!→札が散る→光からピース出現→小パネルへ飛んではまる→進捗が増える の一続き。最後の1枚は召喚演出（継ぎ目に光→発光→線が消える→フラッシュ→前へ→BOSS）
 // const APP_VER='v198'; // v198(2026/09/13): パズルを「道中6戦＋ボス1戦」に。決着の瞬間に WIN!/LOSE（音＋相手の札が崩れる）→リザルト（獲得ピースがドーン）。6枚完成→ボス登場→撃破でSTAGE CLEAR。仮素材：オルビィ立ち絵を6分割
 // const APP_VER='v197'; // v197(2026/09/13): パネル1削除、パネル2を12戦の本気構成に（1〜6通常ましまし、7〜11新ギミック：砂時計・霧・鎖・静寂・重罰、12オルビィ）。相手の星環は毎ラウンド20%。プレイヤーのクロノリンク廃止
 // const APP_VER='v196'; // v196(2026/09/13): 通常ステージのディーラー全体強化（DEALER_BOOST：判断+2段階、速さ0.6倍）。パズルの相手は通常ステージ順に戻した（強化が乗る）
@@ -3448,6 +3452,7 @@ const GIMMICKS={
   chain:  {name:'鎖',    en:'CHAIN',    color:'#ffd35e',ring:'command',desc:'次に出せるのは相手が今出した数字だけ',ms:4000},
   silence:{name:'静寂',  en:'SILENCE',  color:'#b98cff',ring:'erase',  desc:'このラウンド、札を出すたび1秒出せない',cool:1000},
   heavy:  {name:'重罰',  en:'PENALTY',  color:'#ff6b81',ring:'erase',  desc:'このラウンド、バーストが−4',        pen:4},
+  lantern:{name:'ともしび',en:'LANTERN',color:'#ffc46b',ring:'command',desc:'4秒間、手札のうち3枚しか見えない。残りは記憶で出す',ms:4000,lit:3}, // v200 記憶のランタンの少女
 };
 // ── v175 区切りなし（FLOW）：トランプの「スピード」のように、TIMEは試合全体で1本 ──
 // 時間切れ＝点が多い方の勝ち。目標点での先取り終了はしない。10ができたら軽く光って +pt が自分の点まで吸い寄せられ、そのまま続く
@@ -4063,6 +4068,31 @@ function GameEndScreen({data,onRestart,onHome}){
 // ladder：獲得数→相手（AREA_01.stages の添字）。集めるほどだんだん強くなる
 const PZ_TIMING={dropMs:1500,gapMs:300}; // はまる演出の長さ／間隔（v190：480→900ms、はまる瞬間を楽しめるようにゆっくり）
 const PANELS=[
+  // v200 3ステージ構成。順番＝STAGE1 セトラ（仮素材：既存立ち絵）→ STAGE2 記憶のランタンの少女（同梱素材）→ STAGE3 オルビィ
+  {id:'panel_04',ver:1,dir:'img/panel_04/',w:508,h:900,bossName:'セトラ',
+   ladder:[{st:1},{st:2},{st:3,gk:'hour'},{st:4,gk:'mist'},{st:5,gk:'chain'},{st:6,gk:'silence'}],
+   boss:{st:12,gk:'mix'}, // セトラ本人（凍結）＋道中のギミック
+   boost:{speed:0.7,diff:'master'},
+   pieces:[
+    {id:'piece_01',x:0,y:0,w:321,h:367,path:'M 0.0 0.0 L 254.0 0.0 L 254.0 111.0 C 254.0 132.0 231.1 120.0 218.4 105.0 C 190.5 72.0 190.5 228.0 218.4 195.0 C 231.1 180.0 254.0 168.0 254.0 189.0 L 254.0 300.0 L 160.0 300.0 C 142.2 300.0 152.4 322.9 165.1 335.6 C 193.0 363.5 61.0 363.5 88.9 335.6 C 101.6 322.9 111.8 300.0 94.0 300.0 L 0.0 300.0 L 0.0 0.0 Z'},
+    {id:'piece_02',x:187,y:0,w:321,h:367,path:'M 254.0 0.0 L 508.0 0.0 L 508.0 300.0 L 414.0 300.0 C 396.2 300.0 406.4 322.9 419.1 335.6 C 447.0 363.5 315.0 363.5 342.9 335.6 C 355.6 322.9 365.8 300.0 348.0 300.0 L 254.0 300.0 L 254.0 189.0 C 254.0 168.0 231.1 180.0 218.4 195.0 C 190.5 228.0 190.5 72.0 218.4 105.0 C 231.1 120.0 254.0 132.0 254.0 111.0 L 254.0 0.0 Z'},
+    {id:'piece_03',x:0,y:233,w:321,h:434,path:'M 0.0 300.0 L 94.0 300.0 C 111.8 300.0 101.6 322.9 88.9 335.6 C 61.0 363.5 193.0 363.5 165.1 335.6 C 152.4 322.9 142.2 300.0 160.0 300.0 L 254.0 300.0 L 254.0 411.0 C 254.0 432.0 276.9 420.0 289.6 405.0 C 317.5 372.0 317.5 528.0 289.6 495.0 C 276.9 480.0 254.0 468.0 254.0 489.0 L 254.0 600.0 L 160.0 600.0 C 142.2 600.0 152.4 577.1 165.1 564.4 C 193.0 536.5 61.0 536.5 88.9 564.4 C 101.6 577.1 111.8 600.0 94.0 600.0 L 0.0 600.0 L 0.0 300.0 Z'},
+    {id:'piece_04',x:187,y:233,w:321,h:434,path:'M 254.0 300.0 L 348.0 300.0 C 365.8 300.0 355.6 322.9 342.9 335.6 C 315.0 363.5 447.0 363.5 419.1 335.6 C 406.4 322.9 396.2 300.0 414.0 300.0 L 508.0 300.0 L 508.0 600.0 L 414.0 600.0 C 396.2 600.0 406.4 577.1 419.1 564.4 C 447.0 536.5 315.0 536.5 342.9 564.4 C 355.6 577.1 365.8 600.0 348.0 600.0 L 254.0 600.0 L 254.0 489.0 C 254.0 468.0 276.9 480.0 289.6 495.0 C 317.5 528.0 317.5 372.0 289.6 405.0 C 276.9 420.0 254.0 432.0 254.0 411.0 L 254.0 300.0 Z'},
+    {id:'piece_05',x:0,y:533,w:321,h:367,path:'M 0.0 600.0 L 94.0 600.0 C 111.8 600.0 101.6 577.1 88.9 564.4 C 61.0 536.5 193.0 536.5 165.1 564.4 C 152.4 577.1 142.2 600.0 160.0 600.0 L 254.0 600.0 L 254.0 711.0 C 254.0 732.0 276.9 720.0 289.6 705.0 C 317.5 672.0 317.5 828.0 289.6 795.0 C 276.9 780.0 254.0 768.0 254.0 789.0 L 254.0 900.0 L 0.0 900.0 L 0.0 600.0 Z'},
+    {id:'piece_06',x:187,y:533,w:321,h:367,path:'M 254.0 600.0 L 348.0 600.0 C 365.8 600.0 355.6 577.1 342.9 564.4 C 315.0 536.5 447.0 536.5 419.1 564.4 C 406.4 577.1 396.2 600.0 414.0 600.0 L 508.0 600.0 L 508.0 900.0 L 254.0 900.0 L 254.0 789.0 C 254.0 768.0 276.9 780.0 289.6 795.0 C 317.5 828.0 317.5 672.0 289.6 705.0 C 276.9 720.0 254.0 732.0 254.0 711.0 L 254.0 600.0 Z'}
+  ]},
+  {id:'panel_05',ver:1,dir:'img/panel_05/',w:1448,h:1086,bossName:'記憶のランタンの少女',
+   ladder:[{st:3,gk:'mist'},{st:4,gk:'chain'},{st:5,gk:'silence'},{st:6,gk:'heavy'},{st:7,gk:'lantern'},{st:8,gk:'lantern'}],
+   boss:{st:8,gk:'lantern',rate:0.4,boost:{speed:0.5,diff:'master'}}, // 固有ギミック「ともしび」を高頻度で。通常AIの最強設定＋速さ
+   boost:{speed:0.6,diff:'master'},
+   pieces:[
+    {id:'piece_01',x:0,y:0,w:814,h:452,path:'M 0 0 L 0 361 L 105 361 L 112 352 L 118 350 L 129 361 L 134 391 L 145 418 L 156 434 L 164 442 L 176 448 L 185 448 L 193 445 L 210 428 L 224 401 L 229 385 L 232 362 L 235 357 L 244 350 L 248 351 L 257 361 L 466 361 L 475 371 L 481 372 L 490 363 L 496 330 L 510 299 L 528 279 L 539 274 L 546 274 L 556 278 L 568 289 L 576 300 L 589 329 L 595 362 L 604 372 L 611 371 L 619 361 L 723 361 L 723 257 L 713 248 L 713 241 L 723 232 L 747 229 L 770 221 L 784 214 L 805 196 L 810 186 L 810 176 L 807 168 L 788 150 L 776 143 L 756 135 L 723 129 L 713 120 L 712 116 L 714 112 L 723 104 L 723 0 Z'},
+    {id:'piece_02',x:710,y:0,w:738,h:452,path:'M 724 0 L 724 104 L 714 113 L 713 118 L 716 123 L 723 128 L 749 132 L 783 146 L 803 162 L 811 177 L 811 185 L 807 194 L 791 210 L 782 216 L 760 226 L 746 230 L 723 233 L 713 243 L 714 248 L 724 257 L 724 361 L 829 361 L 836 352 L 842 350 L 853 361 L 858 391 L 869 418 L 880 434 L 888 442 L 900 448 L 909 448 L 917 445 L 934 428 L 948 401 L 953 385 L 956 362 L 959 357 L 968 350 L 972 351 L 981 361 L 1190 361 L 1199 371 L 1205 372 L 1214 363 L 1220 330 L 1234 299 L 1252 279 L 1263 274 L 1270 274 L 1280 278 L 1292 289 L 1300 300 L 1313 329 L 1319 362 L 1328 372 L 1335 371 L 1343 361 L 1447 361 L 1447 0 Z'},
+    {id:'piece_03',x:0,y:273,w:738,h:541,path:'M 723 362 L 619 362 L 610 372 L 605 373 L 596 365 L 594 361 L 591 338 L 577 303 L 568 290 L 559 281 L 546 275 L 539 275 L 528 280 L 519 288 L 510 300 L 497 329 L 491 362 L 481 373 L 475 372 L 466 362 L 257 362 L 248 352 L 243 351 L 233 361 L 228 391 L 217 418 L 207 433 L 196 444 L 185 449 L 176 449 L 167 445 L 150 427 L 137 402 L 132 386 L 128 361 L 124 355 L 118 351 L 113 352 L 104 362 L 0 362 L 0 723 L 104 723 L 113 733 L 119 734 L 128 725 L 134 692 L 148 661 L 166 641 L 177 636 L 184 636 L 199 644 L 214 662 L 227 691 L 233 724 L 242 734 L 249 733 L 257 723 L 467 723 L 474 714 L 480 712 L 491 723 L 494 745 L 499 762 L 507 780 L 518 796 L 526 804 L 535 809 L 547 810 L 553 808 L 569 794 L 576 784 L 589 754 L 594 724 L 603 713 L 610 713 L 619 723 L 723 723 L 723 619 L 733 611 L 735 607 L 734 604 L 724 595 L 694 590 L 662 576 L 644 561 L 639 554 L 636 544 L 641 528 L 661 510 L 678 501 L 695 495 L 725 490 L 734 481 L 733 475 L 723 466 Z'},
+    {id:'piece_04',x:634,y:273,w:814,h:541,path:'M 1447 362 L 1343 362 L 1334 372 L 1329 373 L 1320 365 L 1318 361 L 1315 338 L 1301 303 L 1292 290 L 1283 281 L 1270 275 L 1263 275 L 1252 280 L 1243 288 L 1234 300 L 1221 329 L 1215 362 L 1205 373 L 1199 372 L 1190 362 L 981 362 L 972 352 L 967 351 L 957 361 L 952 391 L 941 418 L 931 433 L 920 444 L 909 449 L 900 449 L 891 445 L 874 427 L 861 402 L 856 386 L 852 361 L 848 355 L 842 351 L 837 352 L 828 362 L 724 362 L 724 466 L 734 475 L 735 480 L 732 485 L 724 491 L 688 498 L 658 513 L 641 529 L 637 539 L 637 547 L 643 559 L 652 568 L 667 578 L 697 590 L 724 594 L 735 605 L 734 610 L 724 619 L 724 723 L 828 723 L 837 733 L 843 734 L 852 725 L 858 692 L 872 661 L 890 641 L 901 636 L 908 636 L 923 644 L 938 662 L 951 691 L 957 724 L 966 734 L 973 733 L 981 723 L 1191 723 L 1198 714 L 1204 712 L 1215 723 L 1220 753 L 1227 772 L 1236 788 L 1253 806 L 1262 810 L 1271 810 L 1282 805 L 1300 784 L 1313 754 L 1318 724 L 1327 713 L 1334 713 L 1343 723 L 1447 723 Z'},
+    {id:'piece_05',x:0,y:635,w:814,h:451,path:'M 0 724 L 0 1085 L 723 1085 L 723 981 L 713 972 L 713 965 L 723 956 L 747 953 L 770 945 L 784 938 L 805 920 L 810 910 L 810 900 L 807 892 L 788 874 L 776 867 L 756 859 L 723 853 L 713 844 L 712 840 L 714 836 L 723 828 L 723 724 L 619 724 L 610 714 L 605 713 L 595 723 L 590 753 L 579 780 L 569 795 L 558 806 L 547 811 L 538 811 L 529 807 L 512 789 L 499 764 L 494 748 L 490 723 L 486 717 L 480 713 L 475 714 L 466 724 L 257 724 L 248 734 L 243 735 L 234 727 L 232 723 L 229 700 L 215 665 L 206 652 L 197 643 L 184 637 L 177 637 L 166 642 L 157 650 L 148 662 L 135 691 L 129 724 L 119 735 L 113 734 L 104 724 Z'},
+    {id:'piece_06',x:710,y:635,w:738,h:451,path:'M 724 724 L 724 828 L 714 837 L 713 842 L 716 847 L 723 852 L 749 856 L 783 870 L 803 886 L 811 901 L 811 909 L 807 918 L 791 934 L 782 940 L 760 950 L 746 954 L 723 957 L 713 967 L 714 972 L 724 981 L 724 1085 L 1447 1085 L 1447 724 L 1343 724 L 1334 714 L 1329 713 L 1319 723 L 1314 753 L 1303 780 L 1293 795 L 1282 806 L 1271 811 L 1262 811 L 1253 807 L 1236 789 L 1223 764 L 1218 748 L 1214 723 L 1210 717 L 1204 713 L 1199 714 L 1190 724 L 981 724 L 972 734 L 967 735 L 958 727 L 956 723 L 953 700 L 939 665 L 930 652 L 921 643 L 908 637 L 901 637 L 890 642 L 881 650 L 872 662 L 859 691 L 853 724 L 843 735 L 837 734 L 828 724 Z'}
+  ]},
   // v198 1ステージ＝道中6戦（ピース6枚）＋ボス1戦。絵に描かれたキャラがボス
   // v199 ver2：ピースの形を作り直した（6枚の外周がキャラのシルエット：大きなフード／横に広がる袖／片手のカード／煙のように流れる裾）
   //      ピース番号の意味が変わるので保存キーを ver2 に上げた（ver1の進捗は残るが使わない）。仮素材：既存のオルビィ立ち絵
@@ -4130,7 +4160,7 @@ function PuzzleResult({data,pn,piece,count,boss,onNext,onPanel,onRetry,onPlaced,
       win&&!boss&&piece!=null&&stage!=='done'&&h('div',{className:'burst'}),
       win&&!boss&&piece!=null&&(stage!=='done'||last)&&h('img',{ref:pieceRef,className:'piece'+(stage==='fly'?' flying':''),src:pzImg(pn,piece),alt:'',draggable:false,
         style:stage==='fly'&&fly?{transform:'translate('+fly.tx+'px,'+fly.ty+'px) scale('+fly.sc+')',opacity:.95}:undefined}),
-      win&&!boss&&!last&&h('div',{className:'pz-mini',ref:slotRef},
+      win&&!boss&&!last&&h('div',{className:'pz-mini',ref:slotRef,style:{height:'calc(96 * var(--u) * '+pn.h+' / '+pn.w+')'}},
         h('svg',{viewBox:'0 0 '+pn.w+' '+pn.h,xmlns:'http://www.w3.org/2000/svg'},pn.pieces.map((p,i)=>miniPlaced.includes(i)?null:h('path',{key:i,d:p.path}))),
         miniPlaced.map(i=>{const p=pn.pieces[i];return h('img',{key:i,className:i===piece?'snap':'',src:pzImg(pn,i),alt:'',draggable:false,style:{left:(p.x/pn.w*100)+'%',top:(p.y/pn.h*100)+'%',width:(p.w/pn.w*100)+'%',height:(p.h/pn.h*100)+'%'}});})
       ),
@@ -4142,7 +4172,7 @@ function PuzzleResult({data,pn,piece,count,boss,onNext,onPanel,onRetry,onPlaced,
       h('div',{className:'score'},
         h('div',null,h('div',{className:'v you'},data.pPt),h('div',{className:'l'},'YOU')),
         h('div',{className:'vs'},'vs'),
-        h('div',null,h('div',{className:'v foe'},data.dPt),h('div',{className:'l'},(data.rivalName||'DEALER').toUpperCase()))
+        h('div',null,h('div',{className:'v foe'},data.dPt),h('div',{className:'l'},boss?pn.bossName:(data.rivalName||'DEALER').toUpperCase()))
       ),
       h('div',{className:'btns',style:{opacity:stage==='done'?1:0,transition:'opacity .25s',pointerEvents:stage==='done'?'auto':'none'}},
         win?(boss
@@ -4157,7 +4187,7 @@ function PuzzleResult({data,pn,piece,count,boss,onNext,onPanel,onRetry,onPlaced,
 }
 // パネル画面：円形の台座の上に板が浮いている。獲得済みでまだはめていないピースを1個ずつ落としてはめる（はまる瞬間に音と光）
 // 6枚そろったら完成の音と光→絵のキャラがボスとして登場→「ボスに挑む」
-function PuzzleScreen({save,pn,onPlaced,onNext,onBack,onReset}){
+function PuzzleScreen({save,pn,onPlaced,onNext,onBack,onReset,onNextStage,hasNext}){
   const N=pn.pieces.length,st=pzState(save,pn);
   const[shown,setShown]=useState(()=>st.placed.slice());
   const[dropping,setDropping]=useState(null);
@@ -4191,7 +4221,7 @@ function PuzzleScreen({save,pn,onPlaced,onNext,onBack,onReset}){
   const complete=done&&shown.length>=N;
   const label=complete?(st.cleared?'もう一度ボスに挑む':'ボスに挑む'):'次の対戦へ';
   return h('div',{className:'pz-screen'},
-    h('div',{className:'k'},st.cleared?'STAGE CLEARED':'PANEL'),
+    h('div',{className:'k'},'STAGE '+(PANELS.indexOf(pn)+1)+' / '+PANELS.length+(st.cleared?'　CLEARED':'')), // v200
     flash&&h('div',{className:'sm-flash'}),
     h('div',{className:'tk-stage'+(celeb?' celebrate':'')+(sm?' '+sm:'')},
       h('div',{className:'tk-aura'}),h('div',{className:'tk-beam'}),
@@ -4212,8 +4242,8 @@ function PuzzleScreen({save,pn,onPlaced,onNext,onBack,onReset}){
       ?h('div',{className:'pz-boss'},h('div',{className:'k'},'BOSS'),h('div',{className:'n'},pn.bossName),h('div',{className:'d'},st.cleared?'撃破済み。何度でも挑める':'絵のキャラクターが、ボスとして立ちはだかる'))
       :h('div',{className:'pz-cnt'},shown.length+' / '+N),
     h('div',{className:'pz-btns'},
-      h('button',{className:complete?'gold':'go',disabled:went,onClick:next},label),
-      st.cleared&&h('button',{className:'sm',onClick:onReset},'最初からやり直す'),
+      (st.cleared&&hasNext)?h('button',{className:'gold',onClick:onNextStage},'次のステージへ'):h('button',{className:complete?'gold':'go',disabled:went,onClick:next},label), // v200 クリア済みで次があれば次のステージへ
+      st.cleared&&h('button',{className:'sm',onClick:onReset},hasNext?'このステージをやり直す':'最初からやり直す'),
       h('button',{className:'sm',onClick:onBack},'ホームへ')
     )
   );
@@ -4481,7 +4511,7 @@ function App(){
   }
   function orbyRingOn(){const so=stageOptsR.current;return !!(so&&so.ability==='orbit');}
   // v197 パズルの新ギミック
-  function gkRoundReset(rn){const g=gkR.current;g.chain=null;g.chainUntil=0;g.coolUntil=0;if(g.silenceRn!==rn)g.silenceRn=-1;if(g.heavyRn!==rn)g.heavyRn=-1;mistR.current=0;setMist(false);}
+  function gkRoundReset(rn){setLantern(null);const g=gkR.current;g.chain=null;g.chainUntil=0;g.coolUntil=0;if(g.silenceRn!==rn)g.silenceRn=-1;if(g.heavyRn!==rn)g.heavyRn=-1;mistR.current=0;setMist(false);}
   function attachGkRing(rn){
     let kind=pzGkR.current;if(kind==='mix'){const ks=Object.keys(GIMMICKS);kind=ks[Math.floor(Math.random()*ks.length)];} // v198 ボスは道中のギミックからランダム
     if(!kind||!GIMMICKS[kind])return;
@@ -4502,6 +4532,11 @@ function App(){
     else if(kind==='chain'){g.chain=value;g.chainUntil=Date.now()+G.ms;fxLockHint('鎖：'+value+'だけ');}
     else if(kind==='silence'){g.silenceRn=rn;}
     else if(kind==='heavy'){g.heavyRn=rn;}
+    else if(kind==='lantern'){ // v200 手札のうち3枚だけ灯りが当たる。残りは暗くて数字が見えない（出すことはできる）
+      const idxs=pHR.current.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);for(let i=idxs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idxs[i],idxs[j]]=[idxs[j],idxs[i]];}
+      const lit=idxs.slice(0,G.lit),until=Date.now()+G.ms;setLantern({lit,until});
+      setTimeout(()=>{setLantern(l=>l&&l.until===until?null:l);},G.ms+20);
+    }
   }
   function attachOrbyRing(rn){
     const hand=dHR.current,flags=dRingR.current.slice();
@@ -4954,7 +4989,8 @@ function App(){
   }
   // v180 パズル：勝った試合ごとに1回だけ抽選（同じ試合で結果画面を何度出しても重複しない）
   const[pzView,setPzView]=useState(0);const pzModeR=useRef(false),pzBattleR=useRef(0),pzPanelR=useRef(null);
-  const pzGkR=useRef(null),pzBoostR=useRef(null); // v197 パズルのギミック／上乗せ
+  const pzGkR=useRef(null),pzBoostR=useRef(null),pzGkRateR=useRef(0); // v197 パズルのギミック／上乗せ／v200 星環の確率
+  const[lantern,setLantern]=useState(null); // v200 ともしび：見える手札の添字と期限
   const pzBossR=useRef(false);const[pzFx,setPzFx]=useState(null);const pzFxDoneR=useRef(false); // v198 ボス戦か／勝敗の瞬間演出
   const[pzHit,setPzHit]=useState(false); // v199 決着の静止
   const gkR=useRef({chain:null,chainUntil:0,silenceRn:-1,heavyRn:-1,coolUntil:0,timeCut:0});const[mist,setMist]=useState(false);const mistR=useRef(0); // v181 パズルモード中か／何戦目か（重複付与防止のキー）／v187 戦っているパネル
@@ -4970,14 +5006,14 @@ function App(){
     }
   },[phase]);
   function pzPlaced(pn,idxs){updSave(s=>{const st=pzState(s,pn);const add=idxs.filter(i=>!st.placed.includes(i));return add.length?pzWrite(s,pn,{...st,placed:[...st.placed,...add]}):s;});}
-  function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);pzModeR.current=false;pzGkR.current=null;pzBoostR.current=null;pzBossR.current=false;setPzFx(null);pzFxDoneR.current=false;setPzPiece(null);setPhase('puzzle');phaseR.current='puzzle';}
+  function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);pzModeR.current=false;pzGkR.current=null;pzBoostR.current=null;pzGkRateR.current=0;setLantern(null);pzBossR.current=false;setPzFx(null);pzFxDoneR.current=false;setPzPiece(null);setPhase('puzzle');phaseR.current='puzzle';}
   function startPuzzleBattle(){ // v181 集めた数に応じてだんだん強い相手
     if(phaseR.current==='brief'||phaseR.current==='playing'||phaseR.current==='intro')return; // v185 連打で二重に始めない
     const pn=pzActive(saveR.current);pzPanelR.current=pn;
     const got=pzState(saveR.current,pn).got.length;
     const boss=got>=pn.pieces.length;pzBossR.current=boss; // v198 6枚そろっていればボス戦
     const ent=boss?pn.boss:pn.ladder[Math.min(got,pn.ladder.length-1)];const idx=typeof ent==='number'?ent:ent.st;
-    pzGkR.current=(typeof ent==='object'&&ent.gk)||null;pzBoostR.current=boss?null:(pn.boost||null); // v197 ギミックと上乗せ（ボスは本人の調整のまま）
+    pzGkR.current=(typeof ent==='object'&&ent.gk)||null;pzBoostR.current=boss?(ent.boost||null):(pn.boost||null);pzGkRateR.current=(typeof ent==='object'&&ent.rate)||0; // v197/v200 ギミック・上乗せ・星環の確率（ボスは個別設定）
     pzModeR.current=true;pzBattleR.current++;setPzPiece(null);stageR.current=null;stageOptsR.current=null;
     startStage(0,idx,true);
   }
@@ -5099,7 +5135,7 @@ function App(){
           if(freezeActive()&&rn%5===1)setTimeout(()=>attachSetraRing(rn),500); // v136 セトラ：第1ラウンドから1枚、以降5ラウンドおき
           if(playerRingOn()&&rn%PLAYER_RING_EVERY===1)setTimeout(()=>attachPlayerRing(rn),700); // v136 プレイヤーの星環
           if(orbyRingOn()&&rn%ORBY_RING_EVERY===1)setTimeout(()=>attachOrbyRing(rn),500); // v140 オルビィの星環
-          gkRoundReset(rn);if(pzGkR.current&&Math.random()<GK_RING_RATE)setTimeout(()=>attachGkRing(rn),500); // v197 パズルのギミック星環（20%）
+          gkRoundReset(rn);if(pzGkR.current&&Math.random()<(pzGkRateR.current||GK_RING_RATE))setTimeout(()=>attachGkRing(rn),500); // v197/v200 パズルのギミック星環（既定20%、ボスは個別）
           if(hideLeftR.current>0&&rn>1)setHideLeft2(hideLeftR.current-1); // v140 裏返しの消化
           if(tsLeftR.current>0&&rn>1)setTsLeft2(tsLeftR.current-1); // v136 効果ラウンドを消化
           ensureDealerRefill(); // v89 保険：環付きしか残ってなければ10枚まで補充
@@ -5769,7 +5805,8 @@ function App(){
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
   if(phase==='puzzle'){const pn=pzPanelR.current||pzActive(save);
     return h(PuzzleScreen,{key:pzKey(pn)+'-'+pzBattleR.current+'-'+pzView,save,pn,onPlaced:pzPlaced,onNext:startPuzzleBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';},
-      onReset:()=>{updSave(s=>pzWrite(s,pn,{got:[],placed:[],cleared:false}));pzPanelR.current=null;setPzView(v=>v+1);}});} // v180 / v198
+      hasNext:PANELS.indexOf(pn)<PANELS.length-1,onNextStage:()=>{pzPanelR.current=null;setPzView(v=>v+1);},
+      onReset:()=>{updSave(s=>pzWrite(s,pn,{got:[],placed:[],cleared:false}));pzPanelR.current=null;setPzView(v=>v+1);}});} // v180 / v198 / v200
   if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzle:()=>{pzPanelR.current=null;goPuzzle();},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
@@ -5960,10 +5997,10 @@ function App(){
       h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
       h('div',{className:'gp-hand-rows'},
         h('div',{className:'gp-hand-row'},
-          pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const dv=confuse[i]!=null?confuse[i]:v;return h(SlideCard,{key:i+'_'+v,value:dv,onPlay:()=>playCard(i),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[i]||pFrz[i]!=null||(cmdIdx!=null&&cmdIdx!==i),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[i],justFrozen:justFrz.includes(i),pRing:pRing===i,shuffling:shufAll,marked:marked.includes(i),onLocked:()=>fxLockHint(pFrz[i]!=null?'凍結中 あと'+pFrz[i]+'秒':pLock[i]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[i],rCmd:cmdIdx===i,rWait:cmdIdx!=null&&cmdIdx!==i,confused:confuse[i]!=null});})())
+          pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const dv=confuse[i]!=null?confuse[i]:v;const dk=lantern&&!lantern.lit.includes(i);return h(SlideCard,{key:i+'_'+v,value:dk?'?':dv,dark:dk,onPlay:()=>playCard(i),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[i]||pFrz[i]!=null||(cmdIdx!=null&&cmdIdx!==i),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[i],justFrozen:justFrz.includes(i),pRing:pRing===i,shuffling:shufAll,marked:marked.includes(i),onLocked:()=>fxLockHint(pFrz[i]!=null?'凍結中 あと'+pFrz[i]+'秒':pLock[i]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[i],rCmd:cmdIdx===i,rWait:cmdIdx!=null&&cmdIdx!==i,confused:confuse[i]!=null});})())
         ),
         h('div',{className:'gp-hand-row'},
-          pH.slice(5).map((v,i)=>v===null?h('div',{key:i+5,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const j=i+5,dv=confuse[j]!=null?confuse[j]:v;return h(SlideCard,{key:j+'_'+v,value:dv,onPlay:()=>playCard(j),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[j]||pFrz[j]!=null||(cmdIdx!=null&&cmdIdx!==j),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[j],justFrozen:justFrz.includes(j),pRing:pRing===j,shuffling:shufAll,marked:marked.includes(j),onLocked:()=>fxLockHint(pFrz[j]!=null?'凍結中 あと'+pFrz[j]+'秒':pLock[j]?'星環ロック':(cmdIdx!=null&&cmdIdx!==j)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[j],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[j],rCmd:cmdIdx===j,rWait:cmdIdx!=null&&cmdIdx!==j,confused:confuse[j]!=null});})())
+          pH.slice(5).map((v,i)=>v===null?h('div',{key:i+5,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const j=i+5,dv=confuse[j]!=null?confuse[j]:v;const dk=lantern&&!lantern.lit.includes(j);return h(SlideCard,{key:j+'_'+v,value:dk?'?':dv,dark:dk,onPlay:()=>playCard(j),disabled:countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[j]||pFrz[j]!=null||(cmdIdx!=null&&cmdIdx!==j),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[j],justFrozen:justFrz.includes(j),pRing:pRing===j,shuffling:shufAll,marked:marked.includes(j),onLocked:()=>fxLockHint(pFrz[j]!=null?'凍結中 あと'+pFrz[j]+'秒':pLock[j]?'星環ロック':(cmdIdx!=null&&cmdIdx!==j)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[j],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[j],rCmd:cmdIdx===j,rWait:cmdIdx!=null&&cmdIdx!==j,confused:confuse[j]!=null});})())
         )
       )
     ),
