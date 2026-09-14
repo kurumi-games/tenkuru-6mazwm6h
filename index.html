@@ -3181,7 +3181,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v229'; // v229(2026/09/15): 足場を全体に大きく上へ（ステージ1が下すぎた）。番号・BOSS の文字は描かない（絵だけ）
+const APP_VER='v230'; // v230(2026/09/15): 通常ステージ6つをボスを囲む円に並べる（1番が真下、時計回り）。星環がその輪の外側で回る
+// const APP_VER='v229'; // v229(2026/09/15): 足場を全体に大きく上へ（ステージ1が下すぎた）。番号・BOSS の文字は描かない（絵だけ）
 // const APP_VER='v228'; // v228(2026/09/15): 足場を完成版の丸ボタン絵（nephira-stage-buttons）に差し替え。中央に番号／BOSS を描く
 // const APP_VER='v227'; // v227(2026/09/15): 足場を小さくして（本編マップの丸メダルくらい）、うねる道でつなぐ並びに。星環も小さくボスの後ろ
 // const APP_VER='v226'; // v226(2026/09/15): 絵の中に足場を置いた（くるみ提供 tenkuru-stage-assets：通常6・ボス1、img/pzx/stage・stage-boss.webp）。星環はボスの足場の後ろ。足場を押すと札（今は準備中、相手・条件はまだ）
@@ -3434,9 +3435,10 @@ const PZX={dir:'img/pzx/',w:1672,h:941,outline:'outline.webp',complete:'complete
 };
 // ── v225 パズルクス：絵の中の世界。背景・浮遊する結晶・星環だけ（ステージはくるみの画像が来てから上に足す）。数値はここだけで調整 ──
 const PZX_WORLD={
-  ring:{x:.5,y:.15,size:.56,spin:80,alpha:.85},          // 星環：中心(幅・高さの割合)、大きさ(幅比)、1周の秒数、濃さ。ボスの足場の後ろで回る
+  ring:{x:.5,y:.40,size:.98,spin:80,alpha:.85},          // 星環：中心(幅・高さの割合)、大きさ(幅比)、1周の秒数、濃さ。ボスを囲む
+  circle:{cx:.5,cy:.40,r:.36,start:90},                  // v230 通常ステージ6つはボスを囲む円に並べる：中心、半径(幅比)、1番目の角度(90=真下、時計回り)
   // ステージの足場（下から上へ。最後がボス）：本編のマップみたいに小さくして、うねる道でつなぐ。位置は上のバーより下の範囲に対する割合。size=幅比、anchor=画像の中で足場の中心がある高さの割合
-  nodes:[{x:.20,y:.68},{x:.42,y:.61},{x:.66,y:.55},{x:.78,y:.44},{x:.56,y:.36},{x:.32,y:.30},{x:.50,y:.15}], // v229 ステージ1は画面の下2/3あたり。下に寄せない
+  nodes:[], // circle から自動で決める（下の pzxNodes）
   stage:{size:.19,anchor:.5},boss:{size:.25,anchor:.5}, // v228 丸いボタン絵（中央に番号を描く）
   crystals:[ // 浮遊する結晶：位置、大きさ(幅比)、上下の幅(px@430)、周期(秒)、傾き(度)、濃さ（奥のものは薄く小さく）
     {x:.10,y:.30,s:.11,bob:6,per:5.2,rot:-8,a:.9},{x:.90,y:.26,s:.09,bob:5,per:6.1,rot:10,a:.85},
@@ -3444,6 +3446,7 @@ const PZX_WORLD={
     {x:.52,y:.90,s:.06,bob:4,per:6.8,rot:3,a:.6},{x:.22,y:.10,s:.05,bob:3,per:7.4,rot:14,a:.5},{x:.80,y:.92,s:.05,bob:3,per:6.4,rot:-5,a:.5},
   ],
 };
+function pzxNodes(W,FH){const C=PZX_WORLD.circle,r=C.r*W;const n=[];for(let i=0;i<6;i++){const a=(C.start+i*60)*Math.PI/180;n.push({x:C.cx*W+Math.cos(a)*r,y:C.cy*FH+Math.sin(a)*r});}n.push({x:C.cx*W,y:C.cy*FH});return n;} // 6つは円周、最後がボス（中心）
 function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[]};}
 function boostDiff(d){if(!DEALER_BOOST.enabled)return d;const i=DIFF_ORDER.indexOf(d);return i<0?d:DIFF_ORDER[Math.min(3,i+DEALER_BOOST.diffUp)];}
 // ── v197 パズル用の新ギミック（相手の星環カードを場に出した瞬間だけ発動）：数値はここだけで調整 ──
@@ -4092,7 +4095,7 @@ function PzxWorld({onBack}){
     const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const load=u=>new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=u;});
     const fr=()=>{const f=wrap.querySelector('.frame');return f?{t:f.offsetTop,h:f.clientHeight}:{t:0,h:H};};
-    const pos=()=>{const F=fr();return PZX_WORLD.nodes.map((n,i)=>({x:n.x*W,y:F.t+n.y*F.h+(reduced?0:Math.sin(t*(.76+i*.037)+i*1.1)*(i===6?3:4)*W/430)}));};
+    const pos=()=>{const F=fr();return pzxNodes(W,F.h).map((n,i)=>({x:n.x,y:F.t+n.y+(reduced?0:Math.sin(t*(.76+i*.037)+i*1.1)*(i===6?3:4)*W/430)}));};
     const resize=()=>{W=wrap.clientWidth;H=wrap.clientHeight;const dpr=Math.min(window.devicePixelRatio||1,2);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);};
     resize();const ro=window.ResizeObserver?new ResizeObserver(resize):null;if(ro)ro.observe(wrap);
     const draw=()=>{
@@ -4105,8 +4108,9 @@ function PzxWorld({onBack}){
         c.save();c.translate(k.x*W,k.y*H+bob);c.rotate((k.rot+sway)*Math.PI/180);c.globalAlpha=k.a;c.shadowColor='#8fa0ff';c.shadowBlur=14*k.a;c.drawImage(imgs.cr,-sz/2,-sz/2,sz,sz);c.restore();});
       // 光の道（足場と足場をつなぐ）
       c.save();c.lineCap='round';
-      for(let i=0;i<6;i++){const a=p[i],b=p[i+1],mid=(a.y+b.y)/2;
-        c.beginPath();c.moveTo(a.x,a.y);c.bezierCurveTo(a.x,mid,b.x,mid,b.x,b.y);
+      for(let i=0;i<6;i++){const a=p[i],b=p[i+1],ctr=p[6];
+        c.beginPath();c.moveTo(a.x,a.y);
+        if(i<5){const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;c.quadraticCurveTo(ctr.x+(mx-ctr.x)*1.18,ctr.y+(my-ctr.y)*1.18,b.x,b.y);}else c.lineTo(b.x,b.y); // 円に沿って曲げる。6→ボスはまっすぐ
         c.strokeStyle='#7081fb';c.lineWidth=5*W/430;c.shadowColor='#6b6cff';c.shadowBlur=8;c.globalAlpha=.25;c.stroke();
         c.globalAlpha=.75;c.shadowBlur=0;c.strokeStyle='#c5dfff';c.lineWidth=1*W/430;c.stroke();}
       c.restore();
@@ -4124,7 +4128,7 @@ function PzxWorld({onBack}){
   return h('div',{className:'pzx-world'},
     h('div',{className:'top'},h('button',{onClick:onBack},'‹ パネル'),h('div',{className:'k'},'PUZZLUX'),h('div',{className:'pc'},'')),
     h('div',{className:'sky'},h('div',{className:'stage',ref:wrapR},h('canvas',{ref:canvasR}),
-      h('div',{className:'frame'},PZX_WORLD.nodes.map((n,i)=>h('button',{key:i,className:'hit'+(i===6?' boss':''),style:{left:(n.x*100)+'%',top:(n.y*100)+'%'},'aria-label':i===6?'ボス':'ステージ'+(i+1),onClick:()=>{setSel(i);try{resumeAC();fxTone({f:880,f2:1320,type:'sine',v:0.03,a:0.005,d:0.12,rev:0.3});}catch(e){}}}))))),
+      h('div',{className:'frame'},[0,1,2,3,4,5,6].map(i=>{const C=PZX_WORLD.circle,a=(C.start+i*60)*Math.PI/180,cx=i===6?0:Math.cos(a)*C.r,cy=i===6?0:Math.sin(a)*C.r;return h('button',{key:i,className:'hit'+(i===6?' boss':''),style:{left:'calc('+(C.cx*100)+'% + '+(cx*100)+'vw)',top:'calc('+(C.cy*100)+'% + '+(cy*100)+'vw)'},'aria-label':i===6?'ボス':'ステージ'+(i+1),onClick:()=>{setSel(i);try{resumeAC();fxTone({f:880,f2:1320,type:'sine',v:0.03,a:0.005,d:0.12,rev:0.3});}catch(e){}}});})))),
     sel!=null&&h('div',{className:'pzx-card'},
       h('button',{className:'x',onClick:()=>setSel(null)},'✕'),
       h('div',{className:'hd'},h('div',null,h('div',{className:'no'},sel===6?'BOSS':'STAGE '+(sel+1)),h('div',{className:'nm'},sel===6?'ネフィラ':'準備中')),h('div',{className:'st'},'相手・条件はこれから')),
