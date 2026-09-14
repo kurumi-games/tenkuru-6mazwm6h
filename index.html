@@ -2058,8 +2058,6 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-card .go{margin-top:calc(8 * var(--u));width:100%;min-height:calc(44 * var(--u));border-radius:999px;border:1px solid rgba(255,224,138,.55);background:linear-gradient(135deg,rgba(255,224,138,.22),rgba(150,120,255,.22));color:#fff3c4;font-family:inherit;font-size:calc(14 * var(--u));font-weight:700;letter-spacing:.24em;cursor:pointer;}
 .pzx-card .go:active{transform:scale(.98);}
 .pzx-card .go:disabled{opacity:.4;cursor:default;}
-/* 対戦画面：絵の中の空 */
-.gp-screen.pzx{background-image:url('img/pzx/world-bg.webp');background-size:cover;background-position:center;background-color:#07091b;}
 /* 結果 */
 .pzx-res .k2{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#b9a8ff;margin-bottom:calc(-4 * var(--u));}
 .pzx-res .cond{width:100%;margin-top:calc(8 * var(--u));padding:calc(9 * var(--u)) calc(12 * var(--u));border-radius:calc(10 * var(--u));background:rgba(255,255,255,.04);border:1px solid rgba(190,180,255,.25);font-size:calc(12 * var(--u));line-height:1.65;color:#d6d2ea;text-align:left;}
@@ -3210,7 +3208,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v218'; // v218(2026/09/14): パズルクスの絵の主＝ネフィラ（ボス名）。パネル画面に「はじめから」（2回押しで進行リセット、本編の★は触らない）
+const APP_VER='v219'; // v219(2026/09/14): パズルクスの対戦画面をいつもの背景に戻した（絵の中の空は見づらいので使わない。対戦フィールドは勝手に変えない）
+// const APP_VER='v218'; // v218(2026/09/14): パズルクスの絵の主＝ネフィラ（ボス名）。パネル画面に「はじめから」（2回押しで進行リセット、本編の★は触らない）
 // const APP_VER='v217'; // v217(2026/09/14): パズルクス「絵の中の世界」：浮遊マップ（img/pzx/world-bg・island・boss、島が上下・光の道）と7つの島（6ステージ＋ボス）。勝てば次の島、条件（PZX_STAGES.cond）を満たすとピース、6枚でボス解放。v216（チャッピー版）は破棄
 // const APP_VER='v215'; // v215(2026/09/14): レッスン・パズル・ギャラリーを廃止して削除（画面・データ・画像 img/panel_* img/backs pedestal piece-snap も削除）。スコア制度も廃止。ホームは「遊ぶ」「パズルクス」「あそびかた」。決着演出（WIN/LOSE）と星環ギミックのエンジンだけパズルクス用に残置
 // const APP_VER='v214'; // v214(2026/09/14): パズルクス導入（ホーム「パズルクス」→線画パネル＋四角いピース6枚→「中へ入る」→仮マップ6ノード）。ステージ・ピース獲得条件は後で。素材は img/pzx
@@ -5776,7 +5775,7 @@ function App(){
   const so=stageOptsR.current||{};
   const rival=(form2&&so.form2Name)||so.rivalName||'DEALER';
   // v62: 第7は「ルナ」／v70: 第2形態は「レイピア」
-  return h('div',{className:'gp-screen'+(endHold?' end-hold':'')+(stageR.current&&stageR.current.ar===1?' pzx':'')+(so.challenge?' ch7':'')+(so.ch8?' ch8':'')+(so.ch9?' ch9':'')+(so.ch10?' ch10':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
+  return h('div',{className:'gp-screen'+(endHold?' end-hold':'')+(so.challenge?' ch7':'')+(so.ch8?' ch8':'')+(so.ch9?' ch9':'')+(so.ch10?' ch10':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
     h(ChampionLayer,{champ:stageOptsR.current&&stageOptsR.current.champion?CHAMPIONS[stageOptsR.current.champion]:null}), // v61 チャンピオン戦は立ち絵
     so.challenge&&h('div',{className:'champ-layer'},
       form2
