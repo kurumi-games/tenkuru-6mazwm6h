@@ -4221,6 +4221,8 @@ function PuzzleResult({data,pn,piece,count,boss,onNext,onPanel,onRetry}){
   const N=pn.pieces.length,win=data.winner==='player',full=count>=N,last=full&&!boss;
   const[rel,setRel]=useState(win&&boss); // v209 撃破直後は解放イベント（タップか5秒で結果へ）
   useEffect(()=>{if(!rel)return;try{resumeAC();[659,784,988,1319,1568].forEach((f,i)=>fxBell({f,v:0.05,d:2.2,bright:1.1,rev:0.95,t:0.2+i*0.14}));}catch(e){}const t=setTimeout(()=>setRel(false),5200);return()=>clearTimeout(t);},[]);
+  const wentR=useRef(false);const once=f=>()=>{if(wentR.current)return;wentR.current=true;f();};
+  useEffect(()=>{if(win&&!boss&&piece!=null){const t=setTimeout(playPieceGetSE,130);return()=>clearTimeout(t);}},[]); // 着地に合わせて小さな獲得音
   if(rel)return h('div',{className:'pz-rel',onClick:()=>setRel(false)},
     h('div',{className:'ray'}),
     pn.bossImg&&h('img',{className:'fig',src:pn.bossImg,alt:'',draggable:false}),
@@ -4228,8 +4230,7 @@ function PuzzleResult({data,pn,piece,count,boss,onNext,onPanel,onRetry}){
     h('div',{className:'ln'},'「'+(pn.line||'……')+'」'),
     h('div',{className:'tap'},'タップで続ける　ギャラリーに収蔵されました')
   );
-  const wentR=useRef(false);const once=f=>()=>{if(wentR.current)return;wentR.current=true;f();};
-  useEffect(()=>{if(win&&!boss&&piece!=null){const t=setTimeout(playPieceGetSE,130);return()=>clearTimeout(t);}},[]); // 着地に合わせて小さな獲得音
+
   const cls='pz-res'+(win?(boss?' clear':''):' lose');
   return h('div',{className:cls},
     h('div',{style:{textAlign:'center'}},
