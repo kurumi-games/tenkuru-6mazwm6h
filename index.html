@@ -2042,6 +2042,12 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-world .top button{min-height:calc(32 * var(--u));padding:0 calc(14 * var(--u));border-radius:999px;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.7);color:#d6cfff;font-family:inherit;font-size:calc(11.5 * var(--u));cursor:pointer;}
 .pzx-world .sky{position:absolute;inset:0;}
 .pzx-world .stage{position:absolute;inset:0;}
+.pzx-snap{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(12 * var(--u));background:rgba(4,6,24,.72);animation:pzxCard .3s ease both;}
+.pzx-snap .pzx-panel{width:min(94vw,calc(340 * var(--u)));}
+.pzx-snap .pzx-panel .pc.new{z-index:4;animation:pzxSnapIn .9s cubic-bezier(.16,.8,.26,1) both;}
+@keyframes pzxSnapIn{0%{opacity:0;transform:translateY(-60%) scale(1.35);filter:brightness(1.8)}70%{opacity:1;transform:translateY(0) scale(1.02);filter:brightness(1.5)}100%{transform:none;filter:brightness(1)}}
+.pzx-snap .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#b9a8ff;}
+.pzx-snap .pget{font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.3em;color:#ffe08a;text-shadow:0 0 calc(12 * var(--u)) rgba(255,224,138,.6);animation:pzxCard .5s ease 1s both;}
 .pzx-world .frame{position:absolute;left:0;right:0;top:calc(48 * var(--u));bottom:0;}
 .pzx-world canvas{display:block;width:100%;height:100%;}
 .pzx-world .hit{position:absolute;width:19%;height:9%;transform:translate(-50%,-50%);background:transparent;border:0;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;}
@@ -3211,7 +3217,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v222'; // v222(2026/09/15): ロック中の島は鎖つきの島（img/pzx/island-lock.webp）。開いた島は次にマップを見た時に鎖が光って外れる（1回だけ、save.pzx.seen）
+const APP_VER='v223'; // v223(2026/09/15): 勝ったら結果→「絵の中へ戻る」だけ（連続対戦なし）。マップに戻ると ①ピース獲得なら中央にパネルが出てピースがはまる ②道に光が走って次の島の鎖が外れる。ネフィラの島のロックは専用の鎖絵（boss-lock.webp）
+// const APP_VER='v222'; // v222(2026/09/15): ロック中の島は鎖つきの島（img/pzx/island-lock.webp）。開いた島は次にマップを見た時に鎖が光って外れる（1回だけ、save.pzx.seen）
 // const APP_VER='v221'; // v221(2026/09/14): 絵の中のマップのズレ修正（島の札が右にはみ出す／ボスが上のバーに隠れる）
 // const APP_VER='v220'; // v220(2026/09/14): 絵の中のマップは画面いっぱい（cover）。島の札は島を押した時だけ出る（✕で閉じる）。ピースを持つ島は勝った扱いで次が開く
 // const APP_VER='v219'; // v219(2026/09/14): パズルクスの対戦画面をいつもの背景に戻した（絵の中の空は見づらいので使わない。対戦フィールドは勝手に変えない）
@@ -3479,7 +3486,7 @@ const PZX_AREA={id:'pzx',name:'絵の中',stages:PZX_STAGES};
 STAGES.areas[1]=PZX_AREA;
 // 島の位置（幅・高さに対する割合、下から上へ。最後がボス）
 const PZX_NODES=[{x:.29,y:.86},{x:.70,y:.76},{x:.31,y:.66},{x:.69,y:.56},{x:.31,y:.46},{x:.70,y:.36},{x:.50,y:.205}];
-function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[],won:P.won||[],boss:!!P.boss,seen:P.seen||[]};} // seen=鎖が外れる演出を見た島
+function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[],won:P.won||[],boss:!!P.boss};}
 function pzxOpen(save,i){const P=pzxState(save);if(i>=6)return P.got.length>=PZX.pieces.length;if(i===0)return true;return P.won.includes(PZX_STAGES[i-1].no)||P.got.includes(i-1);} // ピースを持っている島は勝ったとみなす
 function boostDiff(d){if(!DEALER_BOOST.enabled)return d;const i=DIFF_ORDER.indexOf(d);return i<0?d:DIFF_ORDER[Math.min(3,i+DEALER_BOOST.diffUp)];}
 // ── v197 パズル用の新ギミック（相手の星環カードを場に出した瞬間だけ発動）：数値はここだけで調整 ──
@@ -4120,10 +4127,22 @@ function PzxPanel({save,onEnter,onBack,onReset}){
   );
 }
 // ── v217 パズルクス：絵の中の世界（浮遊マップ）。島がゆっくり上下し、光の道でつながる ──
-function PzxWorld({save,onPick,onBack,onSeen}){
+function PzxWorld({save,onPick,onBack,arrive,onArrived}){
   const P=pzxState(save);
-  const unlockR=useRef(null); // v222 今回はじめて開いた島：鎖が外れる演出（1回だけ）
-  useEffect(()=>{const fresh=PZX_NODES.map((n,i)=>i).filter(i=>i<6&&i>0&&pzxOpen(save,i)&&!P.seen.includes(i));if(fresh.length){unlockR.current={idx:fresh,t0:performance.now()};const t=setTimeout(()=>onSeen&&onSeen(fresh),1800);return()=>clearTimeout(t);}},[]);
+  // v223 対戦から戻った時の演出（arrive={from,gotPiece,unlock}）：①ピースがパネルにはまる ②道が光って次の島へ ③鎖が外れる
+  const animR=useRef(null);const[snap,setSnap]=useState(null);const[busy,setBusy]=useState(!!arrive);
+  useEffect(()=>{
+    if(!arrive){return;}
+    const ts=[];const at=(ms,f)=>ts.push(setTimeout(f,ms));let t=300;
+    const A={from:arrive.from,unlock:arrive.unlock,pending:arrive.unlock!=null,light:null,chain:null};animR.current=A;
+    if(arrive.gotPiece!=null){at(t,()=>{setSnap({idx:arrive.gotPiece});try{resumeAC();fxBell({f:1568,v:0.06,d:1.0,bright:1.2,rev:0.7,t:0.9});}catch(e){}});t+=2600;at(t,()=>setSnap(null));t+=200;}
+    if(arrive.unlock!=null){
+      at(t,()=>{A.light={from:arrive.from,to:arrive.unlock,t0:performance.now(),dur:1300};try{resumeAC();fxTone({f:660,f2:1760,type:'sine',v:0.05,a:0.01,d:1.2,rev:0.6});}catch(e){}});t+=1300;
+      at(t,()=>{A.pending=false;A.chain={idx:arrive.unlock,t0:performance.now()};try{resumeAC();fxBell({f:2093,v:0.07,d:1.4,bright:1.4,rev:0.8});}catch(e){}});t+=1600;
+    }
+    at(t,()=>{animR.current=null;setBusy(false);onArrived&&onArrived();});
+    return()=>ts.forEach(clearTimeout);
+  },[]);
   const firstOpen=PZX_STAGES.findIndex((st,i)=>pzxOpen(save,i)&&!P.won.includes(st.no));
   const[sel,setSel]=useState(firstOpen>=0?firstOpen:(P.got.length>=6&&!P.boss?6:0));const[card,setCard]=useState(false); // 札は島を押した時だけ
   const canvasR=useRef(null),wrapR=useRef(null),selR=useRef(sel);selR.current=sel;
@@ -4141,30 +4160,38 @@ function PzxWorld({save,onPick,onBack,onSeen}){
       const drift=reduced?0:Math.sin(t*.12)*W*.006;if(imgs.bg){const k=Math.max(W/imgs.bg.width,H/imgs.bg.height)*1.04,bw=imgs.bg.width*k,bh=imgs.bg.height*k;c.drawImage(imgs.bg,(W-bw)/2+drift,(H-bh)/2,bw,bh);} // 画面いっぱい（cover）
       c.fillStyle='rgba(4,8,31,.32)';c.fillRect(0,0,W,H);
       for(let i=0;i<25;i++){const x=((i*137.7)%997)/997*W,y=(((i*251.3)%991)/991*H-t*(1+i%3)*.55+H*20)%H;c.globalAlpha=.24+.3*(.5+.5*Math.sin(t*.5+i));c.fillStyle=i%2?'#b9bdff':'#e0f6ff';c.beginPath();c.arc(x,y,.65+(i%3)*.25,0,Math.PI*2);c.fill();}c.globalAlpha=1;
-      const p=pos(),cur=selR.current;
+      const p=pos(),cur=selR.current,A=animR.current;
+      const isOpen=i=>pzxOpen(save,i)&&!(A&&A.pending&&A.unlock===i); // 演出待ちの島はまだ鎖つき
       c.save();c.lineCap='round';
-      for(let i=0;i<6;i++){const a=p[i],b=p[i+1],mid=(a.y+b.y)/2,lit=pzxOpen(save,i+1);
+      for(let i=0;i<6;i++){const a=p[i],b=p[i+1],mid=(a.y+b.y)/2,lit=isOpen(i+1);
         c.beginPath();c.moveTo(a.x,a.y);c.bezierCurveTo(a.x,mid,b.x,mid,b.x,b.y);
         c.strokeStyle='#7081fb';c.lineWidth=7*W/430;c.shadowColor='#6b6cff';c.shadowBlur=10;c.globalAlpha=lit?.27:.1;c.stroke();
         c.globalAlpha=lit?.8:.25;c.shadowBlur=0;c.strokeStyle='#c5dfff';c.lineWidth=1.15*W/430;c.stroke();}
       c.restore();
+      if(A&&A.light){ // 光が道を走る（from→to のベジェを 0→k まで明るくなぞり、先頭に光の玉）
+        const L=A.light,k=Math.min(1,(performance.now()-L.t0)/L.dur),a=p[L.from],b=p[L.to],mid=(a.y+b.y)/2;
+        const pt=u=>{const v=1-u;return{x:v*v*v*a.x+3*v*v*u*a.x+3*v*u*u*b.x+u*u*u*b.x,y:v*v*v*a.y+3*v*v*u*mid+3*v*u*u*mid+u*u*u*b.y};};
+        c.save();c.lineCap='round';c.beginPath();const n=40;for(let j=0;j<=n*k;j++){const q=pt(j/n);if(j===0)c.moveTo(q.x,q.y);else c.lineTo(q.x,q.y);}
+        c.strokeStyle='#ffffff';c.lineWidth=3*W/430;c.shadowColor='#bfe6ff';c.shadowBlur=18;c.globalAlpha=.95;c.stroke();
+        const hd=pt(k);c.beginPath();c.arc(hd.x,hd.y,7*W/430,0,Math.PI*2);c.fillStyle='#ffffff';c.shadowBlur=30;c.fill();c.restore();
+      }
       for(let i=6;i>=0;i--){const boss=i===6,size=W*(boss?.55:.34),img=boss?imgs.boss:imgs.isl,a=p[i],anchor=boss?.59:.325,open=pzxOpen(save,i);if(!img)continue;
-        const U=unlockR.current,fresh=U&&U.idx.includes(i)?Math.min(1,Math.max(0,(performance.now()-U.t0-400)/1200)):null; // 0→1 で鎖が消える
+        const open2=isOpen(i),fresh=A&&A.chain&&A.chain.idx===i?Math.min(1,Math.max(0,(performance.now()-A.chain.t0-300)/1100)):null; // 0→1 で鎖が消える
+        const lockImg=boss?imgs.blk:imgs.lock;
         c.save();c.shadowColor=cur===i?'#c0bdff':'#4959e0';c.shadowBlur=cur===i?14:3;
-        if(!boss&&imgs.lock&&(!open||(fresh!=null&&fresh<1))){ // 鎖の島（ロック中、または外れる途中）
-          if(fresh!=null){c.globalAlpha=1;c.drawImage(img,a.x-size/2,a.y-size*anchor,size,size);c.globalAlpha=1-fresh;if(fresh>0&&fresh<1){c.shadowColor='#ffffff';c.shadowBlur=30*(1-fresh);}}
-          c.drawImage(imgs.lock,a.x-size/2,a.y-size*anchor,size,size);c.restore();continue;
+        if(lockImg&&(!open2||(fresh!=null&&fresh<1))){ // 鎖の島（ロック中、または外れる途中）
+          if(fresh!=null){c.globalAlpha=1;c.drawImage(img,a.x-size/2,a.y-size*anchor,size,size);c.globalAlpha=1-fresh;if(fresh>0&&fresh<1){c.shadowColor='#ffffff';c.shadowBlur=36*(1-fresh);}}
+          c.drawImage(lockImg,a.x-size/2,a.y-size*anchor,size,size);c.restore();continue;
         }
-        if(!open){c.globalAlpha=.45;try{c.filter='saturate(.35) brightness(.6)';}catch(e){}}
         c.drawImage(img,a.x-size/2,a.y-size*anchor,size,size);c.restore();
         // 印：勝った島は小さな星、ピースを取った島は金の星
         const st=PZX_STAGES[i],won=P.won.includes(st.no),got=boss?P.boss:P.got.includes(i);
         if(won||got){c.save();c.font='bold '+(13*W/430)+'px serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle=got?'#ffe08a':'#b9bdff';c.shadowColor=got?'#ffd27a':'#8fa0ff';c.shadowBlur=10;c.fillText(got?'★':'✦',a.x,a.y-size*(boss?.68:.36));c.restore();}
-        if(!open&&boss){c.save();c.globalAlpha=.9;c.fillStyle='rgba(230,232,245,.85)';const r=8*W/430;c.beginPath();c.arc(a.x,a.y-size*.02,r,0,Math.PI*2);c.fill();c.fillStyle='#4a3f88';c.fillRect(a.x-r*.38,a.y-size*.02-r*.05,r*.76,r*.6);c.lineWidth=r*.18;c.strokeStyle='#4a3f88';c.beginPath();c.arc(a.x,a.y-size*.02-r*.1,r*.3,Math.PI,0);c.stroke();c.restore();}
+        if(false){c.save();c.globalAlpha=.9;c.fillStyle='rgba(230,232,245,.85)';const r=8*W/430;c.beginPath();c.arc(a.x,a.y-size*.02,r,0,Math.PI*2);c.fill();c.fillStyle='#4a3f88';c.fillRect(a.x-r*.38,a.y-size*.02-r*.05,r*.76,r*.6);c.lineWidth=r*.18;c.strokeStyle='#4a3f88';c.beginPath();c.arc(a.x,a.y-size*.02-r*.1,r*.3,Math.PI,0);c.stroke();c.restore();}
       }
     };
     const loop=now=>{if(!alive)return;if(last&&document.visibilityState!=='hidden')t+=Math.min((now-last)/1000,.05);last=now;draw();raf=requestAnimationFrame(loop);};
-    Promise.all([load(PZX.dir+'world-bg.webp'),load(PZX.dir+'island.webp'),load(PZX.dir+'boss.webp'),load(PZX.dir+'island-lock.webp')]).then(([bg,isl,boss,lock])=>{if(!alive)return;imgs={bg,isl,boss,lock};raf=requestAnimationFrame(loop);});
+    Promise.all([load(PZX.dir+'world-bg.webp'),load(PZX.dir+'island.webp'),load(PZX.dir+'boss.webp'),load(PZX.dir+'island-lock.webp'),load(PZX.dir+'boss-lock.webp')]).then(([bg,isl,boss,lock,blk])=>{if(!alive)return;imgs={bg,isl,boss,lock,blk};raf=requestAnimationFrame(loop);});
     return()=>{alive=false;cancelAnimationFrame(raf);if(ro)ro.disconnect();};
   },[save]);
   const st=PZX_STAGES[sel],open=pzxOpen(save,sel),won=P.won.includes(st.no),got=sel===6?P.boss:P.got.includes(sel);
@@ -4173,9 +4200,13 @@ function PzxWorld({save,onPick,onBack,onSeen}){
     h('div',{className:'top'},h('button',{onClick:onBack},'‹ パネル'),h('div',{className:'k'},'PUZZLUX'),h('div',{className:'pc'},'PIECE '+P.got.length+' / '+PZX.pieces.length)),
     h('div',{className:'sky'},h('div',{className:'stage',ref:wrapR},
       h('canvas',{ref:canvasR}),
-      h('div',{className:'frame'},PZX_NODES.map((n,i)=>h('button',{key:i,className:'hit'+(i===6?' boss':''),style:{left:(n.x*100)+'%',top:(n.y*100)+'%'},'aria-label':i===6?'ボス':'ステージ'+(i+1),onClick:()=>{setSel(i);setCard(true);try{resumeAC();fxTone({f:880,f2:1320,type:'sine',v:0.03,a:0.005,d:0.12,rev:0.3});}catch(e){}}})))
+      h('div',{className:'frame'},PZX_NODES.map((n,i)=>h('button',{key:i,className:'hit'+(i===6?' boss':''),style:{left:(n.x*100)+'%',top:(n.y*100)+'%'},'aria-label':i===6?'ボス':'ステージ'+(i+1),onClick:()=>{if(busy)return;setSel(i);setCard(true);try{resumeAC();fxTone({f:880,f2:1320,type:'sine',v:0.03,a:0.005,d:0.12,rev:0.3});}catch(e){}}})))
     )),
-    card&&h('div',{className:'pzx-card'},
+    snap&&h('div',{className:'pzx-snap'},h('div',{className:'k'},'PIECE'),
+      h('div',{className:'pzx-panel'},h('img',{className:'ol',src:PZX.dir+PZX.outline,alt:'',draggable:false}),
+        PZX.pieces.map((q,i)=>(P.got.includes(i)||i===snap.idx)&&h('img',{key:q.id,className:'pc'+(i===snap.idx?' new':''),src:PZX.dir+q.id+'.webp',alt:'',draggable:false,style:{left:(q.x/PZX.w*100)+'%',top:(q.y/PZX.h*100)+'%',width:(q.w/PZX.w*100)+'%',height:(q.h/PZX.h*100)+'%'}}))),
+      h('div',{className:'pget'},'ピース獲得　'+(P.got.length)+' / '+PZX.pieces.length)),
+    card&&!busy&&h('div',{className:'pzx-card'},
       h('button',{className:'x',onClick:()=>setCard(false)},'✕'),
       h('div',{className:'hd'},h('div',null,h('div',{className:'no'},sel===6?'BOSS':'STAGE '+(sel+1)),h('div',{className:'nm'},open?st.name:'？？？')),
         h('div',{className:'st'+(got?' got':'')},got?(sel===6?'制覇':'ピース獲得済'):won?'勝利済':open?'未踏':'ロック')),
@@ -4202,11 +4233,8 @@ function PzxResult({data,st,idx,gotNow,pieceIdx,nextOpen,onNext,onRetry,onMap}){
       ),
       h('div',{className:'stats'},h('span',null,'バースト ',h('b',null,m.bursts)),h('span',null,'役 ',h('b',null,m.tens.filter(t=>t.voice!=='役なし').length)),h('span',null,h('b',null,m.sec),'秒')),
       h('div',{className:'cond '+(ok?'ok':'ng')},h('span',{className:'mk'},ok?'達成':'未達'),h('span',{className:'l'},isBoss?'CLEAR':'PIECE'),st.cond.text),
-      gotNow&&!isBoss&&pieceIdx!=null&&h('img',{className:'piece',src:PZX.dir+PZX.pieces[pieceIdx].id+'.webp',alt:'',draggable:false}),
-      gotNow&&h('div',{className:'pget'},isBoss?'絵の中を制覇した':'ピース獲得'),
-      win&&!isBoss&&nextOpen&&h('button',{className:'sg-btn',onClick:onNext},idx+1===6?'ボスへ':'次の島へ'),
-      h('button',{className:'sg-btn'+((win&&!isBoss&&nextOpen)?' ghost':''),onClick:onRetry},'もう一度'),
-      h('button',{className:'sg-btn ghost',onClick:onMap},'マップへ')
+      gotNow&&isBoss&&h('div',{className:'pget'},'絵の中を制覇した'),
+      win?h('button',{className:'sg-btn',onClick:onMap},'絵の中へ戻る'):[h('button',{key:'r',className:'sg-btn',onClick:onRetry},'もう一度'),h('button',{key:'m',className:'sg-btn ghost',onClick:onMap},'絵の中へ戻る')]
     )
   );
 }
@@ -4954,6 +4982,7 @@ function App(){
   const hitFxR=useRef(false);const[endFx,setEndFx]=useState(null);const endFxDoneR=useRef(false);
   const matchStatsR=useRef({bursts:0,tens:[],start:0}); // v217 1試合の記録（自分のバースト回数・作った10・開始時刻）。パズルクスの条件判定に使う
   const pzxLastR=useRef(null); // v217 直近のパズルクス対戦（結果画面用）
+  const[pzxArrive,setPzxArrive]=useState(null); // v223 マップに戻った時の演出内容
   const[endHit,setEndHit]=useState(false);const[endHold,setEndHold]=useState(false);
   // 星環ギミック（霧・鎖・静寂・重罰・ともしび・砂時計）：エンジンだけ残置。gkKindR に種類、gkRateR に確率を入れた対戦で発動
   const gkKindR=useRef(null),gkRateR=useRef(0);
@@ -5747,9 +5776,11 @@ function App(){
       const i=c.st,st=PZX_STAGES[i],S=matchStatsR.current,won=(win==='player');
       const m={win:won,pp,dp,bursts:S.bursts,tens:S.tens,sec:Math.round((Date.now()-S.start)/1000)};m.ok=!!(st.cond&&st.cond.check(m));
       const before=pzxState(saveR.current);const gotNow=m.ok&&(i===6?!before.boss:!before.got.includes(i));
+      const nextOpenBefore=i<6&&pzxOpen(saveR.current,i+1);
       if(won||m.ok)updSave(s=>{const P=pzxState(s);const wonL=won&&!P.won.includes(st.no)?[...P.won,st.no]:P.won;
         s.pzx={got:(m.ok&&i<6&&!P.got.includes(i))?[...P.got,i]:P.got,won:wonL,boss:P.boss||(m.ok&&i===6)};return s;});
-      pzxLastR.current={idx:i,gotNow,t:Date.now()};
+      const nextOpenAfter=i<6&&!nextOpenBefore&&pzxOpen(saveR.current,i+1); // この勝ちで次の島が開いた（6枚そろってボスが開いた場合も含む）
+      pzxLastR.current={idx:i,gotNow,t:Date.now(),unlock:nextOpenAfter?i+1:null};
       setGameEndData({pPt:pp,dPt:dp,winner:win,draw:win==='draw',diff:diffRef.current,stars:0,rivalName:stageOptsR.current&&stageOptsR.current.rivalName||null,pzx:m});
       setPhase('gameEnd');phaseR.current='gameEnd';exitLink();return;
     }
@@ -5760,8 +5791,8 @@ function App(){
   function goHome(){if(stageR.current&&stageR.current.ar===1){goPzxWorld();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
-  if(phase==='pzx')return h(PzxPanel,{save,onEnter:()=>{setPhase('pzxmap');phaseR.current='pzxmap';},onBack:()=>{setPhase('menu');phaseR.current='menu';},onReset:()=>{updSave(s=>{s.pzx={got:[],won:[],boss:false,seen:[]};return s;});}}); // v214/v218 リセットは進行だけ消す（本編の★は無関係）
-  if(phase==='pzxmap')return h(PzxWorld,{save,onPick:startPzxStage,onBack:()=>{setPhase('pzx');phaseR.current='pzx';},onSeen:idxs=>{updSave(s=>{const P=pzxState(s);s.pzx={...(s.pzx||{}),got:P.got,won:P.won,boss:P.boss,seen:[...new Set([...P.seen,...idxs])]};return s;});}}); // v217/v222
+  if(phase==='pzx')return h(PzxPanel,{save,onEnter:()=>{setPhase('pzxmap');phaseR.current='pzxmap';},onBack:()=>{setPhase('menu');phaseR.current='menu';},onReset:()=>{updSave(s=>{s.pzx={got:[],won:[],boss:false};return s;});}}); // v214/v218 リセットは進行だけ消す（本編の★は無関係）
+  if(phase==='pzxmap')return h(PzxWorld,{key:'w'+(pzxArrive?pzxArrive.t:'0'),save,arrive:pzxArrive,onArrived:()=>setPzxArrive(null),onPick:startPzxStage,onBack:()=>{setPzxArrive(null);setPhase('pzx');phaseR.current='pzx';}}); // v217/v223
   if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzlux:()=>{setPhase('pzx');phaseR.current='pzx';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
@@ -5782,7 +5813,7 @@ function App(){
   if(phase==='gameEnd'&&gameEndData){
     if(stageCtx&&stageCtx.ar===1&&gameEndData.pzx){const i=stageCtx.st,L=pzxLastR.current||{};
       return h(PzxResult,{key:'pzx'+i+'-'+(L.t||0),data:gameEndData,st:PZX_STAGES[i],idx:i,gotNow:!!L.gotNow,pieceIdx:i<6?i:null,nextOpen:i<6&&pzxOpen(save,i+1),
-        onNext:()=>startPzxStage(i+1),onRetry:()=>startPzxStage(i),onMap:goPzxWorld});} // v217
+        onNext:()=>startPzxStage(i+1),onRetry:()=>startPzxStage(i),onMap:()=>{setPzxArrive({from:i,gotPiece:(L.gotNow&&i<6)?i:null,unlock:L.unlock!=null?L.unlock:null,t:Date.now()});goPzxWorld();}});} // v217/v223
     if(stageCtx)return h(StageEndScreen,{data:gameEndData,stage:curStage,stars:gameEndData.stars||0,onNext:stageNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st),onMap:goMap,isLast:(()=>{const nx=STAGES.areas[stageCtx.ar].stages[stageCtx.st+1];return !nx||!!nx.comingSoon||!!nx.challenge;})()});
     return h(GameEndScreen,{data:gameEndData,onRestart:startGame,onHome:goHome});
   }
