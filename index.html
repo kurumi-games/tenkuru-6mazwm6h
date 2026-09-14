@@ -2018,6 +2018,9 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-screen .prog{font-family:'Fira Code',monospace;font-size:calc(12 * var(--u));color:#ded2b1;letter-spacing:.1em;}
 .pzx-screen .enter{margin-top:calc(4 * var(--u));min-height:calc(46 * var(--u));padding:0 calc(34 * var(--u));border-radius:999px;border:1px solid rgba(255,224,138,.55);background:linear-gradient(135deg,rgba(255,224,138,.22),rgba(150,120,255,.22));color:#fff3c4;font-family:inherit;font-size:calc(14 * var(--u));font-weight:700;letter-spacing:.2em;cursor:pointer;box-shadow:0 0 calc(18 * var(--u)) rgba(255,210,110,.25);}
 .pzx-screen .enter:active{transform:scale(.97);}
+.pzx-screen .sub{font-size:calc(11 * var(--u));letter-spacing:.3em;color:#c9c2ea;margin-top:calc(-10 * var(--u));}
+.pzx-screen .reset{min-height:calc(30 * var(--u));padding:0 calc(14 * var(--u));border-radius:999px;border:1px solid rgba(255,140,160,.35);background:transparent;color:#c9a0aa;font-family:inherit;font-size:calc(10.5 * var(--u));cursor:pointer;margin-top:calc(-4 * var(--u));}
+.pzx-screen .reset.ask{border-color:#ff8fa3;color:#ffd0d8;background:rgba(255,80,110,.12);}
 .pzx-screen .home{min-height:calc(38 * var(--u));padding:0 calc(22 * var(--u));border-radius:999px;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.65);color:#d6cfff;font-family:inherit;font-size:calc(12.5 * var(--u));cursor:pointer;}
 /* 中のマップ（仮：道と6個の丸。絵が来たら差し替え） */
 .pzx-map{position:relative;width:min(94vw,calc(330 * var(--u)));aspect-ratio:330 / 420;border-radius:calc(16 * var(--u));overflow:hidden;background:rgba(10,12,40,.6);box-shadow:0 0 0 1px rgba(190,180,255,.25),0 12px 30px rgba(0,0,0,.5);}
@@ -3207,7 +3210,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v217'; // v217(2026/09/14): パズルクス「絵の中の世界」：浮遊マップ（img/pzx/world-bg・island・boss、島が上下・光の道）と7つの島（6ステージ＋ボス）。勝てば次の島、条件（PZX_STAGES.cond）を満たすとピース、6枚でボス解放。v216（チャッピー版）は破棄
+const APP_VER='v218'; // v218(2026/09/14): パズルクスの絵の主＝ネフィラ（ボス名）。パネル画面に「はじめから」（2回押しで進行リセット、本編の★は触らない）
+// const APP_VER='v217'; // v217(2026/09/14): パズルクス「絵の中の世界」：浮遊マップ（img/pzx/world-bg・island・boss、島が上下・光の道）と7つの島（6ステージ＋ボス）。勝てば次の島、条件（PZX_STAGES.cond）を満たすとピース、6枚でボス解放。v216（チャッピー版）は破棄
 // const APP_VER='v215'; // v215(2026/09/14): レッスン・パズル・ギャラリーを廃止して削除（画面・データ・画像 img/panel_* img/backs pedestal piece-snap も削除）。スコア制度も廃止。ホームは「遊ぶ」「パズルクス」「あそびかた」。決着演出（WIN/LOSE）と星環ギミックのエンジンだけパズルクス用に残置
 // const APP_VER='v214'; // v214(2026/09/14): パズルクス導入（ホーム「パズルクス」→線画パネル＋四角いピース6枚→「中へ入る」→仮マップ6ノード）。ステージ・ピース獲得条件は後で。素材は img/pzx
 // const APP_VER='v213'; // v213(2026/09/14): レッスンモード（HAMARU方式）追加。ホーム「レッスン」→5レベルを丸で並べる。勝った時だけスコア（点×100＋点差×50＋速さ）→★1〜5、★3で次のレベル解放。数値は LESSON_CFG
@@ -3463,7 +3467,7 @@ const PZX_STAGES=[
     cond:{text:'相手を0点に抑えて勝つ',check:m=>m.win&&m.dp===0}},
   {no:106,rivalName:'第六の番人',name:'一筆の橋',description:'凍る手札の中で 1・2・3・4 を通す',icon:'snow',winPt:12,diff:'normal',rule:'normal',speed:.7,smart:true,ability:'freeze',playerRing:true,
     cond:{text:'ストレート（1・2・3・4）を作って勝つ',check:m=>m.win&&m.tens.some(t=>t.voice==='ストレート')}},
-  {no:107,rivalName:'観測者',name:'星環の観測者',description:'絵の中心。全てを観測し、10を作らせない',icon:'card',winPt:20,diff:'master',rule:'normal',speed:.2,smart:true,deny:true,ability:'orbit',playerRing:true,noBoost:true,boss:true,bgm:'Clockwork%20Waltz.mp3',
+  {no:107,rivalName:'ネフィラ',name:'ネフィラ',description:'絵の中心に立つ星環の観測者。全てを観測し、10を作らせない',icon:'card',winPt:20,diff:'master',rule:'normal',speed:.2,smart:true,deny:true,ability:'orbit',playerRing:true,noBoost:true,boss:true,bgm:'Clockwork%20Waltz.mp3',
     cond:{text:'勝つ（バースト2回まで）',check:m=>m.win&&m.bursts<=2}},
 ];
 const PZX_AREA={id:'pzx',name:'絵の中',stages:PZX_STAGES};
@@ -4092,10 +4096,12 @@ function GameEndScreen({data,onRestart,onHome}){
 }
 
 // ── v214 パズルクス：パネル画面（線画＋獲得ピース）／中のマップ（仮） ──
-function PzxPanel({save,onEnter,onBack}){
+function PzxPanel({save,onEnter,onBack,onReset}){
   const st=pzxState(save),N=PZX.pieces.length,done=st.got.length>=N;
+  const[ask,setAsk]=useState(false); // v218 リセットは2回押し
+  const has=st.got.length||st.won.length||st.boss;
   return h('div',{className:'pzx-screen'},
-    h('div',{className:'k'},'PUZZLUX'),h('div',{className:'t'},'パズルクス'),
+    h('div',{className:'k'},'PUZZLUX'),h('div',{className:'t'},'パズルクス'),h('div',{className:'sub'},'ネフィラ'),
     h('div',{className:'pzx-panel'},
       h('img',{className:'ol',src:PZX.dir+PZX.outline,alt:'',draggable:false}),
       !done&&PZX.pieces.map((p,i)=>st.got.includes(i)&&h('img',{key:p.id,className:'pc',src:PZX.dir+p.id+'.webp',alt:'',draggable:false,style:{left:(p.x/PZX.w*100)+'%',top:(p.y/PZX.h*100)+'%',width:(p.w/PZX.w*100)+'%',height:(p.h/PZX.h*100)+'%'}})),
@@ -4103,7 +4109,9 @@ function PzxPanel({save,onEnter,onBack}){
     ),
     h('div',{className:'prog'},'PIECE '+st.got.length+' / '+N+(st.boss?'　CLEAR':'')),
     h('button',{className:'enter',onClick:onEnter},'中へ入る'),
-    h('button',{className:'home',onClick:onBack},'ホームへ')
+    h('button',{className:'home',onClick:onBack},'ホームへ'),
+    !!has&&h('button',{className:'reset'+(ask?' ask':''),onClick:()=>{if(!ask){setAsk(true);return;}setAsk(false);onReset();}},ask?'ほんまに消す？（もう一度押す）':'はじめから'), // v218
+    ask&&h('button',{className:'reset',onClick:()=>setAsk(false)},'やめる')
   );
 }
 // ── v217 パズルクス：絵の中の世界（浮遊マップ）。島がゆっくり上下し、光の道でつながる ──
@@ -5738,7 +5746,7 @@ function App(){
   function goHome(){if(stageR.current&&stageR.current.ar===1){goPzxWorld();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
-  if(phase==='pzx')return h(PzxPanel,{save,onEnter:()=>{setPhase('pzxmap');phaseR.current='pzxmap';},onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v214
+  if(phase==='pzx')return h(PzxPanel,{save,onEnter:()=>{setPhase('pzxmap');phaseR.current='pzxmap';},onBack:()=>{setPhase('menu');phaseR.current='menu';},onReset:()=>{updSave(s=>{s.pzx={got:[],won:[],boss:false};return s;});}}); // v214/v218 リセットは進行だけ消す（本編の★は無関係）
   if(phase==='pzxmap')return h(PzxWorld,{save,onPick:startPzxStage,onBack:()=>{setPhase('pzx');phaseR.current='pzx';}}); // v217
   if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzlux:()=>{setPhase('pzx');phaseR.current='pzx';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
