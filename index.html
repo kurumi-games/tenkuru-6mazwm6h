@@ -3217,7 +3217,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v223'; // v223(2026/09/15): 勝ったら結果→「絵の中へ戻る」だけ（連続対戦なし）。マップに戻ると ①ピース獲得なら中央にパネルが出てピースがはまる ②道に光が走って次の島の鎖が外れる。ネフィラの島のロックは専用の鎖絵（boss-lock.webp）
+const APP_VER='v224'; // v224(2026/09/15): 島の位置を全体に少し上へ（ステージ1が画面の下すぎた）
+// const APP_VER='v223'; // v223(2026/09/15): 勝ったら結果→「絵の中へ戻る」だけ（連続対戦なし）。マップに戻ると ①ピース獲得なら中央にパネルが出てピースがはまる ②道に光が走って次の島の鎖が外れる。ネフィラの島のロックは専用の鎖絵（boss-lock.webp）
 // const APP_VER='v222'; // v222(2026/09/15): ロック中の島は鎖つきの島（img/pzx/island-lock.webp）。開いた島は次にマップを見た時に鎖が光って外れる（1回だけ、save.pzx.seen）
 // const APP_VER='v221'; // v221(2026/09/14): 絵の中のマップのズレ修正（島の札が右にはみ出す／ボスが上のバーに隠れる）
 // const APP_VER='v220'; // v220(2026/09/14): 絵の中のマップは画面いっぱい（cover）。島の札は島を押した時だけ出る（✕で閉じる）。ピースを持つ島は勝った扱いで次が開く
@@ -3485,7 +3486,7 @@ const PZX_STAGES=[
 const PZX_AREA={id:'pzx',name:'絵の中',stages:PZX_STAGES};
 STAGES.areas[1]=PZX_AREA;
 // 島の位置（幅・高さに対する割合、下から上へ。最後がボス）
-const PZX_NODES=[{x:.29,y:.86},{x:.70,y:.76},{x:.31,y:.66},{x:.69,y:.56},{x:.31,y:.46},{x:.70,y:.36},{x:.50,y:.205}];
+const PZX_NODES=[{x:.29,y:.79},{x:.70,y:.70},{x:.31,y:.61},{x:.69,y:.52},{x:.31,y:.43},{x:.70,y:.34},{x:.50,y:.19}]; // v224 ステージ1が下すぎたので全体を少し上へ
 function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[],won:P.won||[],boss:!!P.boss};}
 function pzxOpen(save,i){const P=pzxState(save);if(i>=6)return P.got.length>=PZX.pieces.length;if(i===0)return true;return P.won.includes(PZX_STAGES[i-1].no)||P.got.includes(i-1);} // ピースを持っている島は勝ったとみなす
 function boostDiff(d){if(!DEALER_BOOST.enabled)return d;const i=DIFF_ORDER.indexOf(d);return i<0?d:DIFF_ORDER[Math.min(3,i+DEALER_BOOST.diffUp)];}
