@@ -2094,6 +2094,47 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pz-boss .d{font-size:calc(11 * var(--u));color:#d9cfb0;margin-top:calc(2 * var(--u));}
 .pz-btns button.gold{background:linear-gradient(115deg,#ffd27a,#d98b2a);color:#3a2408;font-weight:700;border-color:transparent;box-shadow:0 6px 22px rgba(255,180,80,.3);letter-spacing:.1em;}
 /* v205 パネル選択 */
+/* ===== v213 レッスン（HAMARU方式：★3で次が開く） ===== */
+.ls-sel .t{margin-bottom:calc(4 * var(--u));}
+.ls-sel .note{font-size:calc(11 * var(--u));color:#c9c2ea;letter-spacing:.06em;text-align:center;line-height:1.7;margin-bottom:calc(18 * var(--u));text-shadow:0 1px 6px rgba(0,0,0,.6);}
+.ls-sel .row{display:flex;justify-content:center;align-items:flex-start;gap:calc(8 * var(--u));width:100%;}
+.ls-node{position:relative;width:calc(58 * var(--u));background:transparent;border:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;color:inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:calc(5 * var(--u));}
+.ls-node:active .orb{transform:scale(.94);}
+.ls-node .orb{position:relative;width:calc(54 * var(--u));height:calc(54 * var(--u));border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.22),rgba(120,90,220,.35) 45%,rgba(30,20,80,.6) 100%);box-shadow:0 0 0 calc(2 * var(--u)) rgba(200,160,255,.55),0 0 calc(18 * var(--u)) rgba(190,140,255,.45),inset 0 0 calc(10 * var(--u)) rgba(255,255,255,.12);transition:transform .12s;}
+.ls-node .orb .num{font-family:'Cinzel',serif;font-weight:700;font-size:calc(24 * var(--u));color:#fff3c4;text-shadow:0 0 calc(10 * var(--u)) rgba(255,220,120,.8);}
+.ls-node.clear .orb{box-shadow:0 0 0 calc(2 * var(--u)) rgba(255,224,138,.7),0 0 calc(20 * var(--u)) rgba(255,210,110,.5),inset 0 0 calc(10 * var(--u)) rgba(255,255,255,.15);}
+.ls-node.cur .orb{animation:lsPulse 1.8s ease-in-out infinite;}
+@keyframes lsPulse{0%,100%{box-shadow:0 0 0 calc(2 * var(--u)) rgba(200,160,255,.55),0 0 calc(18 * var(--u)) rgba(190,140,255,.45);}50%{box-shadow:0 0 0 calc(3 * var(--u)) rgba(255,255,255,.75),0 0 calc(28 * var(--u)) rgba(210,170,255,.8);}}
+.ls-node.lock{cursor:default;}
+.ls-node.lock .orb{opacity:.45;}
+.ls-node.lock .orb .num{color:#cfd3ea;text-shadow:none;}
+.ls-node .lk{position:absolute;right:calc(-4 * var(--u));bottom:calc(-4 * var(--u));width:calc(24 * var(--u));height:calc(24 * var(--u));border-radius:50%;background:rgba(230,232,245,.85);display:flex;align-items:center;justify-content:center;color:#6a5aa8;box-shadow:0 2px 6px rgba(0,0,0,.4);}
+.ls-node .lk svg{width:calc(13 * var(--u));height:calc(13 * var(--u));}
+.ls-node .st{display:flex;gap:calc(1 * var(--u));font-size:calc(9.5 * var(--u));line-height:1;}
+.ls-node .st i{font-style:normal;color:rgba(255,255,255,.28);text-shadow:0 0 calc(2 * var(--u)) rgba(0,0,0,.6);}
+.ls-node .st i.on{color:#ffe08a;text-shadow:0 0 calc(6 * var(--u)) rgba(255,224,138,.8);}
+.ls-node .nm{font-size:calc(10 * var(--u));color:#e6ecfa;letter-spacing:.04em;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.7);}
+.ls-node .bs{font-family:'Fira Code',monospace;font-size:calc(9 * var(--u));color:#ded2b1;opacity:.85;}
+.ls-sel .rule{margin-top:calc(26 * var(--u));font-size:calc(10.5 * var(--u));color:#b9b2d8;line-height:1.9;text-align:center;letter-spacing:.04em;}
+.ls-sel .rule b{color:#ffe08a;font-weight:700;}
+/* 結果 */
+.ls-res .ttl{font-family:'Cinzel',serif;letter-spacing:.3em;}
+.ls-res .lv{font-size:calc(13 * var(--u));color:#c9c2ea;letter-spacing:.1em;margin-top:calc(-4 * var(--u));}
+.ls-res .sc{margin:calc(10 * var(--u)) 0 calc(2 * var(--u));text-align:center;}
+.ls-res .sc .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#b9a8ff;}
+.ls-res .sc .v{font-family:'Fira Code',monospace;font-size:calc(40 * var(--u));font-weight:700;color:#fff3c4;text-shadow:0 0 calc(16 * var(--u)) rgba(255,220,120,.6);line-height:1.15;}
+.ls-res .sc .v.new{color:#ffe08a;}
+.ls-res .bd{display:grid;grid-template-columns:auto 1fr auto;gap:calc(2 * var(--u)) calc(10 * var(--u));font-size:calc(11.5 * var(--u));color:#d6d2ea;width:100%;max-width:calc(230 * var(--u));margin:calc(4 * var(--u)) auto 0;}
+.ls-res .bd .r{text-align:right;font-family:'Fira Code',monospace;color:#fff;}
+.ls-res .bd .m{text-align:right;color:#9a95b8;font-size:calc(10 * var(--u));}
+.ls-res .stars5{display:flex;justify-content:center;gap:calc(6 * var(--u));font-size:calc(30 * var(--u));margin:calc(12 * var(--u)) 0 calc(4 * var(--u));}
+.ls-res .stars5 i{font-style:normal;color:rgba(255,255,255,.18);transform:scale(.9);transition:none;}
+.ls-res .stars5 i.on{color:#ffe08a;text-shadow:0 0 calc(14 * var(--u)) rgba(255,224,138,.75);animation:lsStar .38s cubic-bezier(.2,1.6,.4,1) both;}
+@keyframes lsStar{0%{transform:scale(2.2);opacity:0;}60%{opacity:1;}100%{transform:scale(1);opacity:1;}}
+.ls-res .best{font-family:'Fira Code',monospace;font-size:calc(11 * var(--u));color:#ded2b1;text-align:center;}
+.ls-res .best .nb{color:#ffe08a;margin-left:calc(6 * var(--u));font-weight:700;}
+.ls-res .hint{font-size:calc(11 * var(--u));color:#c9c2ea;text-align:center;margin-top:calc(6 * var(--u));line-height:1.6;}
+.ls-res .hint b{color:#ffe08a;}
 .pz-sel{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#0a0d24 url('img/panel-bg.webp') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;padding:calc(18 * var(--u)) calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#e6ecfa;overflow:hidden;}
 .pz-sel::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,30,.6),rgba(6,8,30,.82));pointer-events:none;}
 .pz-sel>*{position:relative;z-index:1;}
@@ -3316,7 +3357,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v212'; // v212(2026/09/14): カードの装いを「手札マット＋裏向きの札」に変更（表向きの手札には貼らない。数字が読めなくなっていた）
+const APP_VER='v213'; // v213(2026/09/14): レッスンモード（HAMARU方式）追加。ホーム「レッスン」→5レベルを丸で並べる。勝った時だけスコア（点×100＋点差×50＋速さ）→★1〜5、★3で次のレベル解放。数値は LESSON_CFG
+// const APP_VER='v212'; // v212(2026/09/14): カードの装いを「手札マット＋裏向きの札」に変更（表向きの手札には貼らない。数字が読めなくなっていた）
 // const APP_VER='v211'; // v211(2026/09/14): ギャラリーのレイアウト修正（記憶の文が隠れて「カードの装い」と重なっていた→全体を1本のスクロールに）。裏パネルはクリアするまでギャラリーに出さない
 // const APP_VER='v210'; // v210(2026/09/14): 統一イラストに全面差し替え（トモリ・コハク・オルビィ、3×2）。裏パネル（クリアで解放、ボス強化）。星のかけら（ボス撃破）でカードの装い3種を交換・装着（ギャラリー）
 // const APP_VER='v209'; // v209(2026/09/14): 撃破後の解放イベント（本人が光に包まれ、一言残す）とホームの「ギャラリー」（解放したキャラの完成絵・二つ名・記憶3行）。STAGE2のキャラ名は「コハク」、ランタンの少女は「トモリ」
@@ -3544,6 +3586,32 @@ const COLLISION_MS=220;
 // チャレンジ（ルナ・モルフォ・セトラ・オルビィ）は元から専用調整なので対象外。戻す時は enabled:false
 const DEALER_BOOST={enabled:true,diffUp:2,speed:0.6};
 const DIFF_ORDER=['easy','normal','hard','master'];
+
+// ── v213 レッスン（HAMARU方式）：数値はここだけで調整 ──
+// levels: st = AREA_01.stages の添字（0始まり）。ディーラー強化（DEALER_BOOST）は通常ステージに乗る
+// スコア（勝った時だけ）＝ 自分の点×pt ＋ 点差×margin ＋ 速さボーナス max(0, timeBase−秒)×timeRate
+// ★1＝勝ち、★2〜5 は th[レベル] のスコアを超えるごとに1個。unlockStars 個で次のレベルが開く
+const LESSON_CFG={
+  levels:[
+    {no:1,st:0,name:'めざめ',th:[1500,1700,1900,2100]},
+    {no:2,st:5,name:'ざんきょう',th:[1500,1700,1900,2100]},
+    {no:3,st:8,name:'てんがい',th:[2100,2350,2600,2850]},
+    {no:4,st:12,name:'セトラ',th:[2500,2800,3100,3400]},
+    {no:5,st:13,name:'オルビィ',th:[2500,2800,3100,3400]},
+  ],
+  unlockStars:3,
+  score:{pt:100,margin:50,timeBase:150,timeRate:4},
+};
+function lessonScore(pp,dp,sec){
+  const c=LESSON_CFG.score;
+  const pt=pp*c.pt,margin=Math.max(0,pp-dp)*c.margin,time=Math.max(0,Math.round(c.timeBase-sec))*c.timeRate;
+  return {pt,margin,time,sec:Math.round(sec),total:pt+margin+time};
+}
+function lessonStars(lvIdx,won,total){
+  if(!won)return 0;const lv=LESSON_CFG.levels[lvIdx];let n=1;lv.th.forEach(t=>{if(total>=t)n++;});return n;
+}
+function lessonState(save){const L=(save&&save.lesson)||{};return {stars:L.stars||{},best:L.best||{}};}
+function lessonUnlocked(save,lvIdx){if(lvIdx<=0)return true;const L=lessonState(save);const prev=LESSON_CFG.levels[lvIdx-1];return (L.stars[prev.no]||0)>=LESSON_CFG.unlockStars;}
 function boostDiff(d){if(!DEALER_BOOST.enabled)return d;const i=DIFF_ORDER.indexOf(d);return i<0?d:DIFF_ORDER[Math.min(3,i+DEALER_BOOST.diffUp)];}
 // ── v197 パズル用の新ギミック（相手の星環カードを場に出した瞬間だけ発動）：数値はここだけで調整 ──
 // 毎ラウンド開始時 GK_RING_RATE の確率で、相手の手札1枚に星環が付く。相手はその札を普通に出せる
@@ -3738,7 +3806,7 @@ function SkillPanel(){
     )
   );
 }
-function TitleScreen({onPlay,onPuzzle,onGallery,onTutorial,musicOn,toggleMusic}){
+function TitleScreen({onPlay,onPuzzle,onLesson,onGallery,onTutorial,musicOn,toggleMusic}){
   const btnBase={borderRadius:14,padding:'15px 0',fontSize:13,fontWeight:800,letterSpacing:2,cursor:'pointer',fontFamily:"'Inter',sans-serif",background:'rgba(255,255,255,.78)',boxShadow:'0 4px 16px rgba(70,100,150,.16), inset 0 1px 0 #fff',width:'100%'};
   return h('div',{style:{minHeight:'100vh',background:"url('img/title-bg.jpg') center/cover no-repeat, #eef2f8",display:'flex',alignItems:'center',justifyContent:'center',padding:16,position:'relative'}},
     h('div',{style:{textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:18,width:'100%',maxWidth:340,animation:'fadeUp 0.5s ease'}},
@@ -3747,6 +3815,7 @@ function TitleScreen({onPlay,onPuzzle,onGallery,onTutorial,musicOn,toggleMusic})
       h('div',{style:{display:'flex',flexDirection:'column',gap:12,width:'100%',marginTop:6}},
         h('button',{onClick:onPlay,style:{...btnBase,padding:'17px 0',fontSize:16,letterSpacing:6,border:'1.5px solid rgba(46,127,232,.55)',color:'#2e7fe8',boxShadow:'0 6px 20px rgba(46,127,232,.22), inset 0 1px 0 #fff'}},'遊ぶ'),
         h('button',{onClick:onPuzzle,style:{...btnBase,padding:'13px 0',fontSize:13,letterSpacing:4,border:'1.5px solid rgba(230,180,90,.5)',color:'#b07a1e',boxShadow:'0 5px 18px rgba(230,180,90,.2), inset 0 1px 0 #fff'}},'パズル'), // v181
+        h('button',{onClick:onLesson,style:{...btnBase,padding:'13px 0',fontSize:13,letterSpacing:4,border:'1.5px solid rgba(150,110,240,.5)',color:'#7a4fd0',boxShadow:'0 5px 18px rgba(150,110,240,.2), inset 0 1px 0 #fff'}},'レッスン'), // v213
         h('button',{onClick:onGallery,style:{...btnBase,padding:'10px 0',fontSize:12,letterSpacing:4,border:'1.5px solid rgba(120,150,190,.35)',color:'#6a7fa8',boxShadow:'0 3px 10px rgba(70,100,150,.12), inset 0 1px 0 #fff'}},'ギャラリー'), // v209
         h('button',{onClick:onTutorial,style:{...btnBase,padding:'10px 0',fontSize:11,fontWeight:700,background:'rgba(255,255,255,.55)',border:'1.5px solid rgba(120,150,190,.35)',color:'#5a80ab',boxShadow:'0 3px 10px rgba(70,100,150,.12)'}},'✦ あそびかた')
       ),
@@ -4356,6 +4425,63 @@ function Gallery({save,onBack,onBuy,onEquip}){
   );
 }
 // v205 パネル選択：どのステージ（パネル）を進めるか自由に選ぶ。未獲得は暗い形、獲得済みは少し明るい形。クリア済みは完成絵の小さな表示
+// ── v213 レッスン：レベル選択 ──
+function LessonSelect({save,onPick,onBack}){
+  const L=lessonState(save);
+  const curIdx=LESSON_CFG.levels.findIndex((lv,i)=>lessonUnlocked(save,i)&&(L.stars[lv.no]||0)<LESSON_CFG.unlockStars);
+  return h('div',{className:'pz-sel ls-sel'},
+    h('div',{className:'k'},'LESSON'),h('div',{className:'t'},'レッスン'),
+    h('div',{className:'note'},'スターを'+LESSON_CFG.unlockStars+'つ以上とると',h('br'),'次のレベルのロックが解除されます。'),
+    h('div',{className:'row'},LESSON_CFG.levels.map((lv,i)=>{const un=lessonUnlocked(save,i),st=L.stars[lv.no]||0,best=L.best[lv.no]||0;
+      return h('button',{key:lv.no,className:'ls-node'+(un?'':' lock')+(st>0?' clear':'')+(i===curIdx?' cur':''),disabled:!un,onClick:()=>un&&onPick(i)},
+        h('div',{className:'orb'},h('span',{className:'num'},String(lv.no)),!un&&h('span',{className:'lk'},Icon('lock',13))),
+        h('div',{className:'st'},[0,1,2,3,4].map(k=>h('i',{key:k,className:k<st?'on':''},'★'))),
+        h('div',{className:'nm'},un?lv.name:'？？？'),
+        h('div',{className:'bs'},un&&best?String(best):' ')
+      );})),
+    h('div',{className:'rule'},'スコア ＝ 自分の点 × 100',h('br'),'＋ 点差 × 50　＋ 速さボーナス',h('br'),h('b',null,'勝った時だけ'),' ★がつく'),
+    h('button',{className:'home',onClick:onBack},'ホームへ')
+  );
+}
+// ── v213 レッスン：結果（スコア→★が順に灯る） ──
+function LessonResult({data,lv,lvIdx,best,isNewBest,nextOpen,hasNext,onNext,onRetry,onSelect}){
+  const win=data.winner==='player',sc=data.lesson.score,stars=data.lesson.stars;
+  const[shown,setShown]=useState(0);const[lit,setLit]=useState(0);
+  useEffect(()=>{
+    if(!win){setShown(0);return;}
+    const ts=[];const at=(ms,f)=>ts.push(setTimeout(f,ms));
+    const steps=18;for(let i=1;i<=steps;i++)at(40*i,()=>setShown(Math.round(sc.total*i/steps)));
+    for(let k=1;k<=stars;k++)at(40*steps+220+(k-1)*260,()=>{setLit(k);try{resumeAC();fxBell({f:1046*Math.pow(2,(k-1)*2/12),v:0.07,d:0.7,bright:1.3,rev:0.6});}catch(e){}});
+    return()=>ts.forEach(clearTimeout);
+  },[]);
+  const done=lit>=stars;
+  return h('div',{className:'sg-screen sg-end ls-res'},
+    h('div',{className:'sg-end-card'},
+      h('div',{className:'ttl'},'LESSON '+lv.no),
+      h('div',{className:'lv'},lv.name),
+      h('div',{className:'badge'+(win?' win':'')},win?'クリア！':'まけ…'),
+      h('div',{className:'sc'},h('div',{className:'k'},'SCORE'),h('div',{className:'v'+(done&&isNewBest?' new':'')},win?String(shown):'—')),
+      win&&h('div',{className:'bd'},
+        h('span',null,'自分の点'),h('span',{className:'m'},data.pPt+' × 100'),h('span',{className:'r'},'+'+sc.pt),
+        h('span',null,'点差'),h('span',{className:'m'},Math.max(0,data.pPt-data.dPt)+' × 50'),h('span',{className:'r'},'+'+sc.margin),
+        h('span',null,'速さ'),h('span',{className:'m'},sc.sec+'秒'),h('span',{className:'r'},'+'+sc.time)
+      ),
+      h('div',{className:'stars5'},[0,1,2,3,4].map(k=>h('i',{key:k,className:k<lit?'on':''},'★'))),
+      win&&h('div',{className:'best'},'BEST ',String(best),done&&isNewBest&&h('span',{className:'nb'},'NEW!')),
+      !win&&h('div',{className:'score'},
+        h('div',null,h('div',{className:'l'},'YOU'),h('div',{className:'v you'},data.pPt)),
+        h('div',{className:'vs'},'vs'),
+        h('div',null,h('div',{className:'l'},data.rivalName||'DEALER'),h('div',{className:'v'},data.dPt))
+      ),
+      win&&done&&hasNext&&(nextOpen?h('div',{className:'hint'},'LESSON '+(lv.no+1)+' 解放'):h('div',{className:'hint'},'★',h('b',null,LESSON_CFG.unlockStars),'つで次のレベルが開く')),
+      win&&hasNext&&nextOpen
+        ?h('button',{className:'sg-btn',onClick:onNext},'次のレベルへ')
+        :h('button',{className:'sg-btn',onClick:onRetry},'もう一度'),
+      win&&hasNext&&nextOpen&&h('button',{className:'sg-btn ghost',onClick:onRetry},'もう一度（スコアをのばす）'),
+      h('button',{className:'sg-btn ghost',onClick:onSelect},'レベル選択へ')
+    )
+  );
+}
 function PanelSelect({save,onPick,onBack}){
   const cur=pzActive(save);
   return h('div',{className:'pz-sel'},
@@ -5165,7 +5291,7 @@ function App(){
     else{stopBGM();setPhase('menu');phaseR.current='menu';}
   }
   // ── ストーリー進行 ──
-  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);setPhase('map');phaseR.current='map';}
+  function goMap(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);lsModeR.current=false;setPhase('map');phaseR.current='map';}
   function openFlowSample(kind){
     const ar=STAGES.areas[0];
     const stIdx=(kind==='normal'||kind==='intro')?0:ar.stages.findIndex(st=>st.boss);
@@ -5182,7 +5308,8 @@ function App(){
   const[lantern,setLantern]=useState(null); // v200 ともしび：見える手札の添字と期限
   const pzGainR=useRef(0); // v210 今回もらった星のかけら
   const pzBossR=useRef(false);const[pzFx,setPzFx]=useState(null);const pzFxDoneR=useRef(false); // v198 ボス戦か／勝敗の瞬間演出
-  const[pzHit,setPzHit]=useState(false);const[pzHold,setPzHold]=useState(false); // v199/v202 決着の静止（hold=止まっている0.12秒）
+  const[pzHit,setPzHit]=useState(false);const[pzHold,setPzHold]=useState(false);
+  const lsModeR=useRef(false),lsLvR=useRef(0),lsBattleR=useRef(0),matchStartR=useRef(0); // v213 レッスン：モード中か・レベル添字・試合開始時刻 // v199/v202 決着の静止（hold=止まっている0.12秒）
   const gkR=useRef({chain:null,chainUntil:0,silenceRn:-1,heavyRn:-1,coolUntil:0,timeCut:0});const[mist,setMist]=useState(false);const mistR=useRef(0); // v181 パズルモード中か／何戦目か（重複付与防止のキー）／v187 戦っているパネル
   const pzAwardedR=useRef(null);const[pzPiece,setPzPiece]=useState(null);
   useEffect(()=>{ // v198 勝利確定時に1回だけ：道中なら未獲得ピースを1枚（即保存）、ボスならクリア保存。リザルトはこのあと表示
@@ -5197,7 +5324,15 @@ function App(){
     }
   },[phase]);
   function pzPlaced(pn,idxs){updSave(s=>{const st=pzState(s,pn);const add=idxs.filter(i=>!st.placed.includes(i));return add.length?pzWrite(s,pn,{...st,placed:[...st.placed,...add]}):s;});}
-  function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);pzModeR.current=false;pzGkR.current=null;pzBoostR.current=null;pzGkRateR.current=0;setLantern(null);pzBossR.current=false;setPzFx(null);pzFxDoneR.current=false;setPzPiece(null);setPhase('puzzle');phaseR.current='puzzle';}
+  function goPuzzle(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);pzModeR.current=false;pzGkR.current=null;pzBoostR.current=null;pzGkRateR.current=0;setLantern(null);pzBossR.current=false;setPzFx(null);pzFxDoneR.current=false;setPzPiece(null);lsModeR.current=false;setPhase('puzzle');phaseR.current='puzzle';}
+  function goLesson(){roundTokR.current++;clearTimers();exitLink();stopBGM();setDemoMode(false);setShiftScene(null);setLkFx(null);flyR.current=null;setFlyCard(null);cancelCursor();clearConfuse();clearFrz();setPlayerRing(-1);setTsLeft2(0);tsUsedRoundR.current=-1;setHideLeft2(0);shiftPendingR.current=false;sceneOnR.current=false;setScreenPop(false);rStopR.current=false;setRStop(false);rStopT.current.forEach(clearTimeout);pausedR.current=false;setPaused(false);setInfoRing(null);stageR.current=null;stageOptsR.current=null;setStageCtx(null);pzModeR.current=false;pzGkR.current=null;pzBoostR.current=null;pzGkRateR.current=0;setLantern(null);pzBossR.current=false;setPzFx(null);pzFxDoneR.current=false;setPzPiece(null);lsModeR.current=false;setPhase('lesson');phaseR.current='lesson';} // v213
+  function startLessonBattle(i){ // v213 レベル i（0始まり）の相手と対戦。物語・登場は飛ばす
+    if(phaseR.current==='brief'||phaseR.current==='playing'||phaseR.current==='intro')return;
+    const lv=LESSON_CFG.levels[i];if(!lv||!lessonUnlocked(saveR.current,i))return;
+    pzModeR.current=false;pzBossR.current=false;pzGkR.current=null;pzBoostR.current=null;pzGkRateR.current=0;pzFxDoneR.current=false;
+    lsModeR.current=true;lsLvR.current=i;lsBattleR.current++;stageR.current=null;stageOptsR.current=null;
+    startStage(0,lv.st,true);
+  }
   function startPuzzleBattle(){ // v181 集めた数に応じてだんだん強い相手
     if(phaseR.current==='brief'||phaseR.current==='playing'||phaseR.current==='intro')return; // v185 連打で二重に始めない
     const pn=pzActive(saveR.current);pzPanelR.current=pn;
@@ -5205,7 +5340,7 @@ function App(){
     const boss=got>=pn.pieces.length;pzBossR.current=boss; // v198 6枚そろっていればボス戦
     const ent=boss?pn.boss:pn.ladder[Math.min(got,pn.ladder.length-1)];const idx=typeof ent==='number'?ent:ent.st;
     pzGkR.current=(typeof ent==='object'&&ent.gk)||null;pzBoostR.current=boss?(ent.boost||null):(pn.boost||null);pzGkRateR.current=(typeof ent==='object'&&ent.rate)||0; // v197/v200 ギミック・上乗せ・星環の確率（ボスは個別設定）
-    pzModeR.current=true;pzBattleR.current++;setPzPiece(null);stageR.current=null;stageOptsR.current=null;
+    pzModeR.current=true;lsModeR.current=false;pzBattleR.current++;setPzPiece(null);stageR.current=null;stageOptsR.current=null;
     startStage(0,idx,true);
   }
   function startStage(arIdx,stIdx,quick){ // quick=パズルモード：物語・チュートリアル・登場画面を挟まない
@@ -5260,6 +5395,7 @@ function App(){
   function startGame(diff){
     { const so=stageR.current?(stageOptsR.current||{}):{};if(diff&&stageR.current&&!so.challenge)diff=boostDiff(diff);if(pzModeR.current&&pzBoostR.current&&pzBoostR.current.diff&&!so.challenge)diff=pzBoostR.current.diff; } // v196/v197 通常ステージは判断力を底上げ
     if(diff){setDifficulty(diff);diffRef.current=diff;}
+    matchStartR.current=Date.now(); // v213 レッスンの速さボーナス用
     clearTimers();lockR.current=false;
     const p=createDeck(),d=createDeck();
     const opts=stageR.current?(stageOptsR.current||{}):{};
@@ -5975,7 +6111,7 @@ function App(){
   function resetField(){setField([]);setFieldSum(0);fieldR.current=[];fieldSumR.current=0;setFieldColors([]);colorsR.current=[];setFieldSp([]);setFieldShift([]);setFieldRing([]);}
   function endGame(pp,dp,byTime,afterFx){
     const win=byTime?(pp>dp?'player':(pp<dp?'dealer':'draw')):(pp>=winPtR.current?'player':'dealer'); // v175 時間切れは点数比較
-    if(pzModeR.current&&!afterFx){ // v198 決着の瞬間：進行と操作を止めて WIN/LOSE を見せてからリザルトへ
+    if((pzModeR.current||lsModeR.current)&&!afterFx){ // v198/v213 決着の瞬間：進行と操作を止めて WIN/LOSE を見せてからリザルトへ
       if(pzFxDoneR.current)return;pzFxDoneR.current=true;
       roundTokR.current++;clearTimers();lockR.current=true;resolvingR.current=true;exitLink();stopBGM();
       const won=win==='player',boss=pzBossR.current;
@@ -5988,22 +6124,30 @@ function App(){
     roundTokR.current++;stopBGM();
     let stars=0;
     const c=stageR.current;
+    if(lsModeR.current){ // v213 レッスン：スコア→★（勝った時だけ）。本編の★には触らない
+      const i=lsLvR.current,lv=LESSON_CFG.levels[i],sec=(Date.now()-matchStartR.current)/1000,won=win==='player';
+      const sc=lessonScore(pp,dp,sec),st5=lessonStars(i,won,sc.total);const prevBest=lessonState(saveR.current).best[lv.no]||0;
+      if(won)updSave(s=>{const L=lessonState(s);s.lesson={stars:{...L.stars,[lv.no]:Math.max(L.stars[lv.no]||0,st5)},best:{...L.best,[lv.no]:Math.max(prevBest,sc.total)}};return s;});
+      setGameEndData({pPt:pp,dPt:dp,winner:win,draw:win==='draw',diff:diffRef.current,stars:0,rivalName:stageOptsR.current&&stageOptsR.current.rivalName||null,lesson:{lv:i,score:sc,stars:st5,prevBest}});
+      setPhase('gameEnd');phaseR.current='gameEnd';exitLink();return;
+    }
     if(c&&!pzModeR.current){const st=STAGES.areas[c.ar].stages[c.st];stars=calcStars(pp,dp,winPtR.current);if(stars>0)updSave(s=>{s.stars[st.no]=Math.max(s.stars[st.no]||0,stars);return s;});}
     setGameEndData({pPt:pp,dPt:dp,winner:win,draw:win==='draw',diff:diffRef.current,stars,rivalName:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||null});
     setPhase('gameEnd');phaseR.current='gameEnd';exitLink();
   }
-  function goHome(){if(pzModeR.current){goPuzzle();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
+  function goHome(){if(pzModeR.current){goPuzzle();return;}if(lsModeR.current){goLesson();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
   if(phase==='gallery')return h(Gallery,{save,onBack:()=>{setPhase('menu');phaseR.current='menu';},
     onBuy:b=>{updSave(s=>{if((s.shards||0)<b.cost||(s.backs||[]).includes(b.id))return s;s.shards=(s.shards||0)-b.cost;s.backs=[...(s.backs||[]),b.id];s.backSel=b.id;return s;});try{resumeAC();fxBell({f:1568,v:0.06,d:0.8,bright:1.2,rev:0.7});}catch(e){}},
     onEquip:id=>{updSave(s=>{s.backSel=id;return s;});}}); // v209/v210
+  if(phase==='lesson')return h(LessonSelect,{save,onPick:startLessonBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v213
   if(phase==='pzselect')return h(PanelSelect,{save,onPick:pn=>{updSave(s=>{s.pzSel=pn.id;return s;});pzPanelR.current=pn;setPzView(v=>v+1);setPhase('puzzle');phaseR.current='puzzle';},onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v205
   if(phase==='puzzle'){const pn=pzPanelR.current||pzActive(save);
     return h(PuzzleScreen,{key:pzKey(pn)+'-'+pzBattleR.current+'-'+pzView,save,pn,onPlaced:pzPlaced,onNext:startPuzzleBattle,onBack:()=>{setPhase('pzselect');phaseR.current='pzselect';},
       hasNext:PANELS.slice(PANELS.indexOf(pn)+1).some(x=>pzUnlocked(save,x)),onNextStage:()=>{const nx=PANELS.slice(PANELS.indexOf(pn)+1).find(x=>pzUnlocked(save,x));if(!nx)return;updSave(s=>{s.pzSel=nx.id;return s;});pzPanelR.current=nx;setPzView(v=>v+1);},
       onReset:()=>{updSave(s=>pzWrite(s,pn,{got:[],placed:[],cleared:false}));pzPanelR.current=null;setPzView(v=>v+1);}});} // v180 / v198 / v200
-  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzle:()=>{pzPanelR.current=null;setPhase('pzselect');phaseR.current='pzselect';},onGallery:()=>{setPhase('gallery');phaseR.current='gallery';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
+  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzle:()=>{pzPanelR.current=null;setPhase('pzselect');phaseR.current='pzselect';},onLesson:goLesson,onGallery:()=>{setPhase('gallery');phaseR.current='gallery';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
   if(phase==='brief'&&curStage)return h(BriefScreen,{stage:curStage,onStart:()=>startGame(pendingDiff)}); // v119
@@ -6025,6 +6169,9 @@ function App(){
       if(gameEndData.winner==='player'&&pzAwardedR.current!==pzBattleR.current)return h('div',{className:'pz-res'}); // v199 付与が終わる一瞬だけ空（ピース未確定で描かない）
       return h(PuzzleResult,{key:'r'+pzBattleR.current,data:gameEndData,pn,piece:pzPiece,count:st.got.length,boss:pzBossR.current,gain:pzGainR.current,
         onNext:startPuzzleBattle,onPanel:goPuzzle,onRetry:()=>{pzFxDoneR.current=false;startStage(stageCtx.ar,stageCtx.st,true);}});} // v198/v202 はめる演出はパネル側（未配置分が順番に落ちる）
+    if(lsModeR.current&&gameEndData.lesson){const i=gameEndData.lesson.lv,lv=LESSON_CFG.levels[i],L=lessonState(save);
+      return h(LessonResult,{key:'ls'+lsBattleR.current,data:gameEndData,lv,lvIdx:i,best:L.best[lv.no]||0,isNewBest:gameEndData.winner==='player'&&gameEndData.lesson.score.total>gameEndData.lesson.prevBest,
+        hasNext:i+1<LESSON_CFG.levels.length,nextOpen:lessonUnlocked(save,i+1),onNext:()=>startLessonBattle(i+1),onRetry:()=>startLessonBattle(i),onSelect:goLesson});} // v213
     if(stageCtx)return h(StageEndScreen,{data:gameEndData,stage:curStage,stars:gameEndData.stars||0,onNext:stageNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st),onMap:goMap,isLast:(()=>{const nx=STAGES.areas[stageCtx.ar].stages[stageCtx.st+1];return !nx||!!nx.comingSoon||!!nx.challenge;})()});
     return h(GameEndScreen,{data:gameEndData,onRestart:startGame,onHome:goHome});
   }
