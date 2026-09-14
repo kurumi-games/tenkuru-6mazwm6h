@@ -2032,6 +2032,17 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-world .sky{position:absolute;inset:0;}
 .pzx-world .stage{position:absolute;inset:0;}
 .pzx-world canvas{display:block;width:100%;height:100%;}
+.pzx-world .frame{position:absolute;left:0;right:0;top:calc(48 * var(--u));bottom:0;}
+.pzx-world .hit{position:absolute;width:24%;height:9%;transform:translate(-50%,-50%);background:transparent;border:0;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;}
+.pzx-world .hit.boss{width:34%;height:14%;}
+.pzx-card{position:absolute;left:0;right:0;margin:0 auto;bottom:calc(14 * var(--u));width:min(94vw,calc(340 * var(--u)));padding:calc(10 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u));border-radius:calc(14 * var(--u));background:rgba(10,12,40,.86);border:1px solid rgba(190,180,255,.3);box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:2;animation:pzxCard .28s ease both;}
+.pzx-card .hd{display:flex;align-items:baseline;justify-content:space-between;gap:calc(8 * var(--u));padding-right:calc(26 * var(--u));}
+.pzx-card .x{position:absolute;right:calc(8 * var(--u));top:calc(6 * var(--u));width:calc(28 * var(--u));height:calc(28 * var(--u));border-radius:50%;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.7);color:#d6cfff;font-size:calc(14 * var(--u));cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.pzx-card .no{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
+.pzx-card .nm{font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.12em;}
+.pzx-card .st{font-size:calc(10 * var(--u));color:#ded2b1;letter-spacing:.06em;white-space:nowrap;}
+.pzx-card .go{margin-top:calc(8 * var(--u));width:100%;min-height:calc(44 * var(--u));border-radius:999px;border:1px solid rgba(255,224,138,.55);background:linear-gradient(135deg,rgba(255,224,138,.22),rgba(150,120,255,.22));color:#fff3c4;font-family:inherit;font-size:calc(14 * var(--u));font-weight:700;letter-spacing:.24em;cursor:pointer;}
+.pzx-card .go:disabled{opacity:.4;cursor:default;}
 /* v200 ともしび：灯りの当たっていない札 */
 .card-stage.lantern-dark{filter:brightness(.28) saturate(.4);transition:filter .3s;}
 .card-stage.lantern-dark .cs-num,.card-stage.lantern-dark .num{color:#6b6f8a!important;text-shadow:none!important;}
@@ -3170,7 +3181,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v225'; // v225(2026/09/15): 絵の中の世界を作り直し（くるみ提供 tenkuru-world-assets：背景・浮遊する結晶・星環）。島・ステージ・敵・条件・道の演出は全部削除。ステージはくるみの画像が来てからこの上に足す
+const APP_VER='v226'; // v226(2026/09/15): 絵の中に足場を置いた（くるみ提供 tenkuru-stage-assets：通常6・ボス1、img/pzx/stage・stage-boss.webp）。星環はボスの足場の後ろ。足場を押すと札（今は準備中、相手・条件はまだ）
+// const APP_VER='v225'; // v225(2026/09/15): 絵の中の世界を作り直し（くるみ提供 tenkuru-world-assets：背景・浮遊する結晶・星環）。島・ステージ・敵・条件・道の演出は全部削除。ステージはくるみの画像が来てからこの上に足す
 // const APP_VER='v224'; // v224(2026/09/15): 島の位置を全体に少し上へ（ステージ1が画面の下すぎた）
 // const APP_VER='v223'; // v223(2026/09/15): 勝ったら結果→「絵の中へ戻る」だけ（連続対戦なし）。マップに戻ると ①ピース獲得なら中央にパネルが出てピースがはまる ②道に光が走って次の島の鎖が外れる。ネフィラの島のロックは専用の鎖絵（boss-lock.webp）
 // const APP_VER='v222'; // v222(2026/09/15): ロック中の島は鎖つきの島（img/pzx/island-lock.webp）。開いた島は次にマップを見た時に鎖が光って外れる（1回だけ、save.pzx.seen）
@@ -3419,11 +3431,14 @@ const PZX={dir:'img/pzx/',w:1672,h:941,outline:'outline.webp',complete:'complete
 };
 // ── v225 パズルクス：絵の中の世界。背景・浮遊する結晶・星環だけ（ステージはくるみの画像が来てから上に足す）。数値はここだけで調整 ──
 const PZX_WORLD={
-  ring:{x:.5,y:.36,size:1.05,spin:80,alpha:.9},          // 星環：中心(幅・高さの割合)、大きさ(幅比)、1周の秒数、濃さ
+  ring:{x:.5,y:.20,size:.95,spin:80,alpha:.9},           // 星環：中心(幅・高さの割合)、大きさ(幅比)、1周の秒数、濃さ。ボスの足場の後ろで回る
+  // ステージの足場（下から上へ。最後がボス）：位置は上のバーより下の範囲に対する割合。size=幅比、anchor=画像の中で足場の中心がある高さの割合
+  nodes:[{x:.28,y:.80},{x:.70,y:.71},{x:.30,y:.62},{x:.70,y:.53},{x:.30,y:.44},{x:.70,y:.35},{x:.50,y:.20}],
+  stage:{size:.30,anchor:.42},boss:{size:.42,anchor:.56},
   crystals:[ // 浮遊する結晶：位置、大きさ(幅比)、上下の幅(px@430)、周期(秒)、傾き(度)、濃さ（奥のものは薄く小さく）
-    {x:.14,y:.30,s:.13,bob:6,per:5.2,rot:-8,a:.95},{x:.86,y:.24,s:.10,bob:5,per:6.1,rot:10,a:.9},
-    {x:.22,y:.62,s:.08,bob:4,per:4.6,rot:6,a:.75},{x:.80,y:.58,s:.11,bob:6,per:5.7,rot:-12,a:.85},
-    {x:.50,y:.80,s:.07,bob:4,per:6.8,rot:3,a:.7},{x:.36,y:.14,s:.05,bob:3,per:7.4,rot:14,a:.55},{x:.66,y:.90,s:.05,bob:3,per:6.4,rot:-5,a:.5},
+    {x:.10,y:.30,s:.11,bob:6,per:5.2,rot:-8,a:.9},{x:.90,y:.26,s:.09,bob:5,per:6.1,rot:10,a:.85},
+    {x:.08,y:.66,s:.07,bob:4,per:4.6,rot:6,a:.7},{x:.92,y:.60,s:.09,bob:6,per:5.7,rot:-12,a:.8},
+    {x:.52,y:.90,s:.06,bob:4,per:6.8,rot:3,a:.6},{x:.22,y:.10,s:.05,bob:3,per:7.4,rot:14,a:.5},{x:.80,y:.92,s:.05,bob:3,per:6.4,rot:-5,a:.5},
   ],
 };
 function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[]};}
@@ -4067,29 +4082,50 @@ function PzxPanel({save,onEnter,onBack,onReset}){
 }
 // ── v225 パズルクス：絵の中の世界。背景がゆっくり流れ、結晶が浮き、星環が回る。ステージはこの上に後から足す ──
 function PzxWorld({onBack}){
-  const canvasR=useRef(null),wrapR=useRef(null);
+  const canvasR=useRef(null),wrapR=useRef(null);const[sel,setSel]=useState(null); // sel=押した足場（札を出す）
   useEffect(()=>{
     const cv=canvasR.current,wrap=wrapR.current;if(!cv||!wrap)return;
     const ctx=cv.getContext&&cv.getContext('2d');if(!ctx)return;let W=0,H=0,raf=0,last=0,t=0,alive=true,imgs=null;
     const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const load=u=>new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=u;});
+    const fr=()=>{const f=wrap.querySelector('.frame');return f?{t:f.offsetTop,h:f.clientHeight}:{t:0,h:H};};
+    const pos=()=>{const F=fr();return PZX_WORLD.nodes.map((n,i)=>({x:n.x*W,y:F.t+n.y*F.h+(reduced?0:Math.sin(t*(.76+i*.037)+i*1.1)*(i===6?3:4)*W/430)}));};
     const resize=()=>{W=wrap.clientWidth;H=wrap.clientHeight;const dpr=Math.min(window.devicePixelRatio||1,2);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);};
     resize();const ro=window.ResizeObserver?new ResizeObserver(resize):null;if(ro)ro.observe(wrap);
     const draw=()=>{
       if(!imgs)return;const c=ctx;c.clearRect(0,0,W,H);
       const drift=reduced?0:Math.sin(t*.12)*W*.006;if(imgs.bg){const k=Math.max(W/imgs.bg.width,H/imgs.bg.height)*1.04,bw=imgs.bg.width*k,bh=imgs.bg.height*k;c.drawImage(imgs.bg,(W-bw)/2+drift,(H-bh)/2,bw,bh);} // 画面いっぱい（cover）
       for(let i=0;i<30;i++){const x=((i*137.7)%997)/997*W,y=(((i*251.3)%991)/991*H-t*(1+i%3)*.5+H*20)%H;c.globalAlpha=.2+.3*(.5+.5*Math.sin(t*.5+i));c.fillStyle=i%2?'#b9bdff':'#e0f6ff';c.beginPath();c.arc(x,y,.6+(i%3)*.25,0,Math.PI*2);c.fill();}c.globalAlpha=1;
-      const R=PZX_WORLD.ring;if(imgs.ring){const sz=W*R.size,ang=reduced?0:(t/R.spin)*Math.PI*2;c.save();c.translate(R.x*W,R.y*H);c.rotate(ang);c.globalAlpha=R.alpha*(.85+.15*Math.sin(t*.7));c.drawImage(imgs.ring,-sz/2,-sz/2,sz,sz);c.restore();}
+      const p=pos();
+      const R=PZX_WORLD.ring;if(imgs.ring){const sz=W*R.size,ang=reduced?0:(t/R.spin)*Math.PI*2,F=fr();c.save();c.translate(R.x*W,F.t+R.y*F.h);c.rotate(ang);c.globalAlpha=R.alpha*(.85+.15*Math.sin(t*.7));c.drawImage(imgs.ring,-sz/2,-sz/2,sz,sz);c.restore();}
       if(imgs.cr)PZX_WORLD.crystals.forEach((k,i)=>{const sz=W*k.s,bob=reduced?0:Math.sin(t*(Math.PI*2/k.per)+i)*k.bob*W/430,sway=reduced?0:Math.sin(t*(Math.PI*2/(k.per*1.7))+i*.7)*1.5;
         c.save();c.translate(k.x*W,k.y*H+bob);c.rotate((k.rot+sway)*Math.PI/180);c.globalAlpha=k.a;c.shadowColor='#8fa0ff';c.shadowBlur=14*k.a;c.drawImage(imgs.cr,-sz/2,-sz/2,sz,sz);c.restore();});
+      // 光の道（足場と足場をつなぐ）
+      c.save();c.lineCap='round';
+      for(let i=0;i<6;i++){const a=p[i],b=p[i+1],mid=(a.y+b.y)/2;
+        c.beginPath();c.moveTo(a.x,a.y);c.bezierCurveTo(a.x,mid,b.x,mid,b.x,b.y);
+        c.strokeStyle='#7081fb';c.lineWidth=7*W/430;c.shadowColor='#6b6cff';c.shadowBlur=10;c.globalAlpha=.27;c.stroke();
+        c.globalAlpha=.8;c.shadowBlur=0;c.strokeStyle='#c5dfff';c.lineWidth=1.15*W/430;c.stroke();}
+      c.restore();
+      // 足場（上から描いて、下のものが手前に重なる）
+      const cur=selR.current;
+      for(let i=6;i>=0;i--){const boss=i===6,cfg=boss?PZX_WORLD.boss:PZX_WORLD.stage,img=boss?imgs.boss:imgs.st,a=p[i];if(!img)continue;const sz=W*cfg.size;
+        c.save();c.shadowColor=cur===i?'#dcd8ff':'#4959e0';c.shadowBlur=cur===i?22:4;c.drawImage(img,a.x-sz/2,a.y-sz*cfg.anchor,sz,sz);c.restore();}
     };
     const loop=now=>{if(!alive)return;if(last&&document.visibilityState!=='hidden')t+=Math.min((now-last)/1000,.05);last=now;draw();raf=requestAnimationFrame(loop);};
-    Promise.all([load(PZX.dir+'world-bg.webp'),load(PZX.dir+'crystal.webp'),load(PZX.dir+'star-ring.webp')]).then(([bg,cr,ring])=>{if(!alive)return;imgs={bg,cr,ring};raf=requestAnimationFrame(loop);});
+    Promise.all([load(PZX.dir+'world-bg.webp'),load(PZX.dir+'crystal.webp'),load(PZX.dir+'star-ring.webp'),load(PZX.dir+'stage.webp'),load(PZX.dir+'stage-boss.webp')]).then(([bg,cr,ring,st,boss])=>{if(!alive)return;imgs={bg,cr,ring,st,boss};raf=requestAnimationFrame(loop);});
     return()=>{alive=false;cancelAnimationFrame(raf);if(ro)ro.disconnect();};
   },[]);
+  const selR=useRef(null);selR.current=sel;
   return h('div',{className:'pzx-world'},
     h('div',{className:'top'},h('button',{onClick:onBack},'‹ パネル'),h('div',{className:'k'},'PUZZLUX'),h('div',{className:'pc'},'')),
-    h('div',{className:'sky'},h('div',{className:'stage',ref:wrapR},h('canvas',{ref:canvasR})))
+    h('div',{className:'sky'},h('div',{className:'stage',ref:wrapR},h('canvas',{ref:canvasR}),
+      h('div',{className:'frame'},PZX_WORLD.nodes.map((n,i)=>h('button',{key:i,className:'hit'+(i===6?' boss':''),style:{left:(n.x*100)+'%',top:(n.y*100)+'%'},'aria-label':i===6?'ボス':'ステージ'+(i+1),onClick:()=>{setSel(i);try{resumeAC();fxTone({f:880,f2:1320,type:'sine',v:0.03,a:0.005,d:0.12,rev:0.3});}catch(e){}}}))))),
+    sel!=null&&h('div',{className:'pzx-card'},
+      h('button',{className:'x',onClick:()=>setSel(null)},'✕'),
+      h('div',{className:'hd'},h('div',null,h('div',{className:'no'},sel===6?'BOSS':'STAGE '+(sel+1)),h('div',{className:'nm'},sel===6?'ネフィラ':'準備中')),h('div',{className:'st'},'相手・条件はこれから')),
+      h('button',{className:'go',disabled:true},'準備中')
+    )
   );
 }
 const DEFAULT_LAYOUT={handW:53,handY:0,fieldW:64,sumSize:30,sumX:1,sumY:-8,gapDF:10,gapFH:38};
