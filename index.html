@@ -2013,6 +2013,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-panel img{position:absolute;display:block;pointer-events:none;-webkit-user-drag:none;}
 .pzx-panel .ol{inset:0;width:100%;height:100%;}
 .pzx-panel .pc{animation:pzxIn .6s cubic-bezier(.2,1.2,.4,1) both;box-shadow:0 0 calc(10 * var(--u)) rgba(200,190,255,.35);}
+@keyframes pzxCard{0%{opacity:0;}100%{opacity:1;}}
 @keyframes pzxIn{0%{opacity:0;transform:scale(1.12);}100%{opacity:1;transform:none;}}
 .pzx-panel .cp{inset:0;width:100%;height:100%;animation:pzxIn 1.2s ease both;}
 .pzx-screen .prog{font-family:'Fira Code',monospace;font-size:calc(12 * var(--u));color:#ded2b1;letter-spacing:.1em;}
@@ -2041,11 +2042,12 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-world .top button{min-height:calc(32 * var(--u));padding:0 calc(14 * var(--u));border-radius:999px;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.7);color:#d6cfff;font-family:inherit;font-size:calc(11.5 * var(--u));cursor:pointer;}
 .pzx-world .sky{position:absolute;inset:0;}
 .pzx-world .stage{position:absolute;inset:0;}
+.pzx-world .frame{position:absolute;left:0;right:0;top:calc(48 * var(--u));bottom:0;}
 .pzx-world canvas{display:block;width:100%;height:100%;}
 .pzx-world .hit{position:absolute;width:19%;height:9%;transform:translate(-50%,-50%);background:transparent;border:0;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;}
 .pzx-world .hit.boss{width:30%;height:14%;}
 /* 下の札：選んだ島の説明 */
-.pzx-card{position:absolute;left:50%;bottom:calc(14 * var(--u));transform:translateX(-50%);width:min(94vw,calc(340 * var(--u)));animation:pzxIn .28s ease both;padding:calc(10 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u));border-radius:calc(14 * var(--u));background:rgba(10,12,40,.86);border:1px solid rgba(190,180,255,.3);box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:2;}
+.pzx-card{position:absolute;left:0;right:0;margin:0 auto;bottom:calc(14 * var(--u));width:min(94vw,calc(340 * var(--u)));animation:pzxCard .28s ease both;padding:calc(10 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u));border-radius:calc(14 * var(--u));background:rgba(10,12,40,.86);border:1px solid rgba(190,180,255,.3);box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:2;}
 .pzx-card .hd{display:flex;align-items:baseline;justify-content:space-between;gap:calc(8 * var(--u));padding-right:calc(26 * var(--u));}
 .pzx-card .x{position:absolute;right:calc(8 * var(--u));top:calc(6 * var(--u));width:calc(28 * var(--u));height:calc(28 * var(--u));border-radius:50%;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.7);color:#d6cfff;font-size:calc(14 * var(--u));cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .pzx-card .no{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
@@ -3209,7 +3211,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v220'; // v220(2026/09/14): 絵の中のマップは画面いっぱい（cover）。島の札は島を押した時だけ出る（✕で閉じる）。ピースを持つ島は勝った扱いで次が開く
+const APP_VER='v221'; // v221(2026/09/14): 絵の中のマップのズレ修正（島の札が右にはみ出す／ボスが上のバーに隠れる）
+// const APP_VER='v220'; // v220(2026/09/14): 絵の中のマップは画面いっぱい（cover）。島の札は島を押した時だけ出る（✕で閉じる）。ピースを持つ島は勝った扱いで次が開く
 // const APP_VER='v219'; // v219(2026/09/14): パズルクスの対戦画面をいつもの背景に戻した（絵の中の空は見づらいので使わない。対戦フィールドは勝手に変えない）
 // const APP_VER='v218'; // v218(2026/09/14): パズルクスの絵の主＝ネフィラ（ボス名）。パネル画面に「はじめから」（2回押しで進行リセット、本編の★は触らない）
 // const APP_VER='v217'; // v217(2026/09/14): パズルクス「絵の中の世界」：浮遊マップ（img/pzx/world-bg・island・boss、島が上下・光の道）と7つの島（6ステージ＋ボス）。勝てば次の島、条件（PZX_STAGES.cond）を満たすとピース、6枚でボス解放。v216（チャッピー版）は破棄
@@ -4128,7 +4131,8 @@ function PzxWorld({save,onPick,onBack}){
     const load=u=>new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=u;});
     const resize=()=>{W=wrap.clientWidth;H=wrap.clientHeight;const dpr=Math.min(window.devicePixelRatio||1,2);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);};
     resize();const ro=window.ResizeObserver?new ResizeObserver(resize):null;if(ro)ro.observe(wrap);
-    const pos=()=>PZX_NODES.map((n,i)=>({x:n.x*W,y:n.y*H+(reduced?0:Math.sin(t*(.76+i*.037)+i*1.1)*(i===6?3:4)*W/430)}));
+    const fr=()=>{const f=wrap.querySelector('.frame');return f?{t:f.offsetTop,h:f.clientHeight}:{t:0,h:H};};
+    const pos=()=>{const F=fr();return PZX_NODES.map((n,i)=>({x:n.x*W,y:F.t+n.y*F.h+(reduced?0:Math.sin(t*(.76+i*.037)+i*1.1)*(i===6?3:4)*W/430)}));};
     const draw=()=>{
       if(!imgs)return;const c=ctx;c.clearRect(0,0,W,H);
       const drift=reduced?0:Math.sin(t*.12)*W*.006;if(imgs.bg){const k=Math.max(W/imgs.bg.width,H/imgs.bg.height)*1.04,bw=imgs.bg.width*k,bh=imgs.bg.height*k;c.drawImage(imgs.bg,(W-bw)/2+drift,(H-bh)/2,bw,bh);} // 画面いっぱい（cover）
@@ -4161,7 +4165,7 @@ function PzxWorld({save,onPick,onBack}){
     h('div',{className:'top'},h('button',{onClick:onBack},'‹ パネル'),h('div',{className:'k'},'PUZZLUX'),h('div',{className:'pc'},'PIECE '+P.got.length+' / '+PZX.pieces.length)),
     h('div',{className:'sky'},h('div',{className:'stage',ref:wrapR},
       h('canvas',{ref:canvasR}),
-      PZX_NODES.map((n,i)=>h('button',{key:i,className:'hit'+(i===6?' boss':''),style:{left:(n.x*100)+'%',top:(n.y*100)+'%'},'aria-label':i===6?'ボス':'ステージ'+(i+1),onClick:()=>{setSel(i);setCard(true);try{resumeAC();fxTone({f:880,f2:1320,type:'sine',v:0.03,a:0.005,d:0.12,rev:0.3});}catch(e){}}}))
+      h('div',{className:'frame'},PZX_NODES.map((n,i)=>h('button',{key:i,className:'hit'+(i===6?' boss':''),style:{left:(n.x*100)+'%',top:(n.y*100)+'%'},'aria-label':i===6?'ボス':'ステージ'+(i+1),onClick:()=>{setSel(i);setCard(true);try{resumeAC();fxTone({f:880,f2:1320,type:'sine',v:0.03,a:0.005,d:0.12,rev:0.3});}catch(e){}}})))
     )),
     card&&h('div',{className:'pzx-card'},
       h('button',{className:'x',onClick:()=>setCard(false)},'✕'),
