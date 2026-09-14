@@ -3211,7 +3211,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v221'; // v221(2026/09/14): 絵の中のマップのズレ修正（島の札が右にはみ出す／ボスが上のバーに隠れる）
+const APP_VER='v222'; // v222(2026/09/15): ロック中の島は鎖つきの島（img/pzx/island-lock.webp）。開いた島は次にマップを見た時に鎖が光って外れる（1回だけ、save.pzx.seen）
+// const APP_VER='v221'; // v221(2026/09/14): 絵の中のマップのズレ修正（島の札が右にはみ出す／ボスが上のバーに隠れる）
 // const APP_VER='v220'; // v220(2026/09/14): 絵の中のマップは画面いっぱい（cover）。島の札は島を押した時だけ出る（✕で閉じる）。ピースを持つ島は勝った扱いで次が開く
 // const APP_VER='v219'; // v219(2026/09/14): パズルクスの対戦画面をいつもの背景に戻した（絵の中の空は見づらいので使わない。対戦フィールドは勝手に変えない）
 // const APP_VER='v218'; // v218(2026/09/14): パズルクスの絵の主＝ネフィラ（ボス名）。パネル画面に「はじめから」（2回押しで進行リセット、本編の★は触らない）
@@ -3478,7 +3479,7 @@ const PZX_AREA={id:'pzx',name:'絵の中',stages:PZX_STAGES};
 STAGES.areas[1]=PZX_AREA;
 // 島の位置（幅・高さに対する割合、下から上へ。最後がボス）
 const PZX_NODES=[{x:.29,y:.86},{x:.70,y:.76},{x:.31,y:.66},{x:.69,y:.56},{x:.31,y:.46},{x:.70,y:.36},{x:.50,y:.205}];
-function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[],won:P.won||[],boss:!!P.boss};}
+function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[],won:P.won||[],boss:!!P.boss,seen:P.seen||[]};} // seen=鎖が外れる演出を見た島
 function pzxOpen(save,i){const P=pzxState(save);if(i>=6)return P.got.length>=PZX.pieces.length;if(i===0)return true;return P.won.includes(PZX_STAGES[i-1].no)||P.got.includes(i-1);} // ピースを持っている島は勝ったとみなす
 function boostDiff(d){if(!DEALER_BOOST.enabled)return d;const i=DIFF_ORDER.indexOf(d);return i<0?d:DIFF_ORDER[Math.min(3,i+DEALER_BOOST.diffUp)];}
 // ── v197 パズル用の新ギミック（相手の星環カードを場に出した瞬間だけ発動）：数値はここだけで調整 ──
@@ -4119,8 +4120,10 @@ function PzxPanel({save,onEnter,onBack,onReset}){
   );
 }
 // ── v217 パズルクス：絵の中の世界（浮遊マップ）。島がゆっくり上下し、光の道でつながる ──
-function PzxWorld({save,onPick,onBack}){
+function PzxWorld({save,onPick,onBack,onSeen}){
   const P=pzxState(save);
+  const unlockR=useRef(null); // v222 今回はじめて開いた島：鎖が外れる演出（1回だけ）
+  useEffect(()=>{const fresh=PZX_NODES.map((n,i)=>i).filter(i=>i<6&&i>0&&pzxOpen(save,i)&&!P.seen.includes(i));if(fresh.length){unlockR.current={idx:fresh,t0:performance.now()};const t=setTimeout(()=>onSeen&&onSeen(fresh),1800);return()=>clearTimeout(t);}},[]);
   const firstOpen=PZX_STAGES.findIndex((st,i)=>pzxOpen(save,i)&&!P.won.includes(st.no));
   const[sel,setSel]=useState(firstOpen>=0?firstOpen:(P.got.length>=6&&!P.boss?6:0));const[card,setCard]=useState(false); // 札は島を押した時だけ
   const canvasR=useRef(null),wrapR=useRef(null),selR=useRef(sel);selR.current=sel;
@@ -4146,17 +4149,22 @@ function PzxWorld({save,onPick,onBack}){
         c.globalAlpha=lit?.8:.25;c.shadowBlur=0;c.strokeStyle='#c5dfff';c.lineWidth=1.15*W/430;c.stroke();}
       c.restore();
       for(let i=6;i>=0;i--){const boss=i===6,size=W*(boss?.55:.34),img=boss?imgs.boss:imgs.isl,a=p[i],anchor=boss?.59:.325,open=pzxOpen(save,i);if(!img)continue;
+        const U=unlockR.current,fresh=U&&U.idx.includes(i)?Math.min(1,Math.max(0,(performance.now()-U.t0-400)/1200)):null; // 0→1 で鎖が消える
         c.save();c.shadowColor=cur===i?'#c0bdff':'#4959e0';c.shadowBlur=cur===i?14:3;
+        if(!boss&&imgs.lock&&(!open||(fresh!=null&&fresh<1))){ // 鎖の島（ロック中、または外れる途中）
+          if(fresh!=null){c.globalAlpha=1;c.drawImage(img,a.x-size/2,a.y-size*anchor,size,size);c.globalAlpha=1-fresh;if(fresh>0&&fresh<1){c.shadowColor='#ffffff';c.shadowBlur=30*(1-fresh);}}
+          c.drawImage(imgs.lock,a.x-size/2,a.y-size*anchor,size,size);c.restore();continue;
+        }
         if(!open){c.globalAlpha=.45;try{c.filter='saturate(.35) brightness(.6)';}catch(e){}}
         c.drawImage(img,a.x-size/2,a.y-size*anchor,size,size);c.restore();
         // 印：勝った島は小さな星、ピースを取った島は金の星
         const st=PZX_STAGES[i],won=P.won.includes(st.no),got=boss?P.boss:P.got.includes(i);
         if(won||got){c.save();c.font='bold '+(13*W/430)+'px serif';c.textAlign='center';c.textBaseline='middle';c.fillStyle=got?'#ffe08a':'#b9bdff';c.shadowColor=got?'#ffd27a':'#8fa0ff';c.shadowBlur=10;c.fillText(got?'★':'✦',a.x,a.y-size*(boss?.68:.36));c.restore();}
-        if(!open){c.save();c.globalAlpha=.9;c.fillStyle='rgba(230,232,245,.85)';const r=8*W/430;c.beginPath();c.arc(a.x,a.y-size*.02,r,0,Math.PI*2);c.fill();c.fillStyle='#4a3f88';c.fillRect(a.x-r*.38,a.y-size*.02-r*.05,r*.76,r*.6);c.lineWidth=r*.18;c.strokeStyle='#4a3f88';c.beginPath();c.arc(a.x,a.y-size*.02-r*.1,r*.3,Math.PI,0);c.stroke();c.restore();}
+        if(!open&&boss){c.save();c.globalAlpha=.9;c.fillStyle='rgba(230,232,245,.85)';const r=8*W/430;c.beginPath();c.arc(a.x,a.y-size*.02,r,0,Math.PI*2);c.fill();c.fillStyle='#4a3f88';c.fillRect(a.x-r*.38,a.y-size*.02-r*.05,r*.76,r*.6);c.lineWidth=r*.18;c.strokeStyle='#4a3f88';c.beginPath();c.arc(a.x,a.y-size*.02-r*.1,r*.3,Math.PI,0);c.stroke();c.restore();}
       }
     };
     const loop=now=>{if(!alive)return;if(last&&document.visibilityState!=='hidden')t+=Math.min((now-last)/1000,.05);last=now;draw();raf=requestAnimationFrame(loop);};
-    Promise.all([load(PZX.dir+'world-bg.webp'),load(PZX.dir+'island.webp'),load(PZX.dir+'boss.webp')]).then(([bg,isl,boss])=>{if(!alive)return;imgs={bg,isl,boss};raf=requestAnimationFrame(loop);});
+    Promise.all([load(PZX.dir+'world-bg.webp'),load(PZX.dir+'island.webp'),load(PZX.dir+'boss.webp'),load(PZX.dir+'island-lock.webp')]).then(([bg,isl,boss,lock])=>{if(!alive)return;imgs={bg,isl,boss,lock};raf=requestAnimationFrame(loop);});
     return()=>{alive=false;cancelAnimationFrame(raf);if(ro)ro.disconnect();};
   },[save]);
   const st=PZX_STAGES[sel],open=pzxOpen(save,sel),won=P.won.includes(st.no),got=sel===6?P.boss:P.got.includes(sel);
@@ -5752,8 +5760,8 @@ function App(){
   function goHome(){if(stageR.current&&stageR.current.ar===1){goPzxWorld();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
-  if(phase==='pzx')return h(PzxPanel,{save,onEnter:()=>{setPhase('pzxmap');phaseR.current='pzxmap';},onBack:()=>{setPhase('menu');phaseR.current='menu';},onReset:()=>{updSave(s=>{s.pzx={got:[],won:[],boss:false};return s;});}}); // v214/v218 リセットは進行だけ消す（本編の★は無関係）
-  if(phase==='pzxmap')return h(PzxWorld,{save,onPick:startPzxStage,onBack:()=>{setPhase('pzx');phaseR.current='pzx';}}); // v217
+  if(phase==='pzx')return h(PzxPanel,{save,onEnter:()=>{setPhase('pzxmap');phaseR.current='pzxmap';},onBack:()=>{setPhase('menu');phaseR.current='menu';},onReset:()=>{updSave(s=>{s.pzx={got:[],won:[],boss:false,seen:[]};return s;});}}); // v214/v218 リセットは進行だけ消す（本編の★は無関係）
+  if(phase==='pzxmap')return h(PzxWorld,{save,onPick:startPzxStage,onBack:()=>{setPhase('pzx');phaseR.current='pzx';},onSeen:idxs=>{updSave(s=>{const P=pzxState(s);s.pzx={...(s.pzx||{}),got:P.got,won:P.won,boss:P.boss,seen:[...new Set([...P.seen,...idxs])]};return s;});}}); // v217/v222
   if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzlux:()=>{setPhase('pzx');phaseR.current='pzx';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
