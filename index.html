@@ -2150,6 +2150,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 /* v212 装着したカードの装い：手札は表向きなので札には貼らない。手札エリアの布（マット）と、裏向きになる札にだけ出す */
 .gp-screen.skin .gp-hand-area{background:linear-gradient(rgba(6,8,30,.58),rgba(6,8,30,.7)),var(--skin) center/cover no-repeat!important;}
 .gp-screen.skin .gp-dealer-card.hidden-card{background:var(--skin) center/cover no-repeat!important;}
+.gp-screen.skin .gp-hand-rows::before{background-image:var(--skin)!important;background-size:cover!important;background-position:center!important;filter:brightness(.55) saturate(.9);border-radius:calc(10 * var(--u));}
 /* ギャラリー */
 .pz-gal{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#0a0d24 url('img/panel-bg.webp') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;padding:calc(18 * var(--u)) calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#e6ecfa;overflow:hidden;}
 .pz-gal::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,30,.62),rgba(6,8,30,.85));pointer-events:none;}
