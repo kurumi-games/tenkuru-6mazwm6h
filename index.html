@@ -2033,8 +2033,8 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-world .stage{position:absolute;inset:0;}
 .pzx-world canvas{display:block;width:100%;height:100%;}
 .pzx-world .frame{position:absolute;left:0;right:0;top:calc(48 * var(--u));bottom:0;}
-.pzx-world .hit{position:absolute;width:24%;height:9%;transform:translate(-50%,-50%);background:transparent;border:0;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;}
-.pzx-world .hit.boss{width:34%;height:14%;}
+.pzx-world .hit{position:absolute;width:18%;height:7%;transform:translate(-50%,-50%);background:transparent;border:0;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;}
+.pzx-world .hit.boss{width:26%;height:10%;}
 .pzx-card{position:absolute;left:0;right:0;margin:0 auto;bottom:calc(14 * var(--u));width:min(94vw,calc(340 * var(--u)));padding:calc(10 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u));border-radius:calc(14 * var(--u));background:rgba(10,12,40,.86);border:1px solid rgba(190,180,255,.3);box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:2;animation:pzxCard .28s ease both;}
 .pzx-card .hd{display:flex;align-items:baseline;justify-content:space-between;gap:calc(8 * var(--u));padding-right:calc(26 * var(--u));}
 .pzx-card .x{position:absolute;right:calc(8 * var(--u));top:calc(6 * var(--u));width:calc(28 * var(--u));height:calc(28 * var(--u));border-radius:50%;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.7);color:#d6cfff;font-size:calc(14 * var(--u));cursor:pointer;display:flex;align-items:center;justify-content:center;}
@@ -3181,7 +3181,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v226'; // v226(2026/09/15): 絵の中に足場を置いた（くるみ提供 tenkuru-stage-assets：通常6・ボス1、img/pzx/stage・stage-boss.webp）。星環はボスの足場の後ろ。足場を押すと札（今は準備中、相手・条件はまだ）
+const APP_VER='v227'; // v227(2026/09/15): 足場を小さくして（本編マップの丸メダルくらい）、うねる道でつなぐ並びに。星環も小さくボスの後ろ
+// const APP_VER='v226'; // v226(2026/09/15): 絵の中に足場を置いた（くるみ提供 tenkuru-stage-assets：通常6・ボス1、img/pzx/stage・stage-boss.webp）。星環はボスの足場の後ろ。足場を押すと札（今は準備中、相手・条件はまだ）
 // const APP_VER='v225'; // v225(2026/09/15): 絵の中の世界を作り直し（くるみ提供 tenkuru-world-assets：背景・浮遊する結晶・星環）。島・ステージ・敵・条件・道の演出は全部削除。ステージはくるみの画像が来てからこの上に足す
 // const APP_VER='v224'; // v224(2026/09/15): 島の位置を全体に少し上へ（ステージ1が画面の下すぎた）
 // const APP_VER='v223'; // v223(2026/09/15): 勝ったら結果→「絵の中へ戻る」だけ（連続対戦なし）。マップに戻ると ①ピース獲得なら中央にパネルが出てピースがはまる ②道に光が走って次の島の鎖が外れる。ネフィラの島のロックは専用の鎖絵（boss-lock.webp）
@@ -3431,10 +3432,10 @@ const PZX={dir:'img/pzx/',w:1672,h:941,outline:'outline.webp',complete:'complete
 };
 // ── v225 パズルクス：絵の中の世界。背景・浮遊する結晶・星環だけ（ステージはくるみの画像が来てから上に足す）。数値はここだけで調整 ──
 const PZX_WORLD={
-  ring:{x:.5,y:.20,size:.95,spin:80,alpha:.9},           // 星環：中心(幅・高さの割合)、大きさ(幅比)、1周の秒数、濃さ。ボスの足場の後ろで回る
-  // ステージの足場（下から上へ。最後がボス）：位置は上のバーより下の範囲に対する割合。size=幅比、anchor=画像の中で足場の中心がある高さの割合
-  nodes:[{x:.28,y:.80},{x:.70,y:.71},{x:.30,y:.62},{x:.70,y:.53},{x:.30,y:.44},{x:.70,y:.35},{x:.50,y:.20}],
-  stage:{size:.30,anchor:.42},boss:{size:.42,anchor:.56},
+  ring:{x:.5,y:.27,size:.56,spin:80,alpha:.85},          // 星環：中心(幅・高さの割合)、大きさ(幅比)、1周の秒数、濃さ。ボスの足場の後ろで回る
+  // ステージの足場（下から上へ。最後がボス）：本編のマップみたいに小さくして、うねる道でつなぐ。位置は上のバーより下の範囲に対する割合。size=幅比、anchor=画像の中で足場の中心がある高さの割合
+  nodes:[{x:.20,y:.84},{x:.42,y:.77},{x:.66,y:.71},{x:.78,y:.58},{x:.56,y:.50},{x:.32,y:.44},{x:.50,y:.28}],
+  stage:{size:.17,anchor:.42},boss:{size:.25,anchor:.56},
   crystals:[ // 浮遊する結晶：位置、大きさ(幅比)、上下の幅(px@430)、周期(秒)、傾き(度)、濃さ（奥のものは薄く小さく）
     {x:.10,y:.30,s:.11,bob:6,per:5.2,rot:-8,a:.9},{x:.90,y:.26,s:.09,bob:5,per:6.1,rot:10,a:.85},
     {x:.08,y:.66,s:.07,bob:4,per:4.6,rot:6,a:.7},{x:.92,y:.60,s:.09,bob:6,per:5.7,rot:-12,a:.8},
@@ -4104,8 +4105,8 @@ function PzxWorld({onBack}){
       c.save();c.lineCap='round';
       for(let i=0;i<6;i++){const a=p[i],b=p[i+1],mid=(a.y+b.y)/2;
         c.beginPath();c.moveTo(a.x,a.y);c.bezierCurveTo(a.x,mid,b.x,mid,b.x,b.y);
-        c.strokeStyle='#7081fb';c.lineWidth=7*W/430;c.shadowColor='#6b6cff';c.shadowBlur=10;c.globalAlpha=.27;c.stroke();
-        c.globalAlpha=.8;c.shadowBlur=0;c.strokeStyle='#c5dfff';c.lineWidth=1.15*W/430;c.stroke();}
+        c.strokeStyle='#7081fb';c.lineWidth=5*W/430;c.shadowColor='#6b6cff';c.shadowBlur=8;c.globalAlpha=.25;c.stroke();
+        c.globalAlpha=.75;c.shadowBlur=0;c.strokeStyle='#c5dfff';c.lineWidth=1*W/430;c.stroke();}
       c.restore();
       // 足場（上から描いて、下のものが手前に重なる）
       const cur=selR.current;
