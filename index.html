@@ -3181,7 +3181,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v228'; // v228(2026/09/15): 足場を完成版の丸ボタン絵（nephira-stage-buttons）に差し替え。中央に番号／BOSS を描く
+const APP_VER='v229'; // v229(2026/09/15): 足場を全体に大きく上へ（ステージ1が下すぎた）。番号・BOSS の文字は描かない（絵だけ）
+// const APP_VER='v228'; // v228(2026/09/15): 足場を完成版の丸ボタン絵（nephira-stage-buttons）に差し替え。中央に番号／BOSS を描く
 // const APP_VER='v227'; // v227(2026/09/15): 足場を小さくして（本編マップの丸メダルくらい）、うねる道でつなぐ並びに。星環も小さくボスの後ろ
 // const APP_VER='v226'; // v226(2026/09/15): 絵の中に足場を置いた（くるみ提供 tenkuru-stage-assets：通常6・ボス1、img/pzx/stage・stage-boss.webp）。星環はボスの足場の後ろ。足場を押すと札（今は準備中、相手・条件はまだ）
 // const APP_VER='v225'; // v225(2026/09/15): 絵の中の世界を作り直し（くるみ提供 tenkuru-world-assets：背景・浮遊する結晶・星環）。島・ステージ・敵・条件・道の演出は全部削除。ステージはくるみの画像が来てからこの上に足す
@@ -3433,9 +3434,9 @@ const PZX={dir:'img/pzx/',w:1672,h:941,outline:'outline.webp',complete:'complete
 };
 // ── v225 パズルクス：絵の中の世界。背景・浮遊する結晶・星環だけ（ステージはくるみの画像が来てから上に足す）。数値はここだけで調整 ──
 const PZX_WORLD={
-  ring:{x:.5,y:.27,size:.56,spin:80,alpha:.85},          // 星環：中心(幅・高さの割合)、大きさ(幅比)、1周の秒数、濃さ。ボスの足場の後ろで回る
+  ring:{x:.5,y:.15,size:.56,spin:80,alpha:.85},          // 星環：中心(幅・高さの割合)、大きさ(幅比)、1周の秒数、濃さ。ボスの足場の後ろで回る
   // ステージの足場（下から上へ。最後がボス）：本編のマップみたいに小さくして、うねる道でつなぐ。位置は上のバーより下の範囲に対する割合。size=幅比、anchor=画像の中で足場の中心がある高さの割合
-  nodes:[{x:.20,y:.84},{x:.42,y:.77},{x:.66,y:.71},{x:.78,y:.58},{x:.56,y:.50},{x:.32,y:.44},{x:.50,y:.28}],
+  nodes:[{x:.20,y:.68},{x:.42,y:.61},{x:.66,y:.55},{x:.78,y:.44},{x:.56,y:.36},{x:.32,y:.30},{x:.50,y:.15}], // v229 ステージ1は画面の下2/3あたり。下に寄せない
   stage:{size:.19,anchor:.5},boss:{size:.25,anchor:.5}, // v228 丸いボタン絵（中央に番号を描く）
   crystals:[ // 浮遊する結晶：位置、大きさ(幅比)、上下の幅(px@430)、周期(秒)、傾き(度)、濃さ（奥のものは薄く小さく）
     {x:.10,y:.30,s:.11,bob:6,per:5.2,rot:-8,a:.9},{x:.90,y:.26,s:.09,bob:5,per:6.1,rot:10,a:.85},
@@ -4113,8 +4114,7 @@ function PzxWorld({onBack}){
       const cur=selR.current;
       for(let i=6;i>=0;i--){const boss=i===6,cfg=boss?PZX_WORLD.boss:PZX_WORLD.stage,img=boss?imgs.boss:imgs.st,a=p[i];if(!img)continue;const sz=W*cfg.size;
         c.save();c.shadowColor=cur===i?'#dcd8ff':'#4959e0';c.shadowBlur=cur===i?22:4;c.drawImage(img,a.x-sz/2,a.y-sz*cfg.anchor,sz,sz);c.restore();
-        c.save();c.textAlign='center';c.textBaseline='middle';c.fillStyle=boss?'#fff3c4':'#eef3ff';c.shadowColor=boss?'#ffd27a':'#8fb8ff';c.shadowBlur=10;
-        if(boss){c.font='700 '+(sz*.16)+'px Cinzel,serif';c.fillText('BOSS',a.x,a.y-sz*.02);}else{c.font='700 '+(sz*.30)+'px Cinzel,serif';c.fillText(String(i+1).padStart(2,'0'),a.x,a.y+sz*.01);}c.restore();}
+}
     };
     const loop=now=>{if(!alive)return;if(last&&document.visibilityState!=='hidden')t+=Math.min((now-last)/1000,.05);last=now;draw();raf=requestAnimationFrame(loop);};
     Promise.all([load(PZX.dir+'world-bg.webp'),load(PZX.dir+'crystal.webp'),load(PZX.dir+'star-ring.webp'),load(PZX.dir+'stage.webp'),load(PZX.dir+'stage-boss.webp')]).then(([bg,cr,ring,st,boss])=>{if(!alive)return;imgs={bg,cr,ring,st,boss};raf=requestAnimationFrame(loop);});
