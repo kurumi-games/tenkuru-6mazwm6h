@@ -2136,7 +2136,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pz-rel .ray{position:absolute;left:50%;top:50%;width:2px;height:120vh;background:linear-gradient(180deg,transparent,rgba(255,240,200,.35),transparent);transform-origin:center;animation:pzRay 6s linear infinite;pointer-events:none;}
 @keyframes pzRay{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
 /* ギャラリー：カードの装い */
-.pz-gal .shop{width:min(92vw,calc(330 * var(--u)));margin-top:calc(8 * var(--u));text-align:center;}
+.pz-gal .shop{width:100%;margin-top:calc(4 * var(--u));text-align:center;padding:calc(12 * var(--u)) 0 calc(4 * var(--u));border-top:1px solid rgba(190,180,255,.2);}
 .pz-gal .backs{display:flex;gap:calc(8 * var(--u));justify-content:center;}
 .pz-gal .bk{flex:1;background:rgba(16,14,48,.72);border:1px solid rgba(190,180,255,.28);border-radius:calc(12 * var(--u));padding:calc(6 * var(--u));display:flex;flex-direction:column;align-items:center;gap:calc(4 * var(--u));}
 .pz-gal .bk.sel{border-color:#ffd27a;box-shadow:0 0 14px rgba(255,200,110,.3);}
@@ -3315,7 +3315,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v210'; // v210(2026/09/14): 統一イラストに全面差し替え（トモリ・コハク・オルビィ、3×2）。裏パネル（クリアで解放、ボス強化）。星のかけら（ボス撃破）でカードの装い3種を交換・装着（ギャラリー）
+const APP_VER='v211'; // v211(2026/09/14): ギャラリーのレイアウト修正（記憶の文が隠れて「カードの装い」と重なっていた→全体を1本のスクロールに）。裏パネルはクリアするまでギャラリーに出さない
+// const APP_VER='v210'; // v210(2026/09/14): 統一イラストに全面差し替え（トモリ・コハク・オルビィ、3×2）。裏パネル（クリアで解放、ボス強化）。星のかけら（ボス撃破）でカードの装い3種を交換・装着（ギャラリー）
 // const APP_VER='v209'; // v209(2026/09/14): 撃破後の解放イベント（本人が光に包まれ、一言残す）とホームの「ギャラリー」（解放したキャラの完成絵・二つ名・記憶3行）。STAGE2のキャラ名は「コハク」、ランタンの少女は「トモリ」
 // const APP_VER='v208'; // v208(2026/09/14): 落下中もスロットの形を残す。STAGE1・2のボスは絵から切り抜いた本人が対戦フィールドに立つ（撃破で光って消える）
 // const APP_VER='v207'; // v207(2026/09/14): オルビィの切り抜きを元画像から作り直し（白いゴミ・縁の除去、キャラ本来の輪郭でシルエット・6ピース・完成画像を統一）。顔ピースは最後。旧進捗は枚数を引き継ぎ
@@ -4329,7 +4330,7 @@ function PuzzleResult({data,pn,piece,count,boss,gain,onNext,onPanel,onRetry}){
 function Gallery({save,onBack,onBuy,onEquip}){
   return h('div',{className:'pz-gal'},
     h('div',{className:'k'},'GALLERY'),h('div',{className:'t'},'解放した記憶'),
-    h('div',{className:'list'},PANELS.map(pn=>{const st=pzState(save,pn);
+    h('div',{className:'list'},PANELS.filter(pn=>!pn.second||pzState(save,pn).cleared).map(pn=>{const st=pzState(save,pn);
       return h('div',{key:pn.id,className:'item'+(st.cleared?'':' lock')},
         st.cleared?h('img',{src:pn.dir+'complete.webp',alt:'',draggable:false})
           :h('svg',{viewBox:'0 0 '+pn.w+' '+pn.h,xmlns:'http://www.w3.org/2000/svg'},pn.pieces.map((p,j)=>h('path',{key:j,d:p.path}))),
@@ -4337,7 +4338,7 @@ function Gallery({save,onBack,onBuy,onEquip}){
         h('div',{className:'nm'},st.cleared?pn.bossName:'？？？'),
         st.cleared&&pn.lore&&h('div',{className:'lore'},pn.lore.map((l,i)=>h('div',{key:i},l))),
         st.cleared&&pn.line&&h('div',{className:'ln'},'「'+pn.line+'」')
-      );})),
+      );}),
     h('div',{className:'shop'},
       h('div',{className:'k'},'CARD SKIN'),h('div',{className:'t',style:{margin:'calc(2 * var(--u)) 0 calc(6 * var(--u))'}},'カードの装い　✦ '+(save.shards||0)),
       h('div',{className:'backs'},CARD_BACKS.map(b=>{const owned=(save.backs||[]).includes(b.id),sel=save.backSel===b.id,can=(save.shards||0)>=b.cost;
@@ -4348,7 +4349,7 @@ function Gallery({save,onBack,onBuy,onEquip}){
                :h('button',{className:'sm'+(can?' buy':''),disabled:!can,onClick:()=>onBuy(b)},'✦ '+b.cost)
         );})),
       h('div',{className:'note'},'星のかけら：ボス撃破で ＋'+SHARD.first+'（再戦 ＋'+SHARD.repeat+'、裏パネル ＋'+SHARD.second+'）')
-    ),
+    )),
     h('button',{className:'home',onClick:onBack},'ホームへ')
   );
 }
