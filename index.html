@@ -2035,18 +2035,19 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-nd.soon{opacity:.55;cursor:default;}
 /* ===== v217 パズルクス：絵の中の世界（浮遊マップ）と結果 ===== */
 .pzx-world{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#07091b;display:flex;flex-direction:column;align-items:center;font-family:'Noto Serif JP',serif;color:#e6ecfa;overflow:hidden;}
-.pzx-world .top{flex:none;width:100%;display:flex;align-items:center;justify-content:space-between;padding:calc(10 * var(--u)) calc(12 * var(--u)) calc(4 * var(--u));z-index:2;}
+.pzx-world .top{position:absolute;left:0;top:0;width:100%;display:flex;align-items:center;justify-content:space-between;padding:calc(10 * var(--u)) calc(12 * var(--u)) calc(4 * var(--u));z-index:2;background:linear-gradient(180deg,rgba(7,9,27,.7),transparent);}
 .pzx-world .top .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
 .pzx-world .top .pc{font-family:'Fira Code',monospace;font-size:calc(11 * var(--u));color:#ded2b1;letter-spacing:.1em;}
 .pzx-world .top button{min-height:calc(32 * var(--u));padding:0 calc(14 * var(--u));border-radius:999px;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.7);color:#d6cfff;font-family:inherit;font-size:calc(11.5 * var(--u));cursor:pointer;}
-.pzx-world .sky{position:relative;flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;}
-.pzx-world .stage{position:relative;height:100%;aspect-ratio:9 / 16;max-width:100%;}
+.pzx-world .sky{position:absolute;inset:0;}
+.pzx-world .stage{position:absolute;inset:0;}
 .pzx-world canvas{display:block;width:100%;height:100%;}
 .pzx-world .hit{position:absolute;width:19%;height:9%;transform:translate(-50%,-50%);background:transparent;border:0;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;}
 .pzx-world .hit.boss{width:30%;height:14%;}
 /* 下の札：選んだ島の説明 */
-.pzx-card{flex:none;width:min(94vw,calc(340 * var(--u)));margin:calc(6 * var(--u)) 0 calc(12 * var(--u));padding:calc(10 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u));border-radius:calc(14 * var(--u));background:rgba(10,12,40,.86);border:1px solid rgba(190,180,255,.3);box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:2;}
-.pzx-card .hd{display:flex;align-items:baseline;justify-content:space-between;gap:calc(8 * var(--u));}
+.pzx-card{position:absolute;left:50%;bottom:calc(14 * var(--u));transform:translateX(-50%);width:min(94vw,calc(340 * var(--u)));animation:pzxIn .28s ease both;padding:calc(10 * var(--u)) calc(14 * var(--u)) calc(12 * var(--u));border-radius:calc(14 * var(--u));background:rgba(10,12,40,.86);border:1px solid rgba(190,180,255,.3);box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:2;}
+.pzx-card .hd{display:flex;align-items:baseline;justify-content:space-between;gap:calc(8 * var(--u));padding-right:calc(26 * var(--u));}
+.pzx-card .x{position:absolute;right:calc(8 * var(--u));top:calc(6 * var(--u));width:calc(28 * var(--u));height:calc(28 * var(--u));border-radius:50%;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.7);color:#d6cfff;font-size:calc(14 * var(--u));cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .pzx-card .no{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.3em;color:#b9a8ff;}
 .pzx-card .nm{font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.12em;}
 .pzx-card .st{font-size:calc(10 * var(--u));color:#ded2b1;letter-spacing:.06em;white-space:nowrap;}
@@ -3208,7 +3209,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v219'; // v219(2026/09/14): パズルクスの対戦画面をいつもの背景に戻した（絵の中の空は見づらいので使わない。対戦フィールドは勝手に変えない）
+const APP_VER='v220'; // v220(2026/09/14): 絵の中のマップは画面いっぱい（cover）。島の札は島を押した時だけ出る（✕で閉じる）。ピースを持つ島は勝った扱いで次が開く
+// const APP_VER='v219'; // v219(2026/09/14): パズルクスの対戦画面をいつもの背景に戻した（絵の中の空は見づらいので使わない。対戦フィールドは勝手に変えない）
 // const APP_VER='v218'; // v218(2026/09/14): パズルクスの絵の主＝ネフィラ（ボス名）。パネル画面に「はじめから」（2回押しで進行リセット、本編の★は触らない）
 // const APP_VER='v217'; // v217(2026/09/14): パズルクス「絵の中の世界」：浮遊マップ（img/pzx/world-bg・island・boss、島が上下・光の道）と7つの島（6ステージ＋ボス）。勝てば次の島、条件（PZX_STAGES.cond）を満たすとピース、6枚でボス解放。v216（チャッピー版）は破棄
 // const APP_VER='v215'; // v215(2026/09/14): レッスン・パズル・ギャラリーを廃止して削除（画面・データ・画像 img/panel_* img/backs pedestal piece-snap も削除）。スコア制度も廃止。ホームは「遊ぶ」「パズルクス」「あそびかた」。決着演出（WIN/LOSE）と星環ギミックのエンジンだけパズルクス用に残置
@@ -3474,7 +3476,7 @@ STAGES.areas[1]=PZX_AREA;
 // 島の位置（幅・高さに対する割合、下から上へ。最後がボス）
 const PZX_NODES=[{x:.29,y:.86},{x:.70,y:.76},{x:.31,y:.66},{x:.69,y:.56},{x:.31,y:.46},{x:.70,y:.36},{x:.50,y:.205}];
 function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[],won:P.won||[],boss:!!P.boss};}
-function pzxOpen(save,i){const P=pzxState(save);if(i>=6)return P.got.length>=PZX.pieces.length;if(i===0)return true;return P.won.includes(PZX_STAGES[i-1].no);}
+function pzxOpen(save,i){const P=pzxState(save);if(i>=6)return P.got.length>=PZX.pieces.length;if(i===0)return true;return P.won.includes(PZX_STAGES[i-1].no)||P.got.includes(i-1);} // ピースを持っている島は勝ったとみなす
 function boostDiff(d){if(!DEALER_BOOST.enabled)return d;const i=DIFF_ORDER.indexOf(d);return i<0?d:DIFF_ORDER[Math.min(3,i+DEALER_BOOST.diffUp)];}
 // ── v197 パズル用の新ギミック（相手の星環カードを場に出した瞬間だけ発動）：数値はここだけで調整 ──
 // 毎ラウンド開始時 GK_RING_RATE の確率で、相手の手札1枚に星環が付く。相手はその札を普通に出せる
@@ -4117,7 +4119,7 @@ function PzxPanel({save,onEnter,onBack,onReset}){
 function PzxWorld({save,onPick,onBack}){
   const P=pzxState(save);
   const firstOpen=PZX_STAGES.findIndex((st,i)=>pzxOpen(save,i)&&!P.won.includes(st.no));
-  const[sel,setSel]=useState(firstOpen>=0?firstOpen:(P.got.length>=6&&!P.boss?6:0));
+  const[sel,setSel]=useState(firstOpen>=0?firstOpen:(P.got.length>=6&&!P.boss?6:0));const[card,setCard]=useState(false); // 札は島を押した時だけ
   const canvasR=useRef(null),wrapR=useRef(null),selR=useRef(sel);selR.current=sel;
   useEffect(()=>{
     const cv=canvasR.current,wrap=wrapR.current;if(!cv||!wrap)return;
@@ -4129,7 +4131,7 @@ function PzxWorld({save,onPick,onBack}){
     const pos=()=>PZX_NODES.map((n,i)=>({x:n.x*W,y:n.y*H+(reduced?0:Math.sin(t*(.76+i*.037)+i*1.1)*(i===6?3:4)*W/430)}));
     const draw=()=>{
       if(!imgs)return;const c=ctx;c.clearRect(0,0,W,H);
-      const drift=reduced?0:Math.sin(t*.12)*W*.006;if(imgs.bg)c.drawImage(imgs.bg,-W*.02+drift,-H*.018,W*1.04,H*1.04);
+      const drift=reduced?0:Math.sin(t*.12)*W*.006;if(imgs.bg){const k=Math.max(W/imgs.bg.width,H/imgs.bg.height)*1.04,bw=imgs.bg.width*k,bh=imgs.bg.height*k;c.drawImage(imgs.bg,(W-bw)/2+drift,(H-bh)/2,bw,bh);} // 画面いっぱい（cover）
       c.fillStyle='rgba(4,8,31,.32)';c.fillRect(0,0,W,H);
       for(let i=0;i<25;i++){const x=((i*137.7)%997)/997*W,y=(((i*251.3)%991)/991*H-t*(1+i%3)*.55+H*20)%H;c.globalAlpha=.24+.3*(.5+.5*Math.sin(t*.5+i));c.fillStyle=i%2?'#b9bdff':'#e0f6ff';c.beginPath();c.arc(x,y,.65+(i%3)*.25,0,Math.PI*2);c.fill();}c.globalAlpha=1;
       const p=pos(),cur=selR.current;
@@ -4159,9 +4161,10 @@ function PzxWorld({save,onPick,onBack}){
     h('div',{className:'top'},h('button',{onClick:onBack},'‹ パネル'),h('div',{className:'k'},'PUZZLUX'),h('div',{className:'pc'},'PIECE '+P.got.length+' / '+PZX.pieces.length)),
     h('div',{className:'sky'},h('div',{className:'stage',ref:wrapR},
       h('canvas',{ref:canvasR}),
-      PZX_NODES.map((n,i)=>h('button',{key:i,className:'hit'+(i===6?' boss':''),style:{left:(n.x*100)+'%',top:(n.y*100)+'%'},'aria-label':i===6?'ボス':'ステージ'+(i+1),onClick:()=>{setSel(i);try{resumeAC();fxTone({f:880,f2:1320,type:'sine',v:0.03,a:0.005,d:0.12,rev:0.3});}catch(e){}}}))
+      PZX_NODES.map((n,i)=>h('button',{key:i,className:'hit'+(i===6?' boss':''),style:{left:(n.x*100)+'%',top:(n.y*100)+'%'},'aria-label':i===6?'ボス':'ステージ'+(i+1),onClick:()=>{setSel(i);setCard(true);try{resumeAC();fxTone({f:880,f2:1320,type:'sine',v:0.03,a:0.005,d:0.12,rev:0.3});}catch(e){}}}))
     )),
-    h('div',{className:'pzx-card'},
+    card&&h('div',{className:'pzx-card'},
+      h('button',{className:'x',onClick:()=>setCard(false)},'✕'),
       h('div',{className:'hd'},h('div',null,h('div',{className:'no'},sel===6?'BOSS':'STAGE '+(sel+1)),h('div',{className:'nm'},open?st.name:'？？？')),
         h('div',{className:'st'+(got?' got':'')},got?(sel===6?'制覇':'ピース獲得済'):won?'勝利済':open?'未踏':'ロック')),
       open&&h('div',{className:'foe'},'相手：'+b.rival+'　'+b.gName+'　先取 '+b.winPt+' pt'),
