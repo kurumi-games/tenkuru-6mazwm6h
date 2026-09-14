@@ -2147,9 +2147,9 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pz-gal .bk button.sm.on{background:linear-gradient(115deg,#9a84ff,#6752da);color:#fff;border-color:transparent;}
 .pz-gal .bk button.sm:disabled{opacity:.45;cursor:default;}
 .pz-gal .note{font-size:calc(9.5 * var(--u));color:#9f9ac0;margin-top:calc(6 * var(--u));letter-spacing:.05em;}
-/* v210 装着したカードの装い：自分の手札の下地に。数字は読めるように帯を敷く */
-.gp-screen.skin .card-stage.cyan{--cardimg:var(--skin)!important;}
-.gp-screen.skin .card-stage.cyan .cs-num,.gp-screen.skin .card-stage.cyan .num{background:rgba(8,10,30,.62);border-radius:999px;padding:0 .3em;text-shadow:0 0 6px #000,0 0 12px #000;color:#fff!important;}
+/* v212 装着したカードの装い：手札は表向きなので札には貼らない。手札エリアの布（マット）と、裏向きになる札にだけ出す */
+.gp-screen.skin .gp-hand-area{background:linear-gradient(rgba(6,8,30,.58),rgba(6,8,30,.7)),var(--skin) center/cover no-repeat!important;}
+.gp-screen.skin .gp-dealer-card.hidden-card{background:var(--skin) center/cover no-repeat!important;}
 /* ギャラリー */
 .pz-gal{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#0a0d24 url('img/panel-bg.webp') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;padding:calc(18 * var(--u)) calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#e6ecfa;overflow:hidden;}
 .pz-gal::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,30,.62),rgba(6,8,30,.85));pointer-events:none;}
@@ -3315,7 +3315,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v211'; // v211(2026/09/14): ギャラリーのレイアウト修正（記憶の文が隠れて「カードの装い」と重なっていた→全体を1本のスクロールに）。裏パネルはクリアするまでギャラリーに出さない
+const APP_VER='v212'; // v212(2026/09/14): カードの装いを「手札マット＋裏向きの札」に変更（表向きの手札には貼らない。数字が読めなくなっていた）
+// const APP_VER='v211'; // v211(2026/09/14): ギャラリーのレイアウト修正（記憶の文が隠れて「カードの装い」と重なっていた→全体を1本のスクロールに）。裏パネルはクリアするまでギャラリーに出さない
 // const APP_VER='v210'; // v210(2026/09/14): 統一イラストに全面差し替え（トモリ・コハク・オルビィ、3×2）。裏パネル（クリアで解放、ボス強化）。星のかけら（ボス撃破）でカードの装い3種を交換・装着（ギャラリー）
 // const APP_VER='v209'; // v209(2026/09/14): 撃破後の解放イベント（本人が光に包まれ、一言残す）とホームの「ギャラリー」（解放したキャラの完成絵・二つ名・記憶3行）。STAGE2のキャラ名は「コハク」、ランタンの少女は「トモリ」
 // const APP_VER='v208'; // v208(2026/09/14): 落下中もスロットの形を残す。STAGE1・2のボスは絵から切り抜いた本人が対戦フィールドに立つ（撃破で光って消える）
