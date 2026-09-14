@@ -2135,6 +2135,33 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .ls-res .best .nb{color:#ffe08a;margin-left:calc(6 * var(--u));font-weight:700;}
 .ls-res .hint{font-size:calc(11 * var(--u));color:#c9c2ea;text-align:center;margin-top:calc(6 * var(--u));line-height:1.6;}
 .ls-res .hint b{color:#ffe08a;}
+/* ===== v214 パズルクス：線画パネルの中にステージが広がる（条件・ステージは後で） ===== */
+.pzx-screen{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#0a0d24 url('img/panel-bg.webp') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(14 * var(--u));padding:calc(18 * var(--u)) calc(12 * var(--u));font-family:'Noto Serif JP',serif;color:#e6ecfa;overflow:hidden;}
+.pzx-screen::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,30,.55),rgba(6,8,30,.8));pointer-events:none;}
+.pzx-screen>*{position:relative;z-index:1;}
+.pzx-screen .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#b9a8ff;}
+.pzx-screen .t{font-size:calc(16 * var(--u));font-weight:700;letter-spacing:.14em;margin-top:calc(-8 * var(--u));}
+.pzx-panel{position:relative;width:min(96vw,calc(340 * var(--u)));aspect-ratio:1672 / 941;border-radius:calc(6 * var(--u));overflow:hidden;box-shadow:0 0 0 1px rgba(190,180,255,.35),0 18px 40px rgba(0,0,0,.55),0 0 calc(30 * var(--u)) rgba(150,130,255,.25);background:#0b1030;}
+.pzx-panel img{position:absolute;display:block;pointer-events:none;-webkit-user-drag:none;}
+.pzx-panel .ol{inset:0;width:100%;height:100%;}
+.pzx-panel .pc{animation:pzxIn .6s cubic-bezier(.2,1.2,.4,1) both;box-shadow:0 0 calc(10 * var(--u)) rgba(200,190,255,.35);}
+@keyframes pzxIn{0%{opacity:0;transform:scale(1.12);}100%{opacity:1;transform:none;}}
+.pzx-panel .cp{inset:0;width:100%;height:100%;animation:pzxIn 1.2s ease both;}
+.pzx-screen .prog{font-family:'Fira Code',monospace;font-size:calc(12 * var(--u));color:#ded2b1;letter-spacing:.1em;}
+.pzx-screen .enter{margin-top:calc(4 * var(--u));min-height:calc(46 * var(--u));padding:0 calc(34 * var(--u));border-radius:999px;border:1px solid rgba(255,224,138,.55);background:linear-gradient(135deg,rgba(255,224,138,.22),rgba(150,120,255,.22));color:#fff3c4;font-family:inherit;font-size:calc(14 * var(--u));font-weight:700;letter-spacing:.2em;cursor:pointer;box-shadow:0 0 calc(18 * var(--u)) rgba(255,210,110,.25);}
+.pzx-screen .enter:active{transform:scale(.97);}
+.pzx-screen .home{min-height:calc(38 * var(--u));padding:0 calc(22 * var(--u));border-radius:999px;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.65);color:#d6cfff;font-family:inherit;font-size:calc(12.5 * var(--u));cursor:pointer;}
+/* 中のマップ（仮：道と6個の丸。絵が来たら差し替え） */
+.pzx-map{position:relative;width:min(94vw,calc(330 * var(--u)));aspect-ratio:330 / 420;border-radius:calc(16 * var(--u));overflow:hidden;background:rgba(10,12,40,.6);box-shadow:0 0 0 1px rgba(190,180,255,.25),0 12px 30px rgba(0,0,0,.5);}
+.pzx-map .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;filter:blur(2px) saturate(.8);}
+.pzx-map svg{position:absolute;inset:0;width:100%;height:100%;}
+.pzx-map path.road{fill:none;stroke:rgba(200,190,255,.45);stroke-width:3;stroke-dasharray:6 7;}
+.pzx-nd{cursor:pointer;}
+.pzx-nd circle.o{fill:rgba(30,24,80,.85);stroke:rgba(200,180,255,.7);stroke-width:2;}
+.pzx-nd circle.g{fill:none;stroke:rgba(200,180,255,.35);stroke-width:6;filter:blur(3px);}
+.pzx-nd text{fill:#fff3c4;font-family:'Cinzel',serif;font-weight:700;font-size:15px;text-anchor:middle;dominant-baseline:central;}
+.pzx-nd text.s{fill:#b9b2d8;font-family:'Noto Serif JP',serif;font-weight:400;font-size:8px;}
+.pzx-nd.soon{opacity:.55;cursor:default;}
 .pz-sel{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#0a0d24 url('img/panel-bg.webp') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;padding:calc(18 * var(--u)) calc(16 * var(--u));font-family:'Noto Serif JP',serif;color:#e6ecfa;overflow:hidden;}
 .pz-sel::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,30,.6),rgba(6,8,30,.82));pointer-events:none;}
 .pz-sel>*{position:relative;z-index:1;}
@@ -3357,7 +3384,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v213'; // v213(2026/09/14): レッスンモード（HAMARU方式）追加。ホーム「レッスン」→5レベルを丸で並べる。勝った時だけスコア（点×100＋点差×50＋速さ）→★1〜5、★3で次のレベル解放。数値は LESSON_CFG
+const APP_VER='v214'; // v214(2026/09/14): パズルクス導入（ホーム「パズルクス」→線画パネル＋四角いピース6枚→「中へ入る」→仮マップ6ノード）。ステージ・ピース獲得条件は後で。素材は img/pzx
+// const APP_VER='v213'; // v213(2026/09/14): レッスンモード（HAMARU方式）追加。ホーム「レッスン」→5レベルを丸で並べる。勝った時だけスコア（点×100＋点差×50＋速さ）→★1〜5、★3で次のレベル解放。数値は LESSON_CFG
 // const APP_VER='v212'; // v212(2026/09/14): カードの装いを「手札マット＋裏向きの札」に変更（表向きの手札には貼らない。数字が読めなくなっていた）
 // const APP_VER='v211'; // v211(2026/09/14): ギャラリーのレイアウト修正（記憶の文が隠れて「カードの装い」と重なっていた→全体を1本のスクロールに）。裏パネルはクリアするまでギャラリーに出さない
 // const APP_VER='v210'; // v210(2026/09/14): 統一イラストに全面差し替え（トモリ・コハク・オルビィ、3×2）。裏パネル（クリアで解放、ボス強化）。星のかけら（ボス撃破）でカードの装い3種を交換・装着（ギャラリー）
@@ -3610,6 +3638,13 @@ function lessonScore(pp,dp,sec){
 function lessonStars(lvIdx,won,total){
   if(!won)return 0;const lv=LESSON_CFG.levels[lvIdx];let n=1;lv.th.forEach(t=>{if(total>=t)n++;});return n;
 }
+// ── v214 パズルクス：線画のパネル（3×2）に四角いピースがはまる。ピースは勝利では貰えず「各ステージの条件」で貰う（条件・ステージは後で作る） ──
+const PZX={dir:'img/pzx/',w:1672,h:941,outline:'outline.webp',complete:'complete.webp',
+  pieces:[{id:'piece_01',x:0,y:0,w:557,h:470},{id:'piece_02',x:557,y:0,w:557,h:470},{id:'piece_03',x:1114,y:0,w:558,h:470},{id:'piece_04',x:0,y:470,w:557,h:471},{id:'piece_05',x:557,y:470,w:557,h:471},{id:'piece_06',x:1114,y:470,w:558,h:471}],
+  // マップの仮ノード（viewBox 330×420、下から上へ）。ステージの中身は未定
+  map:[{no:1,x:60,y:370},{no:2,x:170,y:330},{no:3,x:270,y:270},{no:4,x:180,y:210},{no:5,x:80,y:150},{no:6,x:170,y:60}],
+};
+function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[]};}
 function lessonState(save){const L=(save&&save.lesson)||{};return {stars:L.stars||{},best:L.best||{}};}
 function lessonUnlocked(save,lvIdx){if(lvIdx<=0)return true;const L=lessonState(save);const prev=LESSON_CFG.levels[lvIdx-1];return (L.stars[prev.no]||0)>=LESSON_CFG.unlockStars;}
 function boostDiff(d){if(!DEALER_BOOST.enabled)return d;const i=DIFF_ORDER.indexOf(d);return i<0?d:DIFF_ORDER[Math.min(3,i+DEALER_BOOST.diffUp)];}
@@ -3806,7 +3841,7 @@ function SkillPanel(){
     )
   );
 }
-function TitleScreen({onPlay,onPuzzle,onLesson,onGallery,onTutorial,musicOn,toggleMusic}){
+function TitleScreen({onPlay,onPuzzle,onPuzzlux,onLesson,onGallery,onTutorial,musicOn,toggleMusic}){
   const btnBase={borderRadius:14,padding:'15px 0',fontSize:13,fontWeight:800,letterSpacing:2,cursor:'pointer',fontFamily:"'Inter',sans-serif",background:'rgba(255,255,255,.78)',boxShadow:'0 4px 16px rgba(70,100,150,.16), inset 0 1px 0 #fff',width:'100%'};
   return h('div',{style:{minHeight:'100vh',background:"url('img/title-bg.jpg') center/cover no-repeat, #eef2f8",display:'flex',alignItems:'center',justifyContent:'center',padding:16,position:'relative'}},
     h('div',{style:{textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:18,width:'100%',maxWidth:340,animation:'fadeUp 0.5s ease'}},
@@ -3816,6 +3851,7 @@ function TitleScreen({onPlay,onPuzzle,onLesson,onGallery,onTutorial,musicOn,togg
         h('button',{onClick:onPlay,style:{...btnBase,padding:'17px 0',fontSize:16,letterSpacing:6,border:'1.5px solid rgba(46,127,232,.55)',color:'#2e7fe8',boxShadow:'0 6px 20px rgba(46,127,232,.22), inset 0 1px 0 #fff'}},'遊ぶ'),
         h('button',{onClick:onPuzzle,style:{...btnBase,padding:'13px 0',fontSize:13,letterSpacing:4,border:'1.5px solid rgba(230,180,90,.5)',color:'#b07a1e',boxShadow:'0 5px 18px rgba(230,180,90,.2), inset 0 1px 0 #fff'}},'パズル'), // v181
         h('button',{onClick:onLesson,style:{...btnBase,padding:'13px 0',fontSize:13,letterSpacing:4,border:'1.5px solid rgba(150,110,240,.5)',color:'#7a4fd0',boxShadow:'0 5px 18px rgba(150,110,240,.2), inset 0 1px 0 #fff'}},'レッスン'), // v213
+        h('button',{onClick:onPuzzlux,style:{...btnBase,padding:'13px 0',fontSize:13,letterSpacing:4,border:'1.5px solid rgba(80,160,230,.5)',color:'#2b7fb8',boxShadow:'0 5px 18px rgba(80,160,230,.2), inset 0 1px 0 #fff'}},'パズルクス'), // v214
         h('button',{onClick:onGallery,style:{...btnBase,padding:'10px 0',fontSize:12,letterSpacing:4,border:'1.5px solid rgba(120,150,190,.35)',color:'#6a7fa8',boxShadow:'0 3px 10px rgba(70,100,150,.12), inset 0 1px 0 #fff'}},'ギャラリー'), // v209
         h('button',{onClick:onTutorial,style:{...btnBase,padding:'10px 0',fontSize:11,fontWeight:700,background:'rgba(255,255,255,.55)',border:'1.5px solid rgba(120,150,190,.35)',color:'#5a80ab',boxShadow:'0 3px 10px rgba(70,100,150,.12)'}},'✦ あそびかた')
       ),
@@ -4425,6 +4461,38 @@ function Gallery({save,onBack,onBuy,onEquip}){
   );
 }
 // v205 パネル選択：どのステージ（パネル）を進めるか自由に選ぶ。未獲得は暗い形、獲得済みは少し明るい形。クリア済みは完成絵の小さな表示
+// ── v214 パズルクス：パネル画面（線画＋獲得ピース）／中のマップ（仮） ──
+function PzxPanel({save,onEnter,onBack}){
+  const st=pzxState(save),N=PZX.pieces.length,done=st.got.length>=N;
+  return h('div',{className:'pzx-screen'},
+    h('div',{className:'k'},'PUZZLUX'),h('div',{className:'t'},'パズルクス'),
+    h('div',{className:'pzx-panel'},
+      h('img',{className:'ol',src:PZX.dir+PZX.outline,alt:'',draggable:false}),
+      !done&&PZX.pieces.map((p,i)=>st.got.includes(i)&&h('img',{key:p.id,className:'pc',src:PZX.dir+p.id+'.webp',alt:'',draggable:false,style:{left:(p.x/PZX.w*100)+'%',top:(p.y/PZX.h*100)+'%',width:(p.w/PZX.w*100)+'%',height:(p.h/PZX.h*100)+'%'}})),
+      done&&h('img',{className:'cp',src:PZX.dir+PZX.complete,alt:'',draggable:false})
+    ),
+    h('div',{className:'prog'},'PIECE '+st.got.length+' / '+N),
+    h('button',{className:'enter',onClick:onEnter},'中へ入る'),
+    h('button',{className:'home',onClick:onBack},'ホームへ')
+  );
+}
+function PzxMap({save,onBack}){
+  const pts=PZX.map;const d=pts.map((p,i)=>(i?'L':'M')+p.x+' '+p.y).join(' ');
+  return h('div',{className:'pzx-screen'},
+    h('div',{className:'k'},'PUZZLUX'),h('div',{className:'t'},'パネルの中'),
+    h('div',{className:'pzx-map'},
+      h('img',{className:'bg',src:PZX.dir+PZX.complete,alt:'',draggable:false}),
+      h('svg',{viewBox:'0 0 330 420',xmlns:'http://www.w3.org/2000/svg'},
+        h('path',{className:'road',d}),
+        pts.map(p=>h('g',{key:p.no,className:'pzx-nd soon',transform:'translate('+p.x+','+p.y+')'},
+          h('circle',{className:'g',r:24}),h('circle',{className:'o',r:20}),
+          h('text',{y:-1},String(p.no)),h('text',{className:'s',y:34},'準備中')))
+      )
+    ),
+    h('div',{className:'prog'},'6つのステージ　条件を満たすとピースがはまる'),
+    h('button',{className:'home',onClick:onBack},'パネルへ戻る')
+  );
+}
 // ── v213 レッスン：レベル選択 ──
 function LessonSelect({save,onPick,onBack}){
   const L=lessonState(save);
@@ -6141,13 +6209,15 @@ function App(){
   if(phase==='gallery')return h(Gallery,{save,onBack:()=>{setPhase('menu');phaseR.current='menu';},
     onBuy:b=>{updSave(s=>{if((s.shards||0)<b.cost||(s.backs||[]).includes(b.id))return s;s.shards=(s.shards||0)-b.cost;s.backs=[...(s.backs||[]),b.id];s.backSel=b.id;return s;});try{resumeAC();fxBell({f:1568,v:0.06,d:0.8,bright:1.2,rev:0.7});}catch(e){}},
     onEquip:id=>{updSave(s=>{s.backSel=id;return s;});}}); // v209/v210
+  if(phase==='pzx')return h(PzxPanel,{save,onEnter:()=>{setPhase('pzxmap');phaseR.current='pzxmap';},onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v214
+  if(phase==='pzxmap')return h(PzxMap,{save,onBack:()=>{setPhase('pzx');phaseR.current='pzx';}}); // v214
   if(phase==='lesson')return h(LessonSelect,{save,onPick:startLessonBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v213
   if(phase==='pzselect')return h(PanelSelect,{save,onPick:pn=>{updSave(s=>{s.pzSel=pn.id;return s;});pzPanelR.current=pn;setPzView(v=>v+1);setPhase('puzzle');phaseR.current='puzzle';},onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v205
   if(phase==='puzzle'){const pn=pzPanelR.current||pzActive(save);
     return h(PuzzleScreen,{key:pzKey(pn)+'-'+pzBattleR.current+'-'+pzView,save,pn,onPlaced:pzPlaced,onNext:startPuzzleBattle,onBack:()=>{setPhase('pzselect');phaseR.current='pzselect';},
       hasNext:PANELS.slice(PANELS.indexOf(pn)+1).some(x=>pzUnlocked(save,x)),onNextStage:()=>{const nx=PANELS.slice(PANELS.indexOf(pn)+1).find(x=>pzUnlocked(save,x));if(!nx)return;updSave(s=>{s.pzSel=nx.id;return s;});pzPanelR.current=nx;setPzView(v=>v+1);},
       onReset:()=>{updSave(s=>pzWrite(s,pn,{got:[],placed:[],cleared:false}));pzPanelR.current=null;setPzView(v=>v+1);}});} // v180 / v198 / v200
-  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzle:()=>{pzPanelR.current=null;setPhase('pzselect');phaseR.current='pzselect';},onLesson:goLesson,onGallery:()=>{setPhase('gallery');phaseR.current='gallery';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
+  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzle:()=>{pzPanelR.current=null;setPhase('pzselect');phaseR.current='pzselect';},onLesson:goLesson,onPuzzlux:()=>{setPhase('pzx');phaseR.current='pzx';},onGallery:()=>{setPhase('gallery');phaseR.current='gallery';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
   if(phase==='brief'&&curStage)return h(BriefScreen,{stage:curStage,onStart:()=>startGame(pendingDiff)}); // v119
