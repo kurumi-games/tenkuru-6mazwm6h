@@ -3220,7 +3220,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v244'; // v244(2026/09/15): ミッション1を実装（くるみ決定の相手設定＋条件「勝つ＋バースト1回以内」、フィールド効果なし）
+const APP_VER='v245'; // v245(2026/09/15): ミッション2を実装（くるみ決定の相手設定＋条件「勝つ＋3を決定打にして10を2回」）。10の記録に決定打の数字（last）を追加
+// const APP_VER='v244'; // v244(2026/09/15): ミッション1を実装（くるみ決定の相手設定＋条件「勝つ＋バースト1回以内」、フィールド効果なし）
 // const APP_VER='v243'; // v243(2026/09/15): ミッション6を実装（くるみ決定の相手設定＋条件「勝つ＋自分の手で9を2回」＋フィールド効果「9」＝9にした側が相手を2秒止める、両者平等、星環なし）。ステージには nineStop:true / winMsAbs / cardSpeed で書ける
 // const APP_VER='v242'; // v242(2026/09/15): 調整から「1枚目の初速」を外す（1枚目のメーターで足りる）。決定打だけ残す
 // const APP_VER='v241'; // v241(2026/09/15): 調整に「1枚目の初速」「決定打」（msで直接指定、0＝メーター通り）。ステージでは firstMs / winMsAbs
@@ -3502,14 +3503,16 @@ const PZX_WORLD={
 };
 // ── v237 パズルクス：6ミッション＋ネフィラ。「対戦」1個で今のミッションの相手と即対戦。達成した勝ちでピース、15枚そろったらネフィラ戦 ──
 // ★ 条件と相手の強さはくるみが決める。今は全部「仮」（勝てば達成、相手はふつうのDEALER）。1行＝1ミッション、ここを書き換えるだけで反映される
-// 判定に使えるもの：m.win（勝ち）／m.pp（自分の点）／m.dp（相手の点）／m.bursts（自分のバースト回数）／m.tens（自分が作った10の一覧 {voice:役名, n:枚数}）／m.sec（試合秒数）
+// 判定に使えるもの：m.win（勝ち）／m.pp（自分の点）／m.dp（相手の点）／m.bursts（自分のバースト回数）／m.tens（自分が作った10の一覧 {voice:役名, n:枚数, last:決定打の数字}）／m.nines（自分の手で9にした回数）／m.sec（試合秒数）
 // 相手の強さに使えるもの：diff（easy/normal/hard/master、通常は+2段の強化が乗る）、speed（小さいほど速い）、smart（読む）、deny（10を作らせない）、ability（'freeze'/'orbit'）、playerRing、winPt、timeLimit、noBoost（強化を乗せない）
 const PZX_MISSION_TODO=m=>m.win; // 仮の判定：勝てば達成
 const PZX_STAGES=[
   // v244 くるみ決定：相手＝MASTER・読み・封じなし・速さ[.2,.35,.35,.35]・決定打660ms・通常の強化あり・先取10・持ち時間5秒。フィールド効果なし
   {no:101,rivalName:'DEALER',name:'MISSION 1',icon:'card',winPt:10,timeLimit:5,diff:'master',rule:'normal',smart:true,cardSpeed:[.2,.35,.35,.35],winMsAbs:660,
     mission:{text:'勝つ ＋ バースト1回以内',check:m=>m.win&&m.bursts<=1}},
-  {no:102,rivalName:'DEALER',name:'MISSION 2',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  // v245 くるみ決定：相手＝MASTER・読み・封じなし・速さ[.2,.35,.35,.35]・決定打550ms・通常の強化あり・先取10・持ち時間5秒。フィールド効果なし
+  {no:102,rivalName:'DEALER',name:'MISSION 2',icon:'card',winPt:10,timeLimit:5,diff:'master',rule:'normal',smart:true,cardSpeed:[.2,.35,.35,.35],winMsAbs:550,
+    mission:{text:'勝つ ＋ 「3」を決定打にして10を2回作る',check:m=>m.win&&m.tens.filter(t=>t.last===3).length>=2}},
   {no:103,rivalName:'DEALER',name:'MISSION 3',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
   {no:104,rivalName:'DEALER',name:'MISSION 4',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
   {no:105,rivalName:'DEALER',name:'MISSION 5',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
@@ -5855,7 +5858,7 @@ function App(){
   function completeTen(nf,who,rn){
       clearTimers();lockR.current=true;resolvingR.current=true;
       const pts=calcPts(nf);
-      if(who==='player')matchStatsR.current.tens.push({voice:pts.voice||'役なし',n:nf.length}); // v217
+      if(who==='player')matchStatsR.current.tens.push({voice:pts.voice||'役なし',n:nf.length,last:nf[nf.length-1]}); // v217/v245 last=決定打に使った札の数字
       const prevPPv=pPtR.current;
       const newPP=who==='player'?pPtR.current+pts.total:pPtR.current;
       const newDP=who==='dealer'?dPtR.current+pts.total:dPtR.current;
