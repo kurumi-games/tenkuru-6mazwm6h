@@ -3223,7 +3223,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v248'; // v248(2026/09/15): ミッション5を実装（くるみ決定の相手設定＋条件「バースト0で勝つ」＋フィールド効果「お互い相手の手札が見えない」）。ステージには blind:true（相手の手札は裏向き表示、相手の思考もこちらの手札を見ない＝1〜9どれでも持ってるかもで読む）
+const APP_VER='v249'; // v249(2026/09/15): ミッション3で決着後リザルトが出ないバグ修正（判定に渡す m に dtens/nines/timeups が入っておらず m.dtens が undefined でエラー→画面が止まっていた）。条件でエラーが出ても結果画面は出るようにガード
+// const APP_VER='v248'; // v248(2026/09/15): ミッション5を実装（くるみ決定の相手設定＋条件「バースト0で勝つ」＋フィールド効果「お互い相手の手札が見えない」）。ステージには blind:true（相手の手札は裏向き表示、相手の思考もこちらの手札を見ない＝1〜9どれでも持ってるかもで読む）
 // const APP_VER='v247'; // v247(2026/09/15): ミッション4を実装（くるみ決定の相手設定＋条件「勝つ＋タイムアップ0回」）
 // const APP_VER='v246'; // v246(2026/09/15): ミッション3を実装（くるみ決定の相手設定＋条件「勝つ＋相手にストレートを1回作らせる」＋フィールド効果「1ラウンド1回、両者の手札1枚が3秒凍結」）。相手側の凍結（dFrz、札IDで管理）を追加。ステージには frzBoth:{sec:3}
 // const APP_VER='v245'; // v245(2026/09/15): ミッション2を実装（くるみ決定の相手設定＋条件「勝つ＋3を決定打にして10を2回」）。10の記録に決定打の数字（last）を追加
@@ -5939,7 +5940,8 @@ function App(){
     if(c&&c.ar===2){setGameEndData({pPt:pp,dPt:dp,winner:win,draw:win==='draw',diff:diffRef.current,stars:0,rivalName:'TEST'});setPhase('gameEnd');phaseR.current='gameEnd';exitLink();return;} // v239 調整モード：何も記録しない
     if(c&&c.ar===1){ // v234 パズルクス：ミッション判定→ピース／ネフィラ制覇。本編の★には触らない
       const i=c.st,st=PZX_STAGES[i],S=matchStatsR.current,won=(win==='player');
-      const m={win:won,pp,dp,bursts:S.bursts,tens:S.tens,sec:Math.round((Date.now()-S.start)/1000)};m.ok=!!(st.mission&&st.mission.check(m));
+      const m={win:won,pp,dp,bursts:S.bursts,tens:S.tens,dtens:S.dtens||[],nines:S.nines||0,timeups:S.timeups||0,sec:Math.round((Date.now()-S.start)/1000)}; // v249 dtens/nines/timeups を渡し忘れていた
+      try{m.ok=!!(st.mission&&st.mission.check(m));}catch(e){m.ok=false;console.error('mission check error',e);} // v249 条件でエラーが出ても結果画面は必ず出す
       const before=pzxState(saveR.current);const gotNow=m.ok&&(i===PZX_BOSS?!before.boss:!before.got.includes(i));
       if(gotNow)updSave(s=>{const P=pzxState(s);s.pzx={got:i<PZX_BOSS?[...P.got,i]:P.got,boss:P.boss||i===PZX_BOSS};return s;});
       pzxLastR.current={idx:i,gotNow,t:Date.now()};
