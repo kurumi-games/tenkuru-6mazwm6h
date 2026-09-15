@@ -2164,12 +2164,12 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.charge-playing .gp-dealer-area .gp-area-label{font-size:calc(11 * var(--u)) !important;color:#aa4e06;}
 .gp-screen.charge-playing .gp-dealer-cards{flex-wrap:nowrap;gap:calc(2.5 * var(--u)) !important;}
 .gp-screen.charge-playing .gp-dealer-card{width:calc(30 * var(--u)) !important;}
-.gp-screen.charge-playing>.gp-field-area{grid-row:3;--card-w:calc(67 * var(--u));width:calc(100% - 44 * var(--u));height:100%;min-height:0 !important;padding:0 !important;margin:0;overflow:visible;gap:calc(14 * var(--u));}
+.gp-screen.charge-playing>.gp-field-area{grid-row:3;--card-w:calc(60 * var(--u));width:100%;height:100%;min-height:0 !important;padding:0 !important;margin:0;overflow:visible;gap:calc(14 * var(--u));}
 .gp-screen.charge-playing .charge-field-slot{width:var(--card-w);height:calc(var(--card-w) * 1.4);flex-shrink:0;border:calc(1.2 * var(--u)) dashed #aab7c8;border-radius:calc(6 * var(--u));background:#ffffff15;}
 .gp-screen.charge-playing>.gp-hand-area{grid-row:4;--card-w:calc(58 * var(--u));margin:0 !important;align-self:start;}
 .gp-screen.charge-playing .gp-hand-rows{margin:0;padding:calc(10 * var(--u)) calc(8 * var(--u));gap:calc(8 * var(--u));}
-.charge-hand-header{display:flex;align-items:center;gap:calc(10 * var(--u));height:calc(34 * var(--u));margin-bottom:calc(6 * var(--u));}
-.gp-screen.charge-playing .charge-hand-header .gp-area-label{padding:0;margin:0;color:#145fc2;font-size:calc(11 * var(--u));letter-spacing:calc(1.5 * var(--u));}
+.charge-hand-header{position:relative;display:flex;justify-content:center;align-items:center;gap:calc(10 * var(--u));height:calc(34 * var(--u));margin-bottom:calc(6 * var(--u));}
+.gp-screen.charge-playing .charge-hand-header .gp-area-label{position:absolute;left:0;padding:0;margin:0;color:#145fc2;font-size:calc(11 * var(--u));letter-spacing:calc(1.5 * var(--u));}
 .gp-screen.charge-playing>.gp-pause-btn{top:calc(20 * var(--u));right:calc(50% - 48 * var(--u));width:calc(38 * var(--u));height:calc(38 * var(--u));}
 .gp-screen.charge-playing .gp-icon-btn,.gp-screen.charge-playing .gp-track-btn{opacity:1 !important;color:#485a70 !important;}
 .charge-meter{--energy:#00a5ff;--energy-light:#75eaff;display:flex;align-items:center;gap:calc(6 * var(--u));width:calc(220 * var(--u));max-width:100%;min-width:0;margin:0;color:var(--energy);}
@@ -3326,7 +3326,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v255'; // v255: 手札チャージと綱引きゲージ、20点差で即決着
+const APP_VER='v256'; // v256: 自分のチャージと場の4枠を画面中央へ
+// const APP_VER='v255'; // v255: 手札チャージと綱引きゲージ、20点差で即決着
 // const APP_VER='v254'; // v254: 60秒チャージ（4個ゲージ・1.5秒回復・ラウンドなし）
 // const APP_VER='v253'; // v253: ホームに10秒ラッシュ（10秒間の得点勝負・5ラウンド先取）
 // const APP_VER='v252'; // v252(2026/09/15): リザルトの獲得ピース画像を小さく（50vw/150u → 30vw/90u）
