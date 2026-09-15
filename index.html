@@ -2009,7 +2009,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-screen>*{position:relative;z-index:1;}
 .pzx-screen .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#b9a8ff;}
 .pzx-screen .t{font-size:calc(16 * var(--u));font-weight:700;letter-spacing:.14em;margin-top:calc(-8 * var(--u));}
-.pzx-panel{position:relative;width:min(96vw,calc(340 * var(--u)));aspect-ratio:1672 / 941;border-radius:calc(6 * var(--u));overflow:hidden;box-shadow:0 0 0 1px rgba(190,180,255,.35),0 18px 40px rgba(0,0,0,.55),0 0 calc(30 * var(--u)) rgba(150,130,255,.25);background:#0b1030;}
+.pzx-panel{position:relative;width:min(96vw,calc(340 * var(--u)));aspect-ratio:1615 / 969;border-radius:calc(6 * var(--u));overflow:hidden;box-shadow:0 0 0 1px rgba(190,180,255,.35),0 18px 40px rgba(0,0,0,.55),0 0 calc(30 * var(--u)) rgba(150,130,255,.25);background:#0b1030;}
 .pzx-panel img{position:absolute;display:block;pointer-events:none;-webkit-user-drag:none;}
 .pzx-panel .ol{inset:0;width:100%;height:100%;}
 .pzx-panel .pc{animation:pzxIn .6s cubic-bezier(.2,1.2,.4,1) both;box-shadow:0 0 calc(10 * var(--u)) rgba(200,190,255,.35);}
@@ -2065,7 +2065,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-res .cond .mk{float:right;font-weight:700;font-size:calc(14 * var(--u));}
 .pzx-res .cond.ok .mk{color:#ffe08a;}
 .pzx-res .cond.ng .mk{color:#9f9ac0;}
-.pzx-res .piece{width:min(70vw,calc(200 * var(--u)));aspect-ratio:557 / 470;object-fit:cover;border-radius:calc(6 * var(--u));margin:calc(10 * var(--u)) auto 0;display:block;box-shadow:0 0 0 1px rgba(255,224,138,.5),0 0 calc(24 * var(--u)) rgba(255,210,110,.35);animation:pzxIn .8s cubic-bezier(.2,1.2,.4,1) .2s both;}
+.pzx-res .piece{width:min(50vw,calc(150 * var(--u)));aspect-ratio:1 / 1;object-fit:cover;border-radius:calc(6 * var(--u));margin:calc(10 * var(--u)) auto 0;display:block;box-shadow:0 0 0 1px rgba(255,224,138,.5),0 0 calc(24 * var(--u)) rgba(255,210,110,.35);animation:pzxIn .8s cubic-bezier(.2,1.2,.4,1) .2s both;}
 .pzx-res .pget{font-size:calc(13 * var(--u));font-weight:700;letter-spacing:.3em;color:#ffe08a;text-align:center;margin-top:calc(8 * var(--u));text-shadow:0 0 calc(12 * var(--u)) rgba(255,224,138,.6);animation:pzxIn .6s ease .7s both;}
 .pzx-res .stats{display:flex;justify-content:center;gap:calc(14 * var(--u));margin-top:calc(8 * var(--u));font-family:'Fira Code',monospace;font-size:calc(10.5 * var(--u));color:#9f9ac0;}
 .pzx-res .stats b{color:#e6ecfa;font-weight:400;}
@@ -3211,7 +3211,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v235'; // v235(2026/09/15): 15ピース（横5×縦3、piece_01〜15.webp）の土台。ミッション15＋ネフィラの枠（条件・相手はくるみが決める。今は全部「仮：勝てば達成」）。ピース画像・線画はチャッピーの新素材待ち
+const APP_VER='v236'; // v236(2026/09/15): チャッピーの15ピース素材（nephira-puzzle-15、1615×969、1枚323×323）を導入。完成絵・パネル・ピース差し替え
+// const APP_VER='v235'; // v235(2026/09/15): 15ピース（横5×縦3、piece_01〜15.webp）の土台。ミッション15＋ネフィラの枠（条件・相手はくるみが決める。今は全部「仮：勝てば達成」）。ピース画像・線画はチャッピーの新素材待ち
 // const APP_VER='v234'; // v234(2026/09/15): パズルクスの流れを短く：パネル画面に「今のミッション」と「対戦」1個。押した瞬間に相手と対戦（説明画面なし）→結果→パネル。ミッション達成の勝ちでピース、6枚でネフィラ戦、勝てば CLEAR。絵の中の世界・入る演出はコードに残すがホームからは行かない
 // const APP_VER='v233'; // v233(2026/09/15): 「中へ入る」の割れる演出を作り直し。パネルを写真に撮って衝撃点からヒビ（放射＋同心円）→フラッシュ→破片が裏返りながら飛んで落ちる＋粉。破片が飛び始めた時点で絵の中に切り替わり、破片はその上を落ちる。数値は FX_SHATTER
 // const APP_VER='v232'; // v232(2026/09/15): 「中へ入る」でパネルがサイコロみたいにパラパラ割れて落ちる演出（10×6のかけら、1.5秒で絵の中へ）
@@ -3463,9 +3464,9 @@ const DEALER_BOOST={enabled:true,diffUp:2,speed:0.6};
 const DIFF_ORDER=['easy','normal','hard','master'];
 
 // ── v214 パズルクス：線画のパネル（3×2）に四角いピースがはまる。ピースは勝利では貰えず「各ステージの条件」で貰う（条件・ステージは後で作る） ──
-const PZX={dir:'img/pzx/',w:1672,h:941,outline:'outline.webp',complete:'complete.webp',
-  // v235 15ピース（横5×縦3）。x の切れ目 0,334,668,1002,1336,1672 / y の切れ目 0,314,628,941。画像は piece_01〜15.webp（左上から右へ、次の段へ）
-  pieces:(()=>{const xs=[0,334,668,1002,1336,1672],ys=[0,314,628,941],a=[];let n=0;for(let r=0;r<3;r++)for(let c=0;c<5;c++){n++;a.push({id:'piece_'+String(n).padStart(2,'0'),x:xs[c],y:ys[r],w:xs[c+1]-xs[c],h:ys[r+1]-ys[r]});}return a;})(),
+const PZX={dir:'img/pzx/',w:1615,h:969,outline:'outline.webp',complete:'complete.webp',
+  // v236 15ピース（横5×縦3、1枚 323×323）。チャッピー素材 nephira-puzzle-15：完成絵・線画は 1615×969。画像は piece_01〜15.webp（左上から右へ、次の段へ）
+  pieces:(()=>{const a=[];let n=0;for(let r=0;r<3;r++)for(let c=0;c<5;c++){n++;a.push({id:'piece_'+String(n).padStart(2,'0'),x:c*323,y:r*323,w:323,h:323});}return a;})(),
   // マップの仮ノード（viewBox 330×420、下から上へ）。ステージの中身は未定
   map:[{no:1,x:60,y:370},{no:2,x:170,y:330},{no:3,x:270,y:270},{no:4,x:180,y:210},{no:5,x:80,y:150},{no:6,x:170,y:60}],
 };
