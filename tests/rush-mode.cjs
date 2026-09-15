@@ -19,16 +19,19 @@ function engine({ai=false}={}){
  const clock=makeClock();const dom=new JSDOM('<body><div id="root"></div></body>',{url:'https://example.test/'});
  const soundNode=()=>({connect(){},gain:{value:0}});
  dom.window.AudioContext=class{constructor(){this.sampleRate=10;this.state='running';}createConvolver(){return soundNode();}createGain(){return soundNode();}createBuffer(ch,n){return{getChannelData:()=>new Float32Array(n)}}};
- const hooks={createElement:(type,props,...children)=>({type,props:props||{},children}),Fragment:'fragment',useState:v=>{let x=typeof v==='function'?v():v;return[x,n=>{x=typeof n==='function'?n(x):n;}];},useRef:v=>({current:v}),useEffect(){},useCallback:f=>f,useMemo:f=>f()};
+ const cells=[];let cursor=0;
+ const hooks={createElement:(type,props,...children)=>({type,props:props||{},children}),Fragment:'fragment',
+ useState:v=>{const i=cursor++;if(!(i in cells))cells[i]=typeof v==='function'?v():v;return[cells[i],n=>{cells[i]=typeof n==='function'?n(cells[i]):n;}];},
+ useRef:v=>{const i=cursor++;if(!(i in cells))cells[i]={current:v};return cells[i];},useEffect(){},useCallback:f=>f,useMemo:f=>f()};
  const context=vm.createContext({window:dom.window,document:dom.window.document,navigator:dom.window.navigator,localStorage:dom.window.localStorage,React:hooks,ReactDOM:{createRoot:()=>({render(){}})},console,performance:{now:clock.now},Date:class extends Date{static now(){return clock.now()}},setTimeout:clock.setTimeout,clearTimeout:clock.clear,setInterval:clock.setInterval,clearInterval:clock.clear,requestAnimationFrame:fn=>clock.setTimeout(fn,16),cancelAnimationFrame:clock.clear,Image:class{},Audio:class{play(){return Promise.resolve()}pause(){}}});
- const capture=`  return {startChargeBattle,finishChargeMatch,updateCharge,refundCharge,togglePause,chargeR,pausedR,pLandAtR,matchStatsR,goCharge,startRushBattle,startStage,startTimer,doCountdown,playCard,resolvePlay,completeTen,finishRushRound,finishRushBoard,goHome,goRush,commitDealerPlay,dealPlayer,setDealer,rushExpired,
+ const capture=`  if(globalThis.__capture) return {startChargeBattle,finishChargeMatch,updateCharge,refundCharge,togglePause,chargeR,pausedR,pLandAtR,matchStatsR,goCharge,startRushBattle,startStage,startTimer,doCountdown,playCard,resolvePlay,completeTen,finishRushRound,finishRushBoard,goHome,goRush,commitDealerPlay,dealPlayer,setDealer,rushExpired,
   phaseR,stageR,stageOptsR,rushMatchR,rushClosedR,rushDeadlineR,timeLeftR,pPtR,dPtR,rnR,roundTokR,pHR,dHR,dIdsR,fieldR,fieldSumR,flyR,lockR,resolvingR,countNumR,saveR,
   silenceAi:()=>{scheduleAi=()=>{};},openRound:()=>{countNumR.current=-1;lockR.current=false;resolvingR.current=false;startTimer(rnR.current);},
   state:()=>({phase:phaseR.current,p:pPtR.current,d:dPtR.current,wins:rushMatchR.current,closed:rushClosedR.current,field:[...fieldR.current],rn:rnR.current})};\n`;
  const code=source.replace('  const curStage=stageCtx?',capture+'  const curStage=stageCtx?');
- vm.runInContext(code+`\n[${['resumeAC','stopBGM','startBGM','stopChronoHum','duckBGM','playGoSE','playPlaceSE','playComboSfx','playBurstSE','playWinSE2','playLoseSE','fxBell','fxAir'].map(n=>JSON.stringify(n)).join(',')}].forEach(n=>{this[n]=()=>{};});\nthis.testApi={ChargeScreen,ChargeResult,ChargeMeter,CHARGE_CFG,chargeStage,chargeAdvance,App,RUSH_CFG,rushRoundResult,rushStage,TitleScreen,RushScreen,RushResult};`,context);
- clock.reset();const app=context.testApi.App();if(!ai)app.silenceAi();
- return {clock,app,api:context.testApi,context,dom};
+ vm.runInContext(code+`\n[${['resumeAC','stopBGM','startBGM','stopChronoHum','duckBGM','playGoSE','playPlaceSE','playComboSfx','playBurstSE','playWinSE2','playLoseSE','fxBell','fxAir'].map(n=>JSON.stringify(n)).join(',')}].forEach(n=>{this[n]=()=>{};});\nthis.testApi={VictoryMeter,ChargeScreen,ChargeResult,ChargeMeter,CHARGE_CFG,chargeStage,chargeAdvance,App,RUSH_CFG,rushRoundResult,rushStage,TitleScreen,RushScreen,RushResult};`,context);
+ clock.reset();context.__capture=true;const app=context.testApi.App();if(!ai)app.silenceAi();
+ return {clock,app,api:context.testApi,context,dom,render:()=>{cursor=0;context.__capture=false;return context.testApi.App();}};
 }
 module.exports={engine,makeClock};
 if(require.main===module){

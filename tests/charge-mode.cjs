@@ -75,4 +75,42 @@ for(const diff of ['normal','hard']){
  e.clock.advance(30000);assert.ok(e.app.dPtR.current>=3,'CPU must keep playing after using initial energy');assert.equal(e.app.phaseR.current,'playing');assert.ok(e.app.chargeR.current.dealer>=0&&e.app.chargeR.current.dealer<=4);
  e.clock.advance(30000);assert.equal(e.app.phaseR.current,'gameEnd');
 }
-console.log('PASS: charge entry/gauges/results; equal energy budgets; rapid taps; refill/cap/refunds; uninterrupted 60 seconds; deadline; pause/resume; retry; save isolation.');
+// The complete App view puts energy near hands, with no separate score tiles.
+{
+ const e=start();const view=e.render(),nodes=walk(view),hasClass=(n,c)=>(n.props.className||'').split(' ').includes(c);
+ assert.ok(hasClass(view,'charge-playing'));
+ assert.equal(nodes.filter(n=>hasClass(n,'gp-score')).length,0);
+ assert.equal(nodes.filter(n=>hasClass(n,'gp-dealer-cards')).length,1);
+ assert.equal(nodes.filter(n=>hasClass(n,'gp-hand-row')).length,2);
+ const dealer=nodes.find(n=>hasClass(n,'gp-dealer-area')),hand=nodes.find(n=>hasClass(n,'charge-hand-header'));
+ assert.equal(walk(dealer).filter(n=>hasClass(n,'gp-dealer-card')).length,10);
+ assert.equal(walk(dealer).filter(n=>n.type===e.api.ChargeMeter&&n.props.who==='dealer').length,1);
+ assert.equal(walk(hand).filter(n=>n.type===e.api.ChargeMeter&&n.props.who==='player').length,1);
+ assert.equal(nodes.filter(n=>n.type===e.api.VictoryMeter).length,1);
+ assert.equal(nodes.filter(n=>hasClass(n,'charge-field-slot')).length,4);
+ const meter=e.api.ChargeMeter({value:3.5,who:'player'}),cells=walk(meter).filter(n=>hasClass(n,'charge-cell'));
+ assert.equal(cells.length,4);assert.equal(cells.filter(n=>hasClass(n,'ready')).length,3);assert.equal(cells[3].children[0].props.style.width,'50%');
+ for(const [difference,position] of [[-20,'0%'],[-8,'30%'],[0,'50%'],[8,'70%'],[20,'100%'],[23,'100%']]){
+  const meter=e.api.VictoryMeter({difference}),all=walk(meter);assert.equal(meter.props['aria-valuenow'],Math.max(-20,Math.min(20,difference)));
+  assert.equal(all.find(n=>hasClass(n,'victory-marker')).props.style.top,position);
+  assert.equal(all.find(n=>hasClass(n,'victory-zero')).children[1].children[0],'0');
+ }
+}
+// First to a 20-point DIFFERENCE wins immediately, including overshoot and bursts.
+for(const winner of ['player','dealer'])for(const cause of ['exact','role','burst']){
+ const e=start(),own=winner==='player'?'pPtR':'dPtR',other=winner==='player'?'dPtR':'pPtR';
+ e.app[own].current=26;e.app[other].current=7;const before=JSON.stringify(e.app.saveR.current);
+ if(cause==='burst')e.app.resolvePlay(5,[3,4],7,winner==='player'?'dealer':'player',1);
+ else e.app.completeTen(cause==='role'?[1,2,3,4]:[5,5],winner,1);
+ assert.equal(e.app.phaseR.current,'gameEnd');assert.equal(e.app.rushClosedR.current,true);assert.ok(e.app.timeLeftR.current>0);
+ const result=e.render();assert.equal(result.type,e.api.ChargeResult);assert.equal(result.props.data.winner,winner);assert.equal(result.props.data.charge.reason,'limit');assert.ok(result.props.data.charge.remaining>0);
+ const pts=e.app[own].current;e.clock.advance(70000);assert.equal(e.app[own].current,pts);assert.equal(JSON.stringify(e.app.saveR.current),before);
+ result.props.onRetry();assert.equal(e.app.phaseR.current,'playing');assert.equal(e.app.pPtR.current,0);assert.equal(e.app.dPtR.current,0);
+}
+{
+ const e=start();e.app.pPtR.current=20;e.app.dPtR.current=19;e.app.completeTen([5,5],'player',1);assert.equal(e.app.phaseR.current,'playing','20 total is not 20 lead');
+ e.clock.advance(60000);const data=e.render().props.data;assert.equal(data.winner,'player');assert.equal(data.charge.reason,'time');
+ const t=start();t.clock.advance(60000);assert.equal(t.render().props.data.winner,'draw');
+ const late=start();late.app.pPtR.current=19;late.clock.jump(60000);late.app.completeTen([5,5],'player',1);assert.equal(late.app.pPtR.current,19);assert.equal(late.render().props.data.charge.reason,'time');
+}
+console.log('PASS: charge hand bars and single-row opponent; fixed-center victory meter; exact/overshoot/burst 20-point-lead finishes; timed wins/draws; equal energy; CPU; pause/retry; saves.');

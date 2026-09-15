@@ -2155,7 +2155,48 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 
 /* v254 60秒チャージ */
 .charge-screen{background:linear-gradient(155deg,#eaf5f4,#edf1fc);}.charge-screen h1,.charge-screen .rush-rule-grid b,.charge-screen .rush-final-score b{color:#236e70;}.charge-screen .rush-primary{background:#236e70;border-color:#236e70;}.charge-screen input{accent-color:#236e70;}
-.charge-meter{min-width:calc(50 * var(--u));margin:calc(3 * var(--u)) auto 0;max-width:calc(78 * var(--u));color:#286fbb;}.charge-meter.dealer{color:#ce711a;}.charge-cells{display:flex;gap:calc(2 * var(--u));}.charge-cell{display:block;flex:1;height:calc(7 * var(--u));border:1px solid #c7d3df;background:#e6ebf1;border-radius:3px;overflow:hidden;}.charge-cell i{display:block;height:100%;background:currentColor;}.charge-count{display:block;font-size:calc(10 * var(--u));line-height:1.3;font-weight:700;letter-spacing:0;}.gp-screen.charge-playing .gp-round-pill{padding:calc(5 * var(--u))!important;}.gp-screen.charge-playing .gp-round-pill .r{font-size:calc(10 * var(--u))!important;}.charge-hand-note{color:#236e70;font-weight:700;font-size:calc(12 * var(--u));text-align:center;margin-bottom:calc(3 * var(--u));}
+
+/* v255: scoped layout for 60秒チャージ. All dimensions share the viewport safety scale. */
+.gp-screen.charge-playing{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:calc(64 * var(--u)) calc(110 * var(--u)) calc(196 * var(--u)) calc(232 * var(--u));gap:calc(4 * var(--u));padding:max(env(safe-area-inset-top,0px),calc(14 * var(--u))) max(calc(12 * var(--u)),calc((100vw - 336 * var(--u))/2)) max(env(safe-area-inset-bottom,0px),calc(10 * var(--u))) !important;--u:min(calc(100vw / 360),calc((100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) / 640));}
+.gp-screen.charge-playing>.gp-top-bar{grid-row:1;padding:0 !important;align-self:start;}
+.gp-screen.charge-playing>.gp-spacer{display:none;}
+.gp-screen.charge-playing>.gp-dealer-area{grid-row:2;margin:0 !important;padding:0 !important;align-self:center;min-width:0;}
+.gp-screen.charge-playing .gp-dealer-area .gp-area-label{font-size:calc(11 * var(--u)) !important;color:#aa4e06;}
+.gp-screen.charge-playing .gp-dealer-cards{flex-wrap:nowrap;gap:calc(2.5 * var(--u)) !important;}
+.gp-screen.charge-playing .gp-dealer-card{width:calc(30 * var(--u)) !important;}
+.gp-screen.charge-playing>.gp-field-area{grid-row:3;--card-w:calc(67 * var(--u));width:calc(100% - 44 * var(--u));height:100%;min-height:0 !important;padding:0 !important;margin:0;overflow:visible;gap:calc(14 * var(--u));}
+.gp-screen.charge-playing .charge-field-slot{width:var(--card-w);height:calc(var(--card-w) * 1.4);flex-shrink:0;border:calc(1.2 * var(--u)) dashed #aab7c8;border-radius:calc(6 * var(--u));background:#ffffff15;}
+.gp-screen.charge-playing>.gp-hand-area{grid-row:4;--card-w:calc(58 * var(--u));margin:0 !important;align-self:start;}
+.gp-screen.charge-playing .gp-hand-rows{margin:0;padding:calc(10 * var(--u)) calc(8 * var(--u));gap:calc(8 * var(--u));}
+.charge-hand-header{display:flex;align-items:center;gap:calc(10 * var(--u));height:calc(34 * var(--u));margin-bottom:calc(6 * var(--u));}
+.gp-screen.charge-playing .charge-hand-header .gp-area-label{padding:0;margin:0;color:#145fc2;font-size:calc(11 * var(--u));letter-spacing:calc(1.5 * var(--u));}
+.gp-screen.charge-playing>.gp-pause-btn{top:calc(20 * var(--u));right:calc(50% - 48 * var(--u));width:calc(38 * var(--u));height:calc(38 * var(--u));}
+.gp-screen.charge-playing .gp-icon-btn,.gp-screen.charge-playing .gp-track-btn{opacity:1 !important;color:#485a70 !important;}
+.charge-meter{--energy:#00a5ff;--energy-light:#75eaff;display:flex;align-items:center;gap:calc(6 * var(--u));width:calc(220 * var(--u));max-width:100%;min-width:0;margin:0;color:var(--energy);}
+.charge-meter.dealer{--energy:#f38a13;--energy-light:#ffe085;margin:calc(10 * var(--u)) auto 0;}
+.charge-hand-header .charge-meter{margin:0 auto;}
+.charge-bolt{width:calc(19 * var(--u));height:calc(28 * var(--u));flex-shrink:0;fill:var(--energy);stroke:white;stroke-width:1.1;filter:drop-shadow(0 1px 1px #60708855);}
+.charge-cells{display:flex;flex:1;gap:calc(4 * var(--u));padding:calc(4 * var(--u));border:calc(1.5 * var(--u)) solid #fff;border-radius:calc(12 * var(--u));background:linear-gradient(#728499,#a5b5c8);box-shadow:0 calc(2 * var(--u)) calc(5 * var(--u)) #344f7140,inset 0 0 0 calc(1 * var(--u)) #a8b9cc;}
+.charge-cell{flex:1;min-width:0;height:calc(17 * var(--u));border:calc(1 * var(--u)) solid #c1d1e4;background:linear-gradient(#354459,#53657a);border-radius:calc(5 * var(--u));overflow:hidden;box-shadow:inset 0 1px 3px #14223966;}
+.charge-cell i{display:block;height:100%;background:linear-gradient(180deg,var(--energy-light),var(--energy) 48%,var(--energy));box-shadow:inset 0 1px 2px #ffffffb0,1px 0 3px #fff;}
+.charge-cell.ready{border-color:#fff;box-shadow:0 0 calc(4 * var(--u)) var(--energy);}
+.victory-meter{display:flex;flex-direction:column;align-items:center;width:calc(32 * var(--u));gap:calc(5 * var(--u));pointer-events:none;}
+.gp-screen.charge-playing>.victory-meter{position:absolute;right:max(calc(12 * var(--u)),calc((100vw - 336 * var(--u))/2));top:calc(196 * var(--u) + max(0px,env(safe-area-inset-top,0px) - 14 * var(--u)));height:calc(196 * var(--u));z-index:5;}
+.victory-end{font-size:calc(10 * var(--u));font-weight:800;line-height:1.1;text-align:center;}
+.victory-end b{display:block;font-size:calc(14 * var(--u));font-variant-numeric:tabular-nums;}
+.victory-end.dealer{color:#a84a00;}.victory-end.player{color:#0758c5;}
+.victory-track{position:relative;flex:1;min-height:0;width:calc(18 * var(--u));border:calc(2 * var(--u)) solid white;border-radius:calc(12 * var(--u));background:linear-gradient(#f1902c 0%,#46576e 44%,#46576e 56%,#078df0 100%);box-shadow:0 0 0 calc(1 * var(--u)) #9aacbe,0 calc(2 * var(--u)) calc(5 * var(--u)) #52698055;}
+.victory-advantage{position:absolute;left:0;right:0;max-height:50%;background:#19b9ff;opacity:.65;transition:top .22s ease,height .22s ease;}
+.victory-advantage.dealer{background:#ffad42;}
+.victory-zero{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);height:calc(2 * var(--u));}
+.victory-zero i{display:block;width:60%;height:100%;background:#fff;border-radius:2px;margin:auto;}
+.victory-zero b{position:absolute;left:calc(100% + 4 * var(--u));top:50%;transform:translateY(-50%);font-size:calc(10 * var(--u));font-weight:800;color:#34465f;}
+.victory-marker{position:absolute;left:50%;width:calc(12 * var(--u));height:calc(12 * var(--u));background:linear-gradient(135deg,#fff 35%,#b7d5ec);border:1px solid #fff;box-shadow:calc(1 * var(--u)) calc(2 * var(--u)) calc(3 * var(--u)) #17334b99;transform:translate(-50%,-50%) rotate(45deg);transition:top .22s ease;z-index:2;}
+.charge-result-balance{--u:1px;display:flex;justify-content:center;margin:16px 0 22px;}
+.charge-result-balance .victory-meter{height:190px;width:64px;}
+.charge-result-balance .victory-end{font-size:13px;}.charge-result-balance .victory-end b{font-size:17px;}
+@media(prefers-reduced-motion:reduce){.victory-marker,.victory-advantage{transition:none;}}
+
 </style>
 </head>
 <body>
@@ -3285,7 +3326,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v254'; // v254: 60秒チャージ（4個ゲージ・1.5秒回復・ラウンドなし）
+const APP_VER='v255'; // v255: 手札チャージと綱引きゲージ、20点差で即決着
+// const APP_VER='v254'; // v254: 60秒チャージ（4個ゲージ・1.5秒回復・ラウンドなし）
 // const APP_VER='v253'; // v253: ホームに10秒ラッシュ（10秒間の得点勝負・5ラウンド先取）
 // const APP_VER='v252'; // v252(2026/09/15): リザルトの獲得ピース画像を小さく（50vw/150u → 30vw/90u）
 // const APP_VER='v251'; // v251(2026/09/15): フィールド効果の凍結（frzBoth）でも「凍った札だけ」になったら配り直すように修正（セトラのabilityの時しか効いていなかった）。パズルクスのリザルトから「次の対戦へ／もう一度」を廃止し、毎回パネルに戻る
@@ -3849,23 +3891,37 @@ function RushResult({data,onRetry,onBack}){
 }
 
 // ── v254 60秒チャージ ──
-const CHARGE_CFG={matchSec:60,max:4,initial:2,refillMs:1500};
+const CHARGE_CFG={matchSec:60,max:4,initial:2,refillMs:1500,leadToWin:20};
 function chargeStage(diff){return {...rushStage(diff),rush:false,charge:true,name:'60秒チャージ',timeLimit:CHARGE_CFG.matchSec};}
 function chargeAdvance(pool,now){
   const elapsed=Math.max(0,now-pool.at)/CHARGE_CFG.refillMs;
   return {player:Math.min(CHARGE_CFG.max,pool.player+elapsed),dealer:Math.min(CHARGE_CFG.max,pool.dealer+elapsed),at:Math.max(pool.at,now)};
 }
 function ChargeMeter({value,who}){
-  const ready=Math.min(CHARGE_CFG.max,Math.floor(value+1e-9));
-  return h('div',{className:'charge-meter '+who,role:'meter','aria-label':who==='player'?'自分のゲージ':'相手のゲージ','aria-valuemin':0,'aria-valuemax':4,'aria-valuenow':Math.round(value*100)/100,'aria-valuetext':ready+'枚出せます'},
-    h('div',{className:'charge-cells','aria-hidden':true},Array.from({length:4},(_,i)=>h('span',{key:i,className:'charge-cell'},h('i',{style:{width:Math.max(0,Math.min(1,value-i))*100+'%'}})))),h('span',{className:'charge-count'},ready+' / 4'));
+  const amount=Math.max(0,Math.min(CHARGE_CFG.max,value));
+  const ready=Math.floor(amount+1e-9);
+  return h('div',{className:'charge-meter '+who,role:'meter','aria-label':who==='player'?'自分のチャージ':'相手のチャージ','aria-valuemin':0,'aria-valuemax':CHARGE_CFG.max,'aria-valuenow':Math.round(amount*100)/100,'aria-valuetext':ready+'枚出せます'},
+    h('svg',{className:'charge-bolt',viewBox:'0 0 24 32','aria-hidden':true},h('path',{d:'M14 1 L2 18 H10 L8 31 L23 12 H14 Z'})),
+    h('div',{className:'charge-cells','aria-hidden':true},Array.from({length:CHARGE_CFG.max},(_,i)=>h('span',{key:i,className:'charge-cell'+(amount+1e-9>=i+1?' ready':'')},h('i',{style:{width:Math.max(0,Math.min(1,amount-i))*100+'%'}})))));
+}
+function VictoryMeter({difference}){
+  const limit=CHARGE_CFG.leadToWin,lead=Math.max(-limit,Math.min(limit,difference));
+  const position=50+lead/(2*limit)*100;
+  const label=lead===0?'互角':(lead>0?'自分':'相手')+'が'+Math.abs(lead)+'点差で優勢';
+  return h('div',{className:'victory-meter',role:'meter','aria-label':'勝敗ゲージ','aria-valuemin':-limit,'aria-valuemax':limit,'aria-valuenow':lead,'aria-valuetext':label},
+    h('div',{className:'victory-end dealer'},'相手',h('b',null,limit)),
+    h('div',{className:'victory-track','aria-hidden':true},
+      h('div',{className:'victory-advantage '+(lead<0?'dealer':'player'),style:{top:Math.min(50,position)+'%',height:Math.abs(position-50)+'%'}}),
+      h('span',{className:'victory-zero'},h('i'),h('b',null,'0')),
+      h('span',{className:'victory-marker',style:{top:position+'%'}})),
+    h('div',{className:'victory-end player'},'自分',h('b',null,limit)));
 }
 function ChargeScreen({onBattle,onBack}){
   const[diff,setDiff]=useState('normal');
   return h('main',{className:'rush-screen charge-screen'},h('section',{className:'rush-card'},
     h('p',{className:'rush-eyebrow'},'TEN-KURU'),h('h1',null,'60秒チャージ'),h('p',{className:'rush-lead'},'貯めるか、今出すか。'),
-    h('div',{className:'rush-rule-grid'},h('div',null,h('b',null,'60秒'),'得点が多い側の勝ち'),h('div',null,h('b',null,'4個'),'ゲージの上限')),
-    h('ul',{className:'rush-rules'},h('li',null,'ゲージは2個から開始。札1枚で1個消費。'),h('li',null,'1.5秒で1個回復。相手のゲージも見える。'),h('li',null,'10を作ると役の得点。バーストは相手に1点。'),h('li',null,'場が空になっても続行。ラウンドの区切りはなし。'),h('li',null,'手札は使い切ったら補充。ゲージは全回復しない。'),h('li',null,'60秒で終了。同点は引き分け。')),
+    h('div',{className:'rush-rule-grid'},h('div',null,h('b',null,'20点差'),'端に届けば即決着'),h('div',null,h('b',null,'4個'),'ゲージの上限')),
+    h('ul',{className:'rush-rules'},h('li',null,'ゲージは2個から開始。札1枚で1個消費。'),h('li',null,'1.5秒で1個回復。相手のゲージも見える。'),h('li',null,'10を作ると役の得点。バーストは相手に1点。'),h('li',null,'場が空になっても続行。ラウンドの区切りはなし。'),h('li',null,'手札は使い切ったら補充。ゲージは全回復しない。'),h('li',null,'勝敗ゲージは中央0から。20点差で即決着。'),h('li',null,'端に届かなければ60秒時点の優勢側が勝ち。中央なら引き分け。')),
     h('fieldset',{className:'rush-difficulty'},h('legend',null,'相手の強さ'),[['normal','ふつう'],['hard','むずかしい']].map(([value,label])=>h('label',{key:value},h('input',{type:'radio',name:'charge-difficulty',value,checked:diff===value,onChange:()=>setDiff(value)}),label))),
     h('button',{className:'rush-primary',onClick:()=>onBattle(diff)},'チャレンジする'),h('button',{className:'rush-secondary',onClick:onBack},'ホームへ')
   ));
@@ -3873,8 +3929,8 @@ function ChargeScreen({onBattle,onBack}){
 function ChargeResult({data,onRetry,onBack}){
   const label=data.winner==='draw'?'引き分け':data.winner==='player'?'勝利！':'敗北';
   return h('main',{className:'rush-screen charge-screen'},h('section',{className:'rush-card'},
-    h('p',{className:'rush-eyebrow'},'60秒チャージ'),h('h1',null,label),h('p',{className:'rush-lead'},'60秒間の合計得点'),
-    h('div',{className:'rush-final-score'},h('span',null,'YOU ',h('b',null,data.pPt)),h('span',null,'—'),h('span',null,h('b',null,data.dPt),' DEALER')),
+    h('p',{className:'rush-eyebrow'},'60秒チャージ'),h('h1',null,label),h('p',{className:'rush-lead'},data.charge.reason==='limit'?'20点差で決着':'60秒終了'),
+    h('div',{className:'charge-result-balance'},h(VictoryMeter,{difference:data.pPt-data.dPt})),
     h('p',{className:'rush-lead'},'10完成 '+data.charge.tens+'回 ／ バースト '+data.charge.bursts+'回'),
     h('button',{className:'rush-primary',onClick:onRetry},'もう一度'),h('button',{className:'rush-secondary',onClick:onBack},'モード選択へ')
   ));
@@ -5521,6 +5577,7 @@ function App(){
     if(rushExpired())return;
     if(who==='player'){pPtR.current+=pts;setPPt(pPtR.current);}
     if(who==='dealer'){dPtR.current+=pts;setDPt(dPtR.current);}
+    if(isCharge()&&Math.abs(pPtR.current-dPtR.current)>=CHARGE_CFG.leadToWin){finishChargeMatch('limit');return;}
     clearTimeout(aiRef.current);cancelCursor();
     // Return an opponent card already in flight before clearing the board.
     const f=flyR.current;if(f){refundCharge(f);setDealer([...dHR.current,f.value],[...dRingR.current,f.rf||false],[...dIdsR.current,f.id]);flyR.current=null;setFlyCard(null);}
@@ -5536,11 +5593,12 @@ function App(){
       ensureDealerRefill();scheduleAi(rnR.current);
     },RUSH_CFG.settleMs);
   }
-  function finishChargeMatch(){
+  function finishChargeMatch(reason='time'){
     if(!isCharge()||rushClosedR.current||phaseR.current!=='playing')return;
     updateCharge();rushClosedR.current=true;clearTimers();roundTokR.current++;
     lockR.current=true;resolvingR.current=true;cancelCursor();flyR.current=null;setFlyCard(null);setPtFly(null);
-    setTimeLeft(0);timeLeftR.current=0;endGame(pPtR.current,dPtR.current,true);
+    const left=reason==='limit'?Math.max(0,(rushDeadlineR.current-performance.now())/1000):0;
+    timeLeftR.current=left;setTimeLeft(Math.ceil(left));endGame(pPtR.current,dPtR.current,true);
   }
   function finishRushRound(rn){
     if(!isRush()||rushClosedR.current||phaseR.current!=='playing')return;
@@ -6228,7 +6286,7 @@ function App(){
     roundTokR.current++;stopBGM();
     let stars=0;
     const c=stageR.current;
-    if(c&&c.ar===4){clearTimers();rushClosedR.current=true;lockR.current=true;resolvingR.current=true;setGameEndData({pPt:pp,dPt:dp,winner:win,diff:diffRef.current,charge:{tens:matchStatsR.current.tens.length,bursts:matchStatsR.current.bursts}});setPhase('gameEnd');phaseR.current='gameEnd';exitLink();try{if(win==='player')playWinSE2(false);else if(win==='dealer')playLoseSE();}catch(e){}return;}
+    if(c&&c.ar===4){clearTimers();rushClosedR.current=true;lockR.current=true;resolvingR.current=true;setGameEndData({pPt:pp,dPt:dp,winner:win,diff:diffRef.current,charge:{tens:matchStatsR.current.tens.length,bursts:matchStatsR.current.bursts,reason:Math.abs(pp-dp)>=CHARGE_CFG.leadToWin?'limit':'time',remaining:timeLeftR.current}});setPhase('gameEnd');phaseR.current='gameEnd';exitLink();try{if(win==='player')playWinSE2(false);else if(win==='dealer')playLoseSE();}catch(e){}return;}
     if(c&&c.ar===3){clearTimers();rushClosedR.current=true;lockR.current=true;resolvingR.current=true;setRushBreak(null);setGameEndData({pPt:pp,dPt:dp,winner:win,diff:diffRef.current,rush:rushMatchR.current});setPhase('gameEnd');phaseR.current='gameEnd';exitLink();try{if(win==='player')playWinSE2(false);else playLoseSE();}catch(e){}return;}
     if(c&&c.ar===2){setGameEndData({pPt:pp,dPt:dp,winner:win,draw:win==='draw',diff:diffRef.current,stars:0,rivalName:'TEST'});setPhase('gameEnd');phaseR.current='gameEnd';exitLink();return;} // v239 調整モード：何も記録しない
     if(c&&c.ar===1){ // v234 パズルクス：ミッション判定→ピース／ネフィラ制覇。本編の★には触らない
@@ -6320,7 +6378,7 @@ function App(){
     chronoFx==='out'&&h('div',{className:'chrono-flash'}),
     linkMode&&h('div',{className:'link-banner'},h('b',null,CHRONO_TEXT.en),CHRONO_TEXT.hint),
     endFx&&h('div',{key:'endfx',className:'end-fx '+(endFx.winner==='player'?(endFx.boss?'win boss':'win'):'lose')},h('div',{className:'dim'}),h('div',{className:'glow'}),endFx.boss&&endFx.winner==='player'&&[h('div',{key:'r1',className:'ring'}),h('div',{key:'r2',className:'ring r2'})],h('div',{className:'slash'}),h('div',{className:'big'},endFx.winner==='player'?(endFx.boss?'BOSS DOWN':'WIN'):'LOSE')), // v202
-    ptFly&&h('div',{key:'pf_'+ptFly.id,className:'ptfly',style:{'--ms':FLOW_CFG.flyMs+'ms','--c':ptFly.color,'--tx':ptFly.who==='player'?'14%':'86%','--ty':'9%'}},h('div',{className:'role'},ptFly.text),h('div',{className:'pt'},'+'+ptFly.pts)), // v175
+    ptFly&&h('div',{key:'pf_'+ptFly.id,className:'ptfly',style:{'--ms':FLOW_CFG.flyMs+'ms','--c':ptFly.color,'--tx':so.charge?'calc(50% + 156 * var(--u))':ptFly.who==='player'?'14%':'86%','--ty':so.charge?'calc(274 * var(--u))':'9%'}},h('div',{className:'role'},ptFly.text),h('div',{className:'pt'},'+'+ptFly.pts)), // v175
     comboShow&&h(CyberComboDisplay,{key:'c_'+comboShow.id,combo:comboShow}), // v88: keyにDate.now()を使うと再描画のたびに演出が再発火してた
     timeUpShow&&h(TimeUpDisplay,{key:'tu_'+Date.now(),show:true}),
     countNum>=0&&h('div',{style:{position:'fixed',inset:0,zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',background:'#2a103066',pointerEvents:'none'}},
@@ -6337,19 +6395,19 @@ function App(){
         h('div',{className:'lbl'},'TIME'),
         h('div',{className:'val'},timeLeft)
       ),
-      h('div',{className:'gp-score you'+(ptBurst?' pt-burst':'')},
+      !so.charge&&h('div',{className:'gp-score you'+(ptBurst?' pt-burst':'')},
         h('div',{className:'lbl'},(so.rush||so.charge)?'YOU 得点':'YOU'),
         h('div',{className:'val'},pPt),
-        so.charge?h(ChargeMeter,{value:charge.player,who:'player'}):so.rush?h('div',{className:'sub'},'獲得 ',h('b',null,rushMatch.pWins),' / 5 R'):FLOW_CFG.enabled?h('div',{className:'sub'},'pt'):h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-pPt)),'pt')
+        so.rush?h('div',{className:'sub'},'獲得 ',h('b',null,rushMatch.pWins),' / 5 R'):FLOW_CFG.enabled?h('div',{className:'sub'},'pt'):h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-pPt)),'pt')
       ),
       h('div',{className:'gp-round-pill '+difficulty},
         h('span',{className:'r'},so.charge?'60秒':'R'+rNum),
         h('span',{className:'lvl'},so.charge?'CHARGE':so.rush?'RUSH':curStage?(curStage.boss?'BOSS':'ST '+curStage.no):(difficulty==='easy'?'EASY':difficulty==='hard'?'HARD':difficulty==='master'?'MASTER':'NORMAL'))
       ),
-      h('div',{className:'gp-score dealer'},
+      !so.charge&&h('div',{className:'gp-score dealer'},
         h('div',{className:'lbl'},(so.rush||so.charge)?'相手 得点':rival),
         h('div',{className:'val'},dPt),
-        so.charge?h(ChargeMeter,{value:charge.dealer,who:'dealer'}):so.rush?h('div',{className:'sub'},'獲得 ',h('b',null,rushMatch.dWins),' / 5 R'):FLOW_CFG.enabled?h('div',{className:'sub'},'pt'):h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-dPt)),'pt')
+        so.rush?h('div',{className:'sub'},'獲得 ',h('b',null,rushMatch.dWins),' / 5 R'):FLOW_CFG.enabled?h('div',{className:'sub'},'pt'):h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-dPt)),'pt')
       ),
       h('div',{className:'gp-icon-btn',onClick:goHome,title:'ホームに戻る'},h('span',null,'⌂')),
       h('div',{className:'gp-track-btn',onClick:toggleMusic,title:'曲を変更（1→2→ミュート）'},
@@ -6393,13 +6451,15 @@ function App(){
 
     // DEALER 手札
     h('div',{className:'gp-dealer-area'},
-      h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
+      h('div',{className:'gp-area-label'},so.charge?'DEALER':(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
       h('div',{className:'gp-dealer-cards'+(endFx&&endFx.winner==='player'?' defeated':'')}, // v198/v202 相手の敗北：決着と同時に光に溶ける
         dSlots.map((id,s)=>{const i=id==null?-1:dIdsR.current.indexOf(id);if(i<0||i>=dH.length)return h('div',{key:'e'+s,className:'gp-dealer-card empty'});const v=dH[i];
           return h('div',{key:'c'+id,'data-card-id':id,className:'gp-dealer-card'+(justStolen.includes(id)?' just-stolen':'')+((hideLeft>0&&dRing[i]!=='orby')||(stageOptsR.current&&stageOptsR.current.blind)?' hidden-card':'')+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dRing[i]==='setra'?' sring':'')+(dRing[i]==='orby'?' oring':'')+(dCur.id===id?' dsel':'')+(dFrz[id]!=null?' dfrz':'')},h('span',{className:'dv'},v),dFrz[id]!=null&&h('span',{className:'dfrz-sec'},dFrz[id]+'s'),
           dCur.id===id&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.id===id&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&dRing[i]!=='setra'&&dRing[i]!=='orby'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+(isGk(dRing[i])?REIPIA_RINGS[GIMMICKS[dRing[i].slice(3)].ring]?dRing[i].slice(3):'':dRing[i]):'')+(tapCardId===id?' tap':''),'data-ring-color':typeof dRing[i]==='string'?(isGk(dRing[i])?REIPIA_RINGS[GIMMICKS[dRing[i].slice(3)].ring].ringColor:REIPIA_RINGS[dRing[i]].ringColor):undefined}));})
-      )
+      ),
+      so.charge&&h(ChargeMeter,{value:charge.dealer,who:'dealer'})
     ),
+    so.charge&&h(VictoryMeter,{difference:pPt-dPt}),
     srBanner&&h('div',{className:'sr-banner'},h('b',null,'STAR RING'),'星環 ── 完成'),
 
     // SPACER (dealer → field)
@@ -6414,7 +6474,8 @@ function App(){
       h('div',{className:'field-planet'}),
 
       h('div',{className:'gp-field-cards'},
-        field.map((v,i)=>h('div',{key:i,className:eraseIdx.includes(i)?'fx-erase':undefined,style:{display:'contents'}},h(FieldCard,{value:mist?'?':v,by:fieldColors[i],decisive:endHit&&i===field.length-1,isComplete:fieldSum===10&&i===field.length-1,isSpecial:!!fieldSp[i],shifted:!!fieldShift[i],ringed:fieldRing[i]||false}))) // v197 霧
+        field.map((v,i)=>h('div',{key:i,className:eraseIdx.includes(i)?'fx-erase':undefined,style:{display:'contents'}},h(FieldCard,{value:mist?'?':v,by:fieldColors[i],decisive:endHit&&i===field.length-1,isComplete:fieldSum===10&&i===field.length-1,isSpecial:!!fieldSp[i],shifted:!!fieldShift[i],ringed:fieldRing[i]||false}))), // v197 霧
+        so.charge&&Array.from({length:Math.max(0,4-field.length)},(_,i)=>h('div',{key:'slot'+i,className:'charge-field-slot','aria-hidden':true}))
       ),
       // FIELD SUM（場のカードの下・前の配置に戻す＋少し強化）
       h('div',{className:'gp-field-sum gp-field-sum-strong',style:{visibility:fieldSum>0?'visible':'hidden'}},
@@ -6442,8 +6503,7 @@ function App(){
       orbyStat&&denyActive()&&h('div',{className:'orby-stat'}, // v166 調査用。原因が分かったら消す
         '判断'+(orbyStat.call||0)+' / 出した'+(orbyStat.play||0)+' / 見送り'+(orbyStat.skip_gift||0)+' / 列作らず'+(orbyStat.skip_nostart||0)+' / 出せる札なし'+(orbyStat.no_playable||0)),
       hideLeft>0&&h('div',{className:'hide-badge'},'不可観測  あと '+hideLeft+' ラウンド'), // v150 効果が続いている間ずっと出す
-      so.charge&&h('div',{className:'charge-hand-note'},chargeEmpty?'チャージ中…':'あと'+Math.floor(charge.player+1e-9)+'枚出せる'),
-      h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
+      so.charge?h('div',{className:'charge-hand-header'},h('div',{className:'gp-area-label'},'YOU'),h(ChargeMeter,{value:charge.player,who:'player'})):h('div',{className:'gp-area-label'},'YOU — '+pH.filter(Boolean).length+'枚'),
       h('div',{className:'gp-hand-rows'},
         h('div',{className:'gp-hand-row'},
           pH.slice(0,5).map((v,i)=>v===null?h('div',{key:i,style:{width:'var(--card-w)',height:'calc(var(--card-w) * 1.4)',flexShrink:0}}):(()=>{const dv=confuse[i]!=null?confuse[i]:v;const dk=lantern&&!lantern.lit.includes(i);return h(SlideCard,{key:i+'_'+v,value:dk?'?':dv,dark:dk,onPlay:()=>playCard(i),disabled:chargeEmpty||countNum>=0||!canPlay(dv,fieldSum,field)||rStop||!!pLock[i]||pFrz[i]!=null||(cmdIdx!=null&&cmdIdx!==i),cardState:countNum>=0?null:handCardState(dv,fieldSum,field),frozen:pFrz[i],justFrozen:justFrz.includes(i),pRing:pRing===i,shuffling:shufAll,marked:marked.includes(i),onLocked:()=>fxLockHint(chargeEmpty?'ゲージ回復中':pFrz[i]!=null?'凍結中 あと'+pFrz[i]+'秒':pLock[i]?'星環ロック':(cmdIdx!=null&&cmdIdx!==i)?'指名された札から':lockReason(dv,fieldSum,field)),cardRole:'player',isSpecial:!!pSp[i],linkPick:linkMode&&canPlay(dv,fieldSum,field),rLock:!!pLock[i],rCmd:cmdIdx===i,rWait:cmdIdx!=null&&cmdIdx!==i,confused:confuse[i]!=null});})())
