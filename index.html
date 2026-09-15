@@ -3220,7 +3220,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v242'; // v242(2026/09/15): 調整から「1枚目の初速」を外す（1枚目のメーターで足りる）。決定打だけ残す
+const APP_VER='v243'; // v243(2026/09/15): ミッション6を実装（くるみ決定の相手設定＋条件「勝つ＋自分の手で9を2回」＋フィールド効果「9」＝9にした側が相手を2秒止める、両者平等、星環なし）。ステージには nineStop:true / winMsAbs / cardSpeed で書ける
+// const APP_VER='v242'; // v242(2026/09/15): 調整から「1枚目の初速」を外す（1枚目のメーターで足りる）。決定打だけ残す
 // const APP_VER='v241'; // v241(2026/09/15): 調整に「1枚目の初速」「決定打」（msで直接指定、0＝メーター通り）。ステージでは firstMs / winMsAbs
 // const APP_VER='v240'; // v240(2026/09/15): cardSpeed の倍率を、考える時間だけでなくカーソル移動・タップ・降下・決定打の下限にも掛ける（0.2で本当に速くなる）。調整画面に「通常の強化」の説明
 // const APP_VER='v239'; // v239(2026/09/15): ホームに「調整」モード。相手の1〜4枚目の速さ倍率・判断力・読み・封じ・能力・強化・先取・持ち時間を触ってその場で対戦。保存（端末）・コピー（TENKURU_TUNE {...} の1行）。ステージには cardSpeed:[m1,m2,m3,m4] で同じ数値を書ける
@@ -3509,7 +3510,9 @@ const PZX_STAGES=[
   {no:103,rivalName:'DEALER',name:'MISSION 3',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
   {no:104,rivalName:'DEALER',name:'MISSION 4',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
   {no:105,rivalName:'DEALER',name:'MISSION 5',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
-  {no:106,rivalName:'DEALER',name:'MISSION 6',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  // v243 くるみ決定：相手＝MASTER・読み・封じ・全部0.2・決定打420ms・通常の強化あり・先取10・持ち時間5秒。フィールド効果「9」（場の合計が9になったら9にした側が相手を2秒止める、両者平等）。星環なし
+  {no:106,rivalName:'DEALER',name:'MISSION 6',icon:'card',winPt:10,timeLimit:5,diff:'master',rule:'normal',smart:true,deny:true,cardSpeed:[.2,.2,.2,.2],winMsAbs:420,nineStop:true,
+    mission:{text:'勝つ ＋ 自分の手で場の合計を「9」に2回する（9にした側は相手を2秒止める）',check:m=>m.win&&(m.nines||0)>=2}},
   {no:199,rivalName:'ネフィラ',name:'ネフィラ',icon:'card',winPt:10,diff:'normal',rule:'normal',boss:true,mission:{text:'（未定）ネフィラに勝つ',check:PZX_MISSION_TODO}}, // 最後＝ボス（6枚そろうと出る）
 ];
 const PZX_BOSS=PZX_STAGES.length-1; // ボスの添字
@@ -4274,7 +4277,7 @@ function PzxResult({data,st,idx,gotNow,onRetry,onPanel}){
         h('div',{className:'vs'},'vs'),
         h('div',null,h('div',{className:'l'},data.rivalName||'DEALER'),h('div',{className:'v'},data.dPt))
       ),
-      h('div',{className:'stats'},h('span',null,'バースト ',h('b',null,m.bursts)),h('span',null,'役 ',h('b',null,m.tens.filter(t=>t.voice!=='役なし').length)),h('span',null,h('b',null,m.sec),'秒')),
+      h('div',{className:'stats'},h('span',null,'バースト ',h('b',null,m.bursts)),h('span',null,'役 ',h('b',null,m.tens.filter(t=>t.voice!=='役なし').length)),h('span',null,'9 ',h('b',null,m.nines||0)),h('span',null,h('b',null,m.sec),'秒')),
       h('div',{className:'cond '+(ok?'ok':'ng')},h('span',{className:'mk'},ok?'達成':'未達'),h('span',{className:'l'},'MISSION'),st.mission.text),
       gotNow&&!isBoss&&h('img',{className:'piece',src:PZX.dir+PZX.pieces[idx].id+'.webp',alt:'',draggable:false,style:{aspectRatio:PZX.pieces[idx].w+' / '+PZX.pieces[idx].h}}),
       gotNow&&h('div',{className:'pget'},isBoss?'絵の中を制覇した':'ピース獲得'),
@@ -4721,6 +4724,28 @@ function App(){
       if(phaseR.current==='playing'&&!resolvingR.current){clearTimeout(aiRef.current);scheduleAi(rn);}
     },PLAYER_TIMESTOP_MS));
   }
+  // v243 「9」：場の合計が9になったら、9にした側が相手を2秒止める（パズルクスの nineStop ステージだけ。星環は使わない）
+  const NINE_STOP_MS=2000;
+  function nineStop(who,rn){
+    if(who==='player'){ // 相手が止まる（pTimeStop と同じ仕組み）
+      if(pStopR.current)return;
+      clearTimeout(aiRef.current);cancelCursor();pStopR.current=true;setPStop(true);
+      if(flyR.current){const f=flyR.current;flyR.current=null;setFlyCard(c=>c?{...c,back:true}:c);setTimeout(()=>setFlyCard(null),380);setDealer([...dHR.current,f.value],[...dRingR.current,f.rf||false],[...dIdsR.current,f.id]);}
+      showSkillCustom('9 ── 相手停止','NINE','#8fe0ff');
+      try{const r=fieldAreaRef.current&&fieldAreaRef.current.getBoundingClientRect();if(r)setBurstPos({x:(r.left+r.width/2)+'px',y:(r.top+r.height/2)+'px'});}catch(e){}
+      setChronoFx('in');playChronoStopSE();setTimeout(()=>{if(pStopR.current)startChronoHum();},350);duckBGM(true);
+      pStopT.current.forEach(clearTimeout);pStopT.current=[];
+      pStopT.current.push(setTimeout(()=>{pStopR.current=false;setPStop(false);duckBGM(false);setChronoFx('out');stopChronoHum();setTimeout(()=>setChronoFx(null),420);
+        try{resumeAC();playChronoReleaseSE();}catch(e){}
+        if(phaseR.current==='playing'&&!resolvingR.current){clearTimeout(aiRef.current);scheduleAi(rn);}},NINE_STOP_MS));
+    }else{ // こっちが止まる（画面に幕が下りてタップできない。相手は動ける。時間は進む）
+      if(rStopR.current)return;rStopR.current=true;setRStop(true);
+      showSkillCustom('9 ── 停止','NINE','#ff9ab0');
+      try{resumeAC();fxTone({f:1400,f2:4000,type:'sine',v:0.09,a:0.02,d:0.3,rev:0.5});fxTone({f:3000,f2:300,type:'sine',v:0.08,a:0.005,d:0.3,t:0.3,rev:0.7});}catch(e){}
+      rStopT.current.forEach(clearTimeout);rStopT.current=[];
+      rStopT.current.push(setTimeout(()=>{rStopR.current=false;setRStop(false);},NINE_STOP_MS));
+    }
+  }
   function r2TimeStop(rn){
     const st=r2R.current;if(!r2Active()||st.timeLeft<=0||st.stopUsedRound===rn)return;st.stopUsedRound=rn;
     exitLink(); // クロノリンク中でも上書き
@@ -5101,7 +5126,7 @@ function App(){
       if(CHRONO_CONFIG.guaranteeFirstUnlock&&firstChrono&&st.no===firstChrono.no&&!saveR.current.chronoIntro){chrono=true;updSave(s=>{s.chronoIntro=true;return s;});}
       else chrono=Math.random()<CHRONO_CONFIG.appearRate;
     }
-    stageOptsR.current={chrono,noBoost:!!st.noBoost,cardSpeed:st.cardSpeed||null,winMsAbs:st.winMsAbs||null,firstMs:st.firstMs||null,firstJit:st.firstJit||0,curStepFirst:st.curStepFirst||null,curArrFirst:st.curArrFirst||null,curHoldFirst:st.curHoldFirst||null,flyMsFirst:st.flyMsFirst||null,winMs:st.winMs||null,winJit:st.winJit||0,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,ch9:!!st.ch9,ch10:!!st.ch10,smart:!!st.smart,deny:!!st.deny,playerRing:!!st.playerRing,speed:st.speed||1,curStep:st.curStep||null,curArr:st.curArr||null,curHold:st.curHold||null,flyMs:st.flyMs||null,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
+    stageOptsR.current={chrono,noBoost:!!st.noBoost,cardSpeed:st.cardSpeed||null,winMsAbs:st.winMsAbs||null,nineStop:!!st.nineStop,firstMs:st.firstMs||null,firstJit:st.firstJit||0,curStepFirst:st.curStepFirst||null,curArrFirst:st.curArrFirst||null,curHoldFirst:st.curHoldFirst||null,flyMsFirst:st.flyMsFirst||null,winMs:st.winMs||null,winJit:st.winJit||0,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,ch9:!!st.ch9,ch10:!!st.ch10,smart:!!st.smart,deny:!!st.deny,playerRing:!!st.playerRing,speed:st.speed||1,curStep:st.curStep||null,curArr:st.curArr||null,curHold:st.curHold||null,flyMs:st.flyMs||null,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
     if(st.challenge&&typeof SHIFT_VIDEO!=='undefined'){try{[SHIFT_VIDEO.v1,SHIFT_VIDEO.v2].forEach(u=>fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(()=>{}));}catch(e){}} // v78: 変身動画を先読み
     if(quick===2){clearTimers();roundTokR.current++;setPendingDiff(st.diff||null);startGame(st.diff);return;} // v234 パズルクス：説明も飛ばして即開始
     if(quick){goBrief(st.diff);return;} // v195 パズルモードはチャレンジの登場ムービーも飛ばす（テンポ優先）
@@ -5140,7 +5165,7 @@ function App(){
   function startGame(diff){
     { const so=stageR.current?(stageOptsR.current||{}):{};if(diff&&stageR.current&&!so.challenge&&!so.noBoost)diff=boostDiff(diff); } // v196 通常ステージは判断力を底上げ
     if(diff){setDifficulty(diff);diffRef.current=diff;}
-    matchStatsR.current={bursts:0,tens:[],start:Date.now()}; // v217
+    matchStatsR.current={bursts:0,tens:[],nines:0,start:Date.now()}; // v217/v243 nines=自分の手で場を9にした回数
     clearTimers();lockR.current=false;
     const p=createDeck(),d=createDeck();
     const opts=stageR.current?(stageOptsR.current||{}):{};
@@ -5812,6 +5837,7 @@ function App(){
     }
     if(ns===10){completeTen(nf,who,rn);return true;}
     if(ns===7&&r2Active()&&nf.length<4){setTimeout(()=>{if(phaseR.current==='playing'&&!resolvingR.current&&fieldSumR.current===7)r2TimeStop(rn);},250);} // v84 合計7で時間停止
+    if(ns===9&&stageOptsR.current&&stageOptsR.current.nineStop&&nf.length<4){if(who==='player')matchStatsR.current.nines=(matchStatsR.current.nines||0)+1;setTimeout(()=>{if(phaseR.current==='playing'&&!resolvingR.current&&fieldSumR.current===9)nineStop(who,rn);},250);} // v243 合計9で相手停止
     if(nf.length>=4){
       clearTimers();lockR.current=true;resolvingR.current=true;setResetFA(true);
       setFlashMsg({text:'4枚！強制リセット',color:DIM});
