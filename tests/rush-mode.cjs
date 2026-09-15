@@ -15,21 +15,23 @@ function makeClock(){
  return {now:()=>now,setTimeout:(fn,ms)=>add(fn,ms,0),setInterval:(fn,ms)=>add(fn,ms,ms),clear:key=>jobs.delete(key),reset:()=>jobs.clear(),
  jump:ms=>{now+=ms;},advance(ms){const to=now+ms;let n=0;while(true){const next=[...jobs].filter(([,j])=>j.at<=to).sort((a,b)=>a[1].at-b[1].at)[0];if(!next)break;if(++n>20000)throw Error('Timer loop');const[key,j]=next;now=j.at;if(j.interval)j.at+=j.interval;else jobs.delete(key);j.fn();}now=to;}};
 }
-function engine(){
+function engine({ai=false}={}){
  const clock=makeClock();const dom=new JSDOM('<body><div id="root"></div></body>',{url:'https://example.test/'});
  const soundNode=()=>({connect(){},gain:{value:0}});
  dom.window.AudioContext=class{constructor(){this.sampleRate=10;this.state='running';}createConvolver(){return soundNode();}createGain(){return soundNode();}createBuffer(ch,n){return{getChannelData:()=>new Float32Array(n)}}};
  const hooks={createElement:(type,props,...children)=>({type,props:props||{},children}),Fragment:'fragment',useState:v=>{let x=typeof v==='function'?v():v;return[x,n=>{x=typeof n==='function'?n(x):n;}];},useRef:v=>({current:v}),useEffect(){},useCallback:f=>f,useMemo:f=>f()};
  const context=vm.createContext({window:dom.window,document:dom.window.document,navigator:dom.window.navigator,localStorage:dom.window.localStorage,React:hooks,ReactDOM:{createRoot:()=>({render(){}})},console,performance:{now:clock.now},Date:class extends Date{static now(){return clock.now()}},setTimeout:clock.setTimeout,clearTimeout:clock.clear,setInterval:clock.setInterval,clearInterval:clock.clear,requestAnimationFrame:fn=>clock.setTimeout(fn,16),cancelAnimationFrame:clock.clear,Image:class{},Audio:class{play(){return Promise.resolve()}pause(){}}});
- const capture=`  return {startRushBattle,startStage,startTimer,doCountdown,playCard,resolvePlay,completeTen,finishRushRound,finishRushBoard,goHome,goRush,commitDealerPlay,dealPlayer,setDealer,rushExpired,
+ const capture=`  return {startChargeBattle,finishChargeMatch,updateCharge,refundCharge,togglePause,chargeR,pausedR,pLandAtR,matchStatsR,goCharge,startRushBattle,startStage,startTimer,doCountdown,playCard,resolvePlay,completeTen,finishRushRound,finishRushBoard,goHome,goRush,commitDealerPlay,dealPlayer,setDealer,rushExpired,
   phaseR,stageR,stageOptsR,rushMatchR,rushClosedR,rushDeadlineR,timeLeftR,pPtR,dPtR,rnR,roundTokR,pHR,dHR,dIdsR,fieldR,fieldSumR,flyR,lockR,resolvingR,countNumR,saveR,
   silenceAi:()=>{scheduleAi=()=>{};},openRound:()=>{countNumR.current=-1;lockR.current=false;resolvingR.current=false;startTimer(rnR.current);},
   state:()=>({phase:phaseR.current,p:pPtR.current,d:dPtR.current,wins:rushMatchR.current,closed:rushClosedR.current,field:[...fieldR.current],rn:rnR.current})};\n`;
  const code=source.replace('  const curStage=stageCtx?',capture+'  const curStage=stageCtx?');
- vm.runInContext(code+`\n[${['resumeAC','stopBGM','startBGM','stopChronoHum','duckBGM','playGoSE','playPlaceSE','playComboSfx','playBurstSE','playWinSE2','playLoseSE','fxBell','fxAir'].map(n=>JSON.stringify(n)).join(',')}].forEach(n=>{this[n]=()=>{};});\nthis.testApi={App,RUSH_CFG,rushRoundResult,rushStage,TitleScreen,RushScreen,RushResult};`,context);
- clock.reset();const app=context.testApi.App();app.silenceAi();
+ vm.runInContext(code+`\n[${['resumeAC','stopBGM','startBGM','stopChronoHum','duckBGM','playGoSE','playPlaceSE','playComboSfx','playBurstSE','playWinSE2','playLoseSE','fxBell','fxAir'].map(n=>JSON.stringify(n)).join(',')}].forEach(n=>{this[n]=()=>{};});\nthis.testApi={ChargeScreen,ChargeResult,ChargeMeter,CHARGE_CFG,chargeStage,chargeAdvance,App,RUSH_CFG,rushRoundResult,rushStage,TitleScreen,RushScreen,RushResult};`,context);
+ clock.reset();const app=context.testApi.App();if(!ai)app.silenceAi();
  return {clock,app,api:context.testApi,context,dom};
 }
+module.exports={engine,makeClock};
+if(require.main===module){
 function start(){const e=engine();e.app.startRushBattle('normal');e.clock.advance(5000);assert.equal(e.app.phaseR.current,'playing');assert.equal(e.app.countNumR.current,-1);return e;}
 function freshRound(e){e.app.startTimer(e.app.rnR.current);}
 function ten(e,cards=[5,5],who='player'){e.app.completeTen(cards,who,e.app.rnR.current);}
@@ -102,3 +104,5 @@ for(const when of ['countdown','settlement','break']){
  const b=engine();b.app.stageOptsR.current={};b.app.phaseR.current='playing';b.app.pPtR.current=4;b.app.resolvePlay(5,[3,4],7,'player',1);assert.equal(b.app.pPtR.current,2);assert.equal(b.app.dPtR.current,0);
 }
 console.log('PASS: rush home entry; role scoring; uninterrupted deadline; burst; board reset; exact-deadline rejection; ties; both match winners; refill; leave/cancel; unchanged saves and normal rules.');
+
+}
