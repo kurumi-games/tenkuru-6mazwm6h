@@ -2054,10 +2054,9 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.nephira .gp-dealer-card .dv{color:#3a2a6a;text-shadow:0 0 3px rgba(255,255,255,.9);}
 .gp-screen.nephira .gp-dealer-card .dcur{border-color:rgba(190,170,255,.95);box-shadow:0 0 10px rgba(170,150,255,.8),inset 0 0 8px rgba(170,150,255,.35);}
 .gp-screen.nephira .fly-card{background:url('img/pzx/card-opponent.webp') center/100% 100% no-repeat;border:none;box-shadow:none;color:#3a2a6a;text-shadow:0 0 4px rgba(255,255,255,.9);}
-/* v232 パネルに入る演出：パネルがサイコロみたいにパラパラ割れて落ちる */
-.pzx-shatter{position:absolute;inset:0;perspective:calc(600 * var(--u));pointer-events:none;z-index:3;}
-.pzx-shatter .tile{position:absolute;background-repeat:no-repeat;will-change:transform,opacity;animation:pzxShatter var(--dur) cubic-bezier(.4,0,.9,.4) var(--delay) both;box-shadow:0 0 0 .5px rgba(190,180,255,.25);}
-@keyframes pzxShatter{0%{transform:none;opacity:1;}12%{transform:translate(calc(var(--dx) * .08),calc(var(--dy) * -.12)) rotateX(calc(var(--rx) * .2)) rotateY(calc(var(--ry) * .2));opacity:1;}100%{transform:translate(var(--dx),var(--dy)) rotateX(var(--rx)) rotateY(var(--ry)) rotate(var(--rz));opacity:0;}}
+/* v233 画面の一番上に乗るエフェクト層（割れる演出など）。タップは通す */
+.fx-layer{position:fixed;inset:0;z-index:9999;pointer-events:none;}
+.fx-layer canvas{display:block;width:100%;height:100%;}
 .pzx-panel.breaking>img{visibility:hidden;}
 /* v200 ともしび：灯りの当たっていない札 */
 .card-stage.lantern-dark{filter:brightness(.28) saturate(.4);transition:filter .3s;}
@@ -3197,7 +3196,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v232'; // v232(2026/09/15): 「中へ入る」でパネルがサイコロみたいにパラパラ割れて落ちる演出（10×6のかけら、1.5秒で絵の中へ）
+const APP_VER='v233'; // v233(2026/09/15): 「中へ入る」の割れる演出を作り直し。パネルを写真に撮って衝撃点からヒビ（放射＋同心円）→フラッシュ→破片が裏返りながら飛んで落ちる＋粉。破片が飛び始めた時点で絵の中に切り替わり、破片はその上を落ちる。数値は FX_SHATTER
+// const APP_VER='v232'; // v232(2026/09/15): 「中へ入る」でパネルがサイコロみたいにパラパラ割れて落ちる演出（10×6のかけら、1.5秒で絵の中へ）
 // const APP_VER='v231'; // v231(2026/09/15): ネフィラの世界の対戦画面（通常・ボス共通）に nephira-battle-assets を適用：背景・手札マット・自分の札・相手の札（img/pzx/battle-bg・hand-mat・card-player・card-opponent）。確認用に仮のステージ7つ（相手・条件は未定）と最小の結果画面
 // const APP_VER='v230'; // v230(2026/09/15): 通常ステージ6つをボスを囲む円に並べる（1番が真下、時計回り）。星環がその輪の外側で回る
 // const APP_VER='v229'; // v229(2026/09/15): 足場を全体に大きく上へ（ステージ1が下すぎた）。番号・BOSS の文字は描かない（絵だけ）
@@ -4098,30 +4098,78 @@ function GameEndScreen({data,onRestart,onHome}){
 }
 
 // ── v214 パズルクス：パネル画面（線画＋獲得ピース）／中のマップ（仮） ──
+// ── v233 割れる演出（ガラス）：画面の一部を写真に撮り、衝撃点からヒビ→破片が飛び散って落ちる。数値は FX_SHATTER で調整 ──
+const FX_SHATTER={spokes:15,rings:[.08,.17,.28,.41,.56,.74,.95,1.25],crackMs:320,flashMs:220,gravity:2400,spread:180,spin:5,holdMs:120,fadeAt:.85,dust:70,total:1700};
+let fxCanvas=null,fxRun=null;
+function playShatterFx({snap,rect,onCracked}){
+  const cv=fxCanvas,ctx=cv&&cv.getContext&&cv.getContext('2d');if(!ctx){onCracked&&onCracked();return;}
+  const F=FX_SHATTER;const dpr=Math.min(window.devicePixelRatio||1,2);
+  const W=window.innerWidth,H=window.innerHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+  const rd=(a,b)=>a+Math.random()*(b-a);
+  const P={x:rect.x+rect.w*rd(.38,.62),y:rect.y+rect.h*rd(.35,.65)}; // 衝撃点（パネルの中ほど）
+  const R=Math.max(Math.hypot(rect.x-P.x,rect.y-P.y),Math.hypot(rect.x+rect.w-P.x,rect.y-P.y),Math.hypot(rect.x-P.x,rect.y+rect.h-P.y),Math.hypot(rect.x+rect.w-P.x,rect.y+rect.h-P.y));
+  // ヒビの骨組み：放射線（角度をゆらす）と同心円（半径をゆらす）
+  const N=F.spokes,ang=[];for(let i=0;i<N;i++)ang.push(i/N*Math.PI*2+rd(-.12,.12));
+  const rad=[];for(let i=0;i<N;i++){rad.push(F.rings.map(k=>k*R*rd(.9,1.1)));}
+  const pt=(i,k)=>{const ii=i%N;if(k<0)return{x:P.x,y:P.y};return{x:P.x+Math.cos(ang[ii])*rad[ii][k],y:P.y+Math.sin(ang[ii])*rad[ii][k]};};
+  const clipRect=poly=>{ // 破片をパネルの枠で切る（はみ出た部分は捨てる）
+    const edges=[[q=>q.x>=rect.x,(a,b)=>({x:rect.x,y:a.y+(b.y-a.y)*(rect.x-a.x)/(b.x-a.x)})],[q=>q.x<=rect.x+rect.w,(a,b)=>({x:rect.x+rect.w,y:a.y+(b.y-a.y)*(rect.x+rect.w-a.x)/(b.x-a.x)})],[q=>q.y>=rect.y,(a,b)=>({x:a.x+(b.x-a.x)*(rect.y-a.y)/(b.y-a.y),y:rect.y})],[q=>q.y<=rect.y+rect.h,(a,b)=>({x:a.x+(b.x-a.x)*(rect.y+rect.h-a.y)/(b.y-a.y),y:rect.y+rect.h})]];
+    let out=poly;for(const[inside,cross]of edges){const inp=out;out=[];for(let j=0;j<inp.length;j++){const a=inp[j],b=inp[(j+1)%inp.length];const ai=inside(a),bi=inside(b);if(ai&&bi)out.push(b);else if(ai&&!bi)out.push(cross(a,b));else if(!ai&&bi){out.push(cross(a,b));out.push(b);}}if(!out.length)break;}
+    return out;};
+  const shards=[];
+  for(let i=0;i<N;i++)for(let k=-1;k<F.rings.length-1;k++){
+    const poly=clipRect(k<0?[pt(i,-1),pt(i,0),pt(i+1,0)]:[pt(i,k),pt(i,k+1),pt(i+1,k+1),pt(i+1,k)]);if(poly.length<3)continue;
+    const xs=poly.map(q=>q.x),ys=poly.map(q=>q.y);
+    const c={x:xs.reduce((a,b)=>a+b)/xs.length,y:ys.reduce((a,b)=>a+b)/ys.length};const d=Math.hypot(c.x-P.x,c.y-P.y),dir=Math.atan2(c.y-P.y,c.x-P.x);
+    shards.push({poly,c,delay:F.crackMs/1000*(d/R)+rd(0,.06),vx:Math.cos(dir)*F.spread*rd(.4,1.2),vy:Math.sin(dir)*F.spread*rd(.4,1.2)-rd(60,260),w:rd(-F.spin,F.spin),fl:rd(2,7),ph:rd(0,6.3),z:rd(.6,1)});
+  }
+  const dust=[];for(let i=0;i<F.dust;i++){const a=rd(0,6.3),v=rd(60,420);dust.push({x:P.x,y:P.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-rd(50,200),r:rd(.6,2.2),t0:rd(0,.15),life:rd(.5,1.1)});}
+  const t0=performance.now();let cracked=false;if(fxRun)cancelAnimationFrame(fxRun);
+  const draw=()=>{
+    const t=(performance.now()-t0)/1000;ctx.clearRect(0,0,W,H);
+    const crackK=Math.min(1,t/(F.crackMs/1000));
+    // 破片（ヒビが届くまではその場に静止、届いたら飛ぶ）
+    shards.forEach(sh=>{
+      const dt=Math.max(0,t-sh.delay-F.holdMs/1000);let x=0,y=0,rot=0,sx=1,al=1;
+      if(dt>0){x=sh.vx*dt;y=sh.vy*dt+.5*F.gravity*dt*dt;rot=sh.w*dt;sx=Math.max(.12,Math.abs(Math.cos(sh.fl*dt+sh.ph)));const life=(dt)/(F.total/1000-sh.delay);al=life<F.fadeAt?1:Math.max(0,1-(life-F.fadeAt)/(1-F.fadeAt));}
+      if(al<=0)return;
+      ctx.save();ctx.globalAlpha=al;ctx.translate(sh.c.x+x,sh.c.y+y);ctx.rotate(rot);ctx.scale(sx,1);ctx.translate(-sh.c.x,-sh.c.y);
+      ctx.beginPath();sh.poly.forEach((q,j)=>j?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.closePath();ctx.clip();
+      ctx.drawImage(snap,rect.x,rect.y,rect.w,rect.h);
+      if(dt>0){ctx.globalAlpha=al*(.10+.45*(1-sx));ctx.fillStyle='#ffffff';ctx.fill();} // 裏返る瞬間に白く光る
+      ctx.restore();
+      // フチの光
+      const seen=t>=sh.delay*.9;if(seen){ctx.save();ctx.globalAlpha=al*(dt>0?.55:.9*crackK);ctx.translate(sh.c.x+x,sh.c.y+y);ctx.rotate(rot);ctx.scale(sx,1);ctx.translate(-sh.c.x,-sh.c.y);ctx.beginPath();sh.poly.forEach((q,j)=>j?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));ctx.closePath();ctx.strokeStyle='rgba(235,240,255,.9)';ctx.lineWidth=dt>0?.9:1.4;ctx.shadowColor='#bfe6ff';ctx.shadowBlur=dt>0?4:10;ctx.stroke();ctx.restore();}
+    });
+    // 衝撃のフラッシュ
+    if(t<F.flashMs/1000){const k=1-t/(F.flashMs/1000);const g=ctx.createRadialGradient(P.x,P.y,0,P.x,P.y,R*.9);g.addColorStop(0,'rgba(255,255,255,'+(.95*k)+')');g.addColorStop(.35,'rgba(200,220,255,'+(.45*k)+')');g.addColorStop(1,'rgba(200,220,255,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+    // 粉
+    dust.forEach(p=>{const dt=t-p.t0;if(dt<0||dt>p.life)return;const k=1-dt/p.life;ctx.globalAlpha=k*.9;ctx.fillStyle=Math.random()<.5?'#ffffff':'#bfe6ff';ctx.beginPath();ctx.arc(p.x+p.vx*dt,p.y+p.vy*dt+.5*F.gravity*.6*dt*dt,p.r*k,0,Math.PI*2);ctx.fill();});ctx.globalAlpha=1;
+    if(!cracked&&t>=F.crackMs/1000+F.holdMs/1000){cracked=true;onCracked&&onCracked();}
+    if(t<F.total/1000)fxRun=requestAnimationFrame(draw);else{ctx.clearRect(0,0,W,H);fxRun=null;}
+  };
+  try{resumeAC();fxTone({f:1800,f2:600,type:'triangle',v:0.06,a:0.002,d:0.12,rev:0.3});setTimeout(()=>{fxTone({f:3200,f2:900,type:'triangle',v:0.05,a:0.002,d:0.08,rev:0.3});fxTone({f:120,f2:40,type:'sine',v:0.08,a:0.005,d:0.35,rev:0.4});},F.crackMs);[420,520,610,700,820].forEach(ms=>setTimeout(()=>fxTone({f:2400+Math.random()*1500,f2:500,type:'triangle',v:0.022,a:0.002,d:0.07,rev:0.35}),ms));}catch(e){}
+  fxRun=requestAnimationFrame(draw);
+}
+window.playShatterFx=playShatterFx;
+function FxLayer(){const r=useRef(null);useEffect(()=>{fxCanvas=r.current;return()=>{if(fxCanvas===r.current)fxCanvas=null;};},[]);return h('div',{className:'fx-layer'},h('canvas',{ref:r}));}
 function PzxPanel({save,onEnter,onBack,onReset}){
   const st=pzxState(save),N=PZX.pieces.length,done=st.got.length>=N;
   const[ask,setAsk]=useState(false); // v218 リセットは2回押し
-  const panelR=useRef(null);const[tiles,setTiles]=useState(null); // v232 割れる演出のかけら
-  const enter=()=>{ // 中へ入る：パネルを 10×6 のかけらにして散らし、落ちきったら絵の中へ
-    if(tiles)return;const el=panelR.current;if(!el){onEnter();return;}
-    const r=el.getBoundingClientRect(),PW=r.width,PH=r.height,C=10,R=6,tw=PW/C,th=PH/R;
-    const layers=[];const pieceIdx=done?[]:PZX.pieces.map((p,i)=>i).filter(i=>st.got.includes(i));
-    const imgs=done?[{u:PZX.dir+PZX.complete,x:0,y:0,w:PW,h:PH}]:[...pieceIdx.map(i=>{const p=PZX.pieces[i];return{u:PZX.dir+p.id+'.webp',x:p.x/PZX.w*PW,y:p.y/PZX.h*PH,w:p.w/PZX.w*PW,h:p.h/PZX.h*PH};}),{u:PZX.dir+PZX.outline,x:0,y:0,w:PW,h:PH}];
-    const list=[];
-    for(let j=0;j<R;j++)for(let i=0;i<C;i++){const tx=i*tw,ty=j*th;
-      list.push({key:j*C+i,style:{left:tx+'px',top:ty+'px',width:(tw+.6)+'px',height:(th+.6)+'px',
-        backgroundImage:imgs.map(m=>'url('+m.u+')').join(','),backgroundSize:imgs.map(m=>m.w+'px '+m.h+'px').join(','),backgroundPosition:imgs.map(m=>(m.x-tx)+'px '+(m.y-ty)+'px').join(','),
-        '--dx':((Math.random()-.5)*PW*.9)+'px','--dy':(PH*.9+Math.random()*PH*1.4)+'px','--rx':((Math.random()-.5)*720)+'deg','--ry':((Math.random()-.5)*720)+'deg','--rz':((Math.random()-.5)*360)+'deg',
-        '--delay':(Math.random()*.35+j*.04)+'s','--dur':(.8+Math.random()*.4)+'s'}});}
-    setTiles(list);
-    try{resumeAC();[0,60,130,220].forEach(ms=>setTimeout(()=>fxTone({f:2200+Math.random()*900,f2:400,type:'triangle',v:0.035,a:0.002,d:0.09,rev:0.25}),ms));}catch(e){}
-    setTimeout(onEnter,1500);
+  const panelR=useRef(null);const[breaking,setBreaking]=useState(false);
+  const enter=()=>{ // v233 中へ入る：パネルを写真に撮って、ガラスみたいにヒビ→パリッと割れて破片が落ちる（FX_SHATTER）
+    if(breaking)return;const el=panelR.current;if(!el||!window.playShatterFx){onEnter();return;}
+    setBreaking(true);
+    const r=el.getBoundingClientRect();
+    const snap=document.createElement('canvas');const dpr=Math.min(window.devicePixelRatio||1,2);snap.width=Math.round(r.width*dpr);snap.height=Math.round(r.height*dpr);
+    const g=snap.getContext&&snap.getContext('2d');if(!g){onEnter();return;}g.scale(dpr,dpr);g.fillStyle='#0b1030';g.fillRect(0,0,r.width,r.height);
+    el.querySelectorAll('img').forEach(im=>{if(!im.complete||!im.naturalWidth)return;const b=im.getBoundingClientRect();try{g.drawImage(im,b.left-r.left,b.top-r.top,b.width,b.height);}catch(e){}});
+    playShatterFx({snap,rect:{x:r.left,y:r.top,w:r.width,h:r.height},onCracked:()=>onEnter()});
   };
   const has=st.got.length;
   return h('div',{className:'pzx-screen'},
     h('div',{className:'k'},'PUZZLUX'),h('div',{className:'t'},'パズルクス'),h('div',{className:'sub'},'ネフィラ'),
-    h('div',{className:'pzx-panel'+(tiles?' breaking':''),ref:panelR},
-      tiles&&h('div',{className:'pzx-shatter'},tiles.map(t=>h('div',{key:t.key,className:'tile',style:t.style}))),
+    h('div',{className:'pzx-panel'+(breaking?' breaking':''),ref:panelR},
       h('img',{className:'ol',src:PZX.dir+PZX.outline,alt:'',draggable:false}),
       !done&&PZX.pieces.map((p,i)=>st.got.includes(i)&&h('img',{key:p.id,className:'pc',src:PZX.dir+p.id+'.webp',alt:'',draggable:false,style:{left:(p.x/PZX.w*100)+'%',top:(p.y/PZX.h*100)+'%',width:(p.w/PZX.w*100)+'%',height:(p.h/PZX.h*100)+'%'}})),
       done&&h('img',{className:'cp',src:PZX.dir+PZX.complete,alt:'',draggable:false})
@@ -5941,7 +5989,7 @@ function App(){
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(h(App,null));
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,h(App,null),h(FxLayer,null))); // v233 FxLayer=画面の一番上のエフェクト層
 </script>
 </body>
 </html>
