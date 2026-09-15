@@ -2046,17 +2046,6 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-card .st{font-size:calc(10 * var(--u));color:#ded2b1;letter-spacing:.06em;white-space:nowrap;}
 .pzx-card .go{margin-top:calc(8 * var(--u));width:100%;min-height:calc(44 * var(--u));border-radius:999px;border:1px solid rgba(255,224,138,.55);background:linear-gradient(135deg,rgba(255,224,138,.22),rgba(150,120,255,.22));color:#fff3c4;font-family:inherit;font-size:calc(14 * var(--u));font-weight:700;letter-spacing:.24em;cursor:pointer;}
 .pzx-card .go:disabled{opacity:.4;cursor:default;}
-/* ===== v231 ネフィラの世界の対戦画面（通常・ボス共通）：背景・手札マット・自分の札・相手の札だけ差し替え。配置や他のUIは触らない ===== */
-.gp-screen.nephira{background-image:url('img/pzx/battle-bg.webp');background-size:cover;background-position:center;background-color:#0a0d24;}
-.gp-screen.nephira .gp-hand-rows{position:relative;background:transparent;border:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;}
-.gp-screen.nephira .gp-hand-rows::before{content:'';position:absolute;left:50%;top:50%;width:108%;aspect-ratio:1619/971;transform:translate(-50%,-50%);background:url('img/pzx/hand-mat.webp') center/100% 100% no-repeat;pointer-events:none;z-index:0;}
-.gp-screen.nephira .gp-hand-row{position:relative;z-index:1;}
-.gp-screen.nephira .card-stage.cyan{--cardimg:url('img/pzx/card-player.webp');--nc:#1d2a55;}
-.gp-screen.nephira .card-stage.magenta{--cardimg:url('img/pzx/card-opponent.webp');--nc:#3a2a6a;}
-.gp-screen.nephira .gp-dealer-card{aspect-ratio:2/3;border-radius:0;border:none;box-shadow:none;background:url('img/pzx/card-opponent.webp') center/contain no-repeat !important;}
-.gp-screen.nephira .gp-dealer-card .dv{color:#3a2a6a;text-shadow:0 0 3px rgba(255,255,255,.9);}
-.gp-screen.nephira .gp-dealer-card .dcur{border-color:rgba(190,170,255,.95);box-shadow:0 0 10px rgba(170,150,255,.8),inset 0 0 8px rgba(170,150,255,.35);}
-.gp-screen.nephira .fly-card{background:url('img/pzx/card-opponent.webp') center/100% 100% no-repeat;border:none;box-shadow:none;color:#3a2a6a;text-shadow:0 0 4px rgba(255,255,255,.9);}
 /* v234 パズルクス結果 */
 .pzx-res .k2{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#b9a8ff;margin-bottom:calc(-4 * var(--u));}
 .pzx-res .cond{width:100%;margin-top:calc(8 * var(--u));padding:calc(9 * var(--u)) calc(12 * var(--u));border-radius:calc(10 * var(--u));background:rgba(255,255,255,.04);border:1px solid rgba(190,180,255,.25);font-size:calc(12 * var(--u));line-height:1.65;color:#d6d2ea;text-align:left;}
@@ -3211,7 +3200,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v237'; // v237(2026/09/15): チャッピー素材 nephira-puzzle-6 に全差し替え：縦長パネル 1024×1536、白い線画パネル、ガラス割れ形の6ピース（透過）。ミッション枠は6＋ネフィラ（中身は未定のまま）
+const APP_VER='v238'; // v238(2026/09/15): パズルクスの対戦画面をいつもの白背景に戻す（v231の背景・マット・札は外す。画像 img/pzx/battle-bg・hand-mat・card-* は削除）
+// const APP_VER='v237'; // v237(2026/09/15): チャッピー素材 nephira-puzzle-6 に全差し替え：縦長パネル 1024×1536、白い線画パネル、ガラス割れ形の6ピース（透過）。ミッション枠は6＋ネフィラ（中身は未定のまま）
 // const APP_VER='v236'; // v236(2026/09/15): チャッピーの15ピース素材（nephira-puzzle-15、1615×969、1枚323×323）を導入。完成絵・パネル・ピース差し替え
 // const APP_VER='v235'; // v235(2026/09/15): 15ピース（横5×縦3、piece_01〜15.webp）の土台。ミッション15＋ネフィラの枠（条件・相手はくるみが決める。今は全部「仮：勝てば達成」）。ピース画像・線画はチャッピーの新素材待ち
 // const APP_VER='v234'; // v234(2026/09/15): パズルクスの流れを短く：パネル画面に「今のミッション」と「対戦」1個。押した瞬間に相手と対戦（説明画面なし）→結果→パネル。ミッション達成の勝ちでピース、6枚でネフィラ戦、勝てば CLEAR。絵の中の世界・入る演出はコードに残すがホームからは行かない
@@ -5860,7 +5850,7 @@ function App(){
   const so=stageOptsR.current||{};
   const rival=(form2&&so.form2Name)||so.rivalName||'DEALER';
   // v62: 第7は「ルナ」／v70: 第2形態は「レイピア」
-  return h('div',{className:'gp-screen'+(endHold?' end-hold':'')+(stageR.current&&stageR.current.ar===1?' nephira':'')+(so.challenge?' ch7':'')+(so.ch8?' ch8':'')+(so.ch9?' ch9':'')+(so.ch10?' ch10':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
+  return h('div',{className:'gp-screen'+(endHold?' end-hold':'')+(so.challenge?' ch7':'')+(so.ch8?' ch8':'')+(so.ch9?' ch9':'')+(so.ch10?' ch10':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
     h(ChampionLayer,{champ:stageOptsR.current&&stageOptsR.current.champion?CHAMPIONS[stageOptsR.current.champion]:null}), // v61 チャンピオン戦は立ち絵
     so.challenge&&h('div',{className:'champ-layer'},
       form2
