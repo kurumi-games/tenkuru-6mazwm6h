@@ -3220,7 +3220,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v243'; // v243(2026/09/15): ミッション6を実装（くるみ決定の相手設定＋条件「勝つ＋自分の手で9を2回」＋フィールド効果「9」＝9にした側が相手を2秒止める、両者平等、星環なし）。ステージには nineStop:true / winMsAbs / cardSpeed で書ける
+const APP_VER='v244'; // v244(2026/09/15): ミッション1を実装（くるみ決定の相手設定＋条件「勝つ＋バースト1回以内」、フィールド効果なし）
+// const APP_VER='v243'; // v243(2026/09/15): ミッション6を実装（くるみ決定の相手設定＋条件「勝つ＋自分の手で9を2回」＋フィールド効果「9」＝9にした側が相手を2秒止める、両者平等、星環なし）。ステージには nineStop:true / winMsAbs / cardSpeed で書ける
 // const APP_VER='v242'; // v242(2026/09/15): 調整から「1枚目の初速」を外す（1枚目のメーターで足りる）。決定打だけ残す
 // const APP_VER='v241'; // v241(2026/09/15): 調整に「1枚目の初速」「決定打」（msで直接指定、0＝メーター通り）。ステージでは firstMs / winMsAbs
 // const APP_VER='v240'; // v240(2026/09/15): cardSpeed の倍率を、考える時間だけでなくカーソル移動・タップ・降下・決定打の下限にも掛ける（0.2で本当に速くなる）。調整画面に「通常の強化」の説明
@@ -3505,7 +3506,9 @@ const PZX_WORLD={
 // 相手の強さに使えるもの：diff（easy/normal/hard/master、通常は+2段の強化が乗る）、speed（小さいほど速い）、smart（読む）、deny（10を作らせない）、ability（'freeze'/'orbit'）、playerRing、winPt、timeLimit、noBoost（強化を乗せない）
 const PZX_MISSION_TODO=m=>m.win; // 仮の判定：勝てば達成
 const PZX_STAGES=[
-  {no:101,rivalName:'DEALER',name:'MISSION 1',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  // v244 くるみ決定：相手＝MASTER・読み・封じなし・速さ[.2,.35,.35,.35]・決定打660ms・通常の強化あり・先取10・持ち時間5秒。フィールド効果なし
+  {no:101,rivalName:'DEALER',name:'MISSION 1',icon:'card',winPt:10,timeLimit:5,diff:'master',rule:'normal',smart:true,cardSpeed:[.2,.35,.35,.35],winMsAbs:660,
+    mission:{text:'勝つ ＋ バースト1回以内',check:m=>m.win&&m.bursts<=1}},
   {no:102,rivalName:'DEALER',name:'MISSION 2',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
   {no:103,rivalName:'DEALER',name:'MISSION 3',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
   {no:104,rivalName:'DEALER',name:'MISSION 4',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
