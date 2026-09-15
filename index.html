@@ -3211,7 +3211,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v234'; // v234(2026/09/15): パズルクスの流れを短く：パネル画面に「今のミッション」と「対戦」1個。押した瞬間に相手と対戦（説明画面なし）→結果→パネル。ミッション達成の勝ちでピース、6枚でネフィラ戦、勝てば CLEAR。絵の中の世界・入る演出はコードに残すがホームからは行かない
+const APP_VER='v235'; // v235(2026/09/15): 15ピース（横5×縦3、piece_01〜15.webp）の土台。ミッション15＋ネフィラの枠（条件・相手はくるみが決める。今は全部「仮：勝てば達成」）。ピース画像・線画はチャッピーの新素材待ち
+// const APP_VER='v234'; // v234(2026/09/15): パズルクスの流れを短く：パネル画面に「今のミッション」と「対戦」1個。押した瞬間に相手と対戦（説明画面なし）→結果→パネル。ミッション達成の勝ちでピース、6枚でネフィラ戦、勝てば CLEAR。絵の中の世界・入る演出はコードに残すがホームからは行かない
 // const APP_VER='v233'; // v233(2026/09/15): 「中へ入る」の割れる演出を作り直し。パネルを写真に撮って衝撃点からヒビ（放射＋同心円）→フラッシュ→破片が裏返りながら飛んで落ちる＋粉。破片が飛び始めた時点で絵の中に切り替わり、破片はその上を落ちる。数値は FX_SHATTER
 // const APP_VER='v232'; // v232(2026/09/15): 「中へ入る」でパネルがサイコロみたいにパラパラ割れて落ちる演出（10×6のかけら、1.5秒で絵の中へ）
 // const APP_VER='v231'; // v231(2026/09/15): ネフィラの世界の対戦画面（通常・ボス共通）に nephira-battle-assets を適用：背景・手札マット・自分の札・相手の札（img/pzx/battle-bg・hand-mat・card-player・card-opponent）。確認用に仮のステージ7つ（相手・条件は未定）と最小の結果画面
@@ -3463,7 +3464,8 @@ const DIFF_ORDER=['easy','normal','hard','master'];
 
 // ── v214 パズルクス：線画のパネル（3×2）に四角いピースがはまる。ピースは勝利では貰えず「各ステージの条件」で貰う（条件・ステージは後で作る） ──
 const PZX={dir:'img/pzx/',w:1672,h:941,outline:'outline.webp',complete:'complete.webp',
-  pieces:[{id:'piece_01',x:0,y:0,w:557,h:470},{id:'piece_02',x:557,y:0,w:557,h:470},{id:'piece_03',x:1114,y:0,w:558,h:470},{id:'piece_04',x:0,y:470,w:557,h:471},{id:'piece_05',x:557,y:470,w:557,h:471},{id:'piece_06',x:1114,y:470,w:558,h:471}],
+  // v235 15ピース（横5×縦3）。x の切れ目 0,334,668,1002,1336,1672 / y の切れ目 0,314,628,941。画像は piece_01〜15.webp（左上から右へ、次の段へ）
+  pieces:(()=>{const xs=[0,334,668,1002,1336,1672],ys=[0,314,628,941],a=[];let n=0;for(let r=0;r<3;r++)for(let c=0;c<5;c++){n++;a.push({id:'piece_'+String(n).padStart(2,'0'),x:xs[c],y:ys[r],w:xs[c+1]-xs[c],h:ys[r+1]-ys[r]});}return a;})(),
   // マップの仮ノード（viewBox 330×420、下から上へ）。ステージの中身は未定
   map:[{no:1,x:60,y:370},{no:2,x:170,y:330},{no:3,x:270,y:270},{no:4,x:180,y:210},{no:5,x:80,y:150},{no:6,x:170,y:60}],
 };
@@ -3480,29 +3482,35 @@ const PZX_WORLD={
     {x:.52,y:.90,s:.06,bob:4,per:6.8,rot:3,a:.6},{x:.22,y:.10,s:.05,bob:3,per:7.4,rot:14,a:.5},{x:.80,y:.92,s:.05,bob:3,per:6.4,rot:-5,a:.5},
   ],
 };
-// ── v234 パズルクス：ステージ選択なし。「対戦」1個で今のミッションの相手と即対戦。ミッションを達成した勝ちでピース、6枚そろったらネフィラ戦 ──
-// 判定に使えるもの：勝ち／自分の点／相手の点／自分のバースト回数／自分が作った10（役名・枚数）／試合秒数。数値・文はここだけで調整
+// ── v235 パズルクス：15ミッション＋ネフィラ。「対戦」1個で今のミッションの相手と即対戦。達成した勝ちでピース、15枚そろったらネフィラ戦 ──
+// ★ 条件と相手の強さはくるみが決める。今は全部「仮」（勝てば達成、相手はふつうのDEALER）。1行＝1ミッション、ここを書き換えるだけで反映される
+// 判定に使えるもの：m.win（勝ち）／m.pp（自分の点）／m.dp（相手の点）／m.bursts（自分のバースト回数）／m.tens（自分が作った10の一覧 {voice:役名, n:枚数}）／m.sec（試合秒数）
+// 相手の強さに使えるもの：diff（easy/normal/hard/master、通常は+2段の強化が乗る）、speed（小さいほど速い）、smart（読む）、deny（10を作らせない）、ability（'freeze'/'orbit'）、playerRing、winPt、timeLimit、noBoost（強化を乗せない）
+const PZX_MISSION_TODO=m=>m.win; // 仮の判定：勝てば達成
 const PZX_STAGES=[
-  {no:101,rivalName:'第一の番人',name:'静かな岸',description:'まずは崩れずに',icon:'card',winPt:10,diff:'normal',rule:'normal',speed:.85,smart:true,
-    mission:{text:'バースト0で勝つ。相手は5点以下に抑える',check:m=>m.win&&m.bursts===0&&m.dp<=5}},
-  {no:102,rivalName:'第二の番人',name:'重ねの島',description:'役をつないで押し切る',icon:'card',winPt:12,diff:'normal',rule:'normal',speed:.8,smart:true,
-    mission:{text:'役つきの10（ワンペア以上）を4回作って勝つ',check:m=>m.win&&m.tens.filter(t=>t.voice!=='役なし').length>=4}},
-  {no:103,rivalName:'第三の番人',name:'風の裂け目',description:'考える間はない',icon:'clock',winPt:10,diff:'normal',rule:'normal',timeLimit:7,speed:.7,smart:true,
-    mission:{text:'75秒以内に勝つ（持ち時間7秒）',check:m=>m.win&&m.sec<=75}},
-  {no:104,rivalName:'第四の番人',name:'三つ星の岩',description:'同じ数を三つ',icon:'card',winPt:12,diff:'normal',rule:'normal',speed:.75,smart:true,
-    mission:{text:'スリーカードを2回作って勝つ',check:m=>m.win&&m.tens.filter(t=>t.voice==='スリーカード').length>=2}},
-  {no:105,rivalName:'第五の番人',name:'封じの塔',description:'相手は10を作らせない',icon:'card',winPt:10,diff:'normal',rule:'normal',speed:.7,smart:true,deny:true,
-    mission:{text:'相手を0点に抑えて勝つ',check:m=>m.win&&m.dp===0}},
-  {no:106,rivalName:'第六の番人',name:'一筆の橋',description:'凍る手札の中で',icon:'snow',winPt:12,diff:'normal',rule:'normal',speed:.7,smart:true,ability:'freeze',playerRing:true,
-    mission:{text:'ストレート（1・2・3・4）を作って勝つ',check:m=>m.win&&m.tens.some(t=>t.voice==='ストレート')}},
-  {no:107,rivalName:'ネフィラ',name:'ネフィラ',description:'絵の主',icon:'card',winPt:20,diff:'master',rule:'normal',speed:.2,smart:true,deny:true,ability:'orbit',playerRing:true,noBoost:true,boss:true,bgm:'Clockwork%20Waltz.mp3',
-    mission:{text:'ネフィラに勝つ（バースト2回まで）',check:m=>m.win&&m.bursts<=2}},
+  {no:101,rivalName:'DEALER',name:'MISSION 1', icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:102,rivalName:'DEALER',name:'MISSION 2', icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:103,rivalName:'DEALER',name:'MISSION 3', icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:104,rivalName:'DEALER',name:'MISSION 4', icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:105,rivalName:'DEALER',name:'MISSION 5', icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:106,rivalName:'DEALER',name:'MISSION 6', icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:107,rivalName:'DEALER',name:'MISSION 7', icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:108,rivalName:'DEALER',name:'MISSION 8', icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:109,rivalName:'DEALER',name:'MISSION 9', icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:110,rivalName:'DEALER',name:'MISSION 10',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:111,rivalName:'DEALER',name:'MISSION 11',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:112,rivalName:'DEALER',name:'MISSION 12',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:113,rivalName:'DEALER',name:'MISSION 13',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:114,rivalName:'DEALER',name:'MISSION 14',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:115,rivalName:'DEALER',name:'MISSION 15',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  {no:199,rivalName:'ネフィラ',name:'ネフィラ',icon:'card',winPt:10,diff:'normal',rule:'normal',boss:true,mission:{text:'（未定）ネフィラに勝つ',check:PZX_MISSION_TODO}}, // 最後＝ボス（15枚そろうと出る）
 ];
+const PZX_BOSS=PZX_STAGES.length-1; // ボスの添字
 const PZX_AREA={id:'pzx',name:'絵の中',stages:PZX_STAGES};
 STAGES.areas[1]=PZX_AREA;
 function pzxNodes(W,FH){const C=PZX_WORLD.circle,r=C.r*W;const n=[];for(let i=0;i<6;i++){const a=(C.start+i*60)*Math.PI/180;n.push({x:C.cx*W+Math.cos(a)*r,y:C.cy*FH+Math.sin(a)*r});}n.push({x:C.cx*W,y:C.cy*FH});return n;} // 6つは円周、最後がボス（中心）
 function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[],boss:!!P.boss};}
-function pzxCurrent(save){const P=pzxState(save);if(P.boss)return 6;const i=PZX_STAGES.findIndex((st,k)=>k<6&&!P.got.includes(k));return i<0?6:i;} // 今のミッション（ピースが無い最初のもの。6枚あればネフィラ）
+function pzxCurrent(save){const P=pzxState(save);if(P.boss)return PZX_BOSS;const i=PZX_STAGES.findIndex((st,k)=>k<PZX_BOSS&&!P.got.includes(k));return i<0?PZX_BOSS:i;} // 今のミッション（ピースが無い最初のもの。全部あればネフィラ）
 function boostDiff(d){if(!DEALER_BOOST.enabled)return d;const i=DIFF_ORDER.indexOf(d);return i<0?d:DIFF_ORDER[Math.min(3,i+DEALER_BOOST.diffUp)];}
 // ── v197 パズル用の新ギミック（相手の星環カードを場に出した瞬間だけ発動）：数値はここだけで調整 ──
 // 毎ラウンド開始時 GK_RING_RATE の確率で、相手の手札1枚に星環が付く。相手はその札を普通に出せる
@@ -4201,7 +4209,7 @@ function PzxPanel({save,onEnter,onBack,onReset,onBattle}){
       done&&h('img',{className:'cp',src:PZX.dir+PZX.complete,alt:'',draggable:false})
     ),
     h('div',{className:'prog'},'PIECE '+st.got.length+' / '+N+(cleared?'　CLEAR':'')),
-    h('div',{className:'mission'},h('span',{className:'l'},cleared?'CLEAR':(cur===6?'BOSS':'MISSION '+(cur+1))),cleared?'絵は完成した。ネフィラは何度でも':ms.mission.text,!cleared&&h('div',{className:'foe'},'相手：'+ms.rivalName+'　先取 '+ms.winPt+' pt')),
+    h('div',{className:'mission'},h('span',{className:'l'},cleared?'CLEAR':(cur===PZX_BOSS?'BOSS':'MISSION '+(cur+1))),cleared?'絵は完成した。ネフィラは何度でも':ms.mission.text,!cleared&&h('div',{className:'foe'},'相手：'+ms.rivalName+'　先取 '+ms.winPt+' pt')),
     h('button',{className:'enter',onClick:()=>onBattle(cur)},'対戦'),
     h('button',{className:'home',onClick:onBack},'ホームへ'),
     !!has&&h('button',{className:'reset'+(ask?' ask':''),onClick:()=>{if(!ask){setAsk(true);return;}setAsk(false);onReset();}},ask?'ほんまに消す？（もう一度押す）':'はじめから'), // v218
@@ -4210,7 +4218,7 @@ function PzxPanel({save,onEnter,onBack,onReset,onBattle}){
 }
 // ── v234 パズルクス：結果。勝ち負け・ミッション達成・ピース ──
 function PzxResult({data,st,idx,gotNow,onRetry,onPanel}){
-  const win=data.winner==='player',m=data.pzx,ok=!!m.ok,isBoss=idx===6;
+  const win=data.winner==='player',m=data.pzx,ok=!!m.ok,isBoss=idx===PZX_BOSS;
   useEffect(()=>{if(gotNow){const t=setTimeout(()=>{try{resumeAC();[1046,1318,1568,2093].forEach((f,i)=>fxBell({f,v:0.06,d:1.2,bright:1.2,rev:0.8,t:i*0.09}));}catch(e){}},300);return()=>clearTimeout(t);}},[]);
   return h('div',{className:'sg-screen sg-end pzx-res'},
     h('div',{className:'sg-end-card'},
@@ -5818,8 +5826,8 @@ function App(){
     if(c&&c.ar===1){ // v234 パズルクス：ミッション判定→ピース／ネフィラ制覇。本編の★には触らない
       const i=c.st,st=PZX_STAGES[i],S=matchStatsR.current,won=(win==='player');
       const m={win:won,pp,dp,bursts:S.bursts,tens:S.tens,sec:Math.round((Date.now()-S.start)/1000)};m.ok=!!(st.mission&&st.mission.check(m));
-      const before=pzxState(saveR.current);const gotNow=m.ok&&(i===6?!before.boss:!before.got.includes(i));
-      if(gotNow)updSave(s=>{const P=pzxState(s);s.pzx={got:i<6?[...P.got,i]:P.got,boss:P.boss||i===6};return s;});
+      const before=pzxState(saveR.current);const gotNow=m.ok&&(i===PZX_BOSS?!before.boss:!before.got.includes(i));
+      if(gotNow)updSave(s=>{const P=pzxState(s);s.pzx={got:i<PZX_BOSS?[...P.got,i]:P.got,boss:P.boss||i===PZX_BOSS};return s;});
       pzxLastR.current={idx:i,gotNow,t:Date.now()};
       setGameEndData({pPt:pp,dPt:dp,winner:win,draw:win==='draw',diff:diffRef.current,stars:0,rivalName:stageOptsR.current&&stageOptsR.current.rivalName||null,pzx:m});
       setPhase('gameEnd');phaseR.current='gameEnd';exitLink();return;
