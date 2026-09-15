@@ -3220,7 +3220,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v241'; // v241(2026/09/15): 調整に「1枚目の初速」「決定打」（msで直接指定、0＝メーター通り）。ステージでは firstMs / winMsAbs
+const APP_VER='v242'; // v242(2026/09/15): 調整から「1枚目の初速」を外す（1枚目のメーターで足りる）。決定打だけ残す
+// const APP_VER='v241'; // v241(2026/09/15): 調整に「1枚目の初速」「決定打」（msで直接指定、0＝メーター通り）。ステージでは firstMs / winMsAbs
 // const APP_VER='v240'; // v240(2026/09/15): cardSpeed の倍率を、考える時間だけでなくカーソル移動・タップ・降下・決定打の下限にも掛ける（0.2で本当に速くなる）。調整画面に「通常の強化」の説明
 // const APP_VER='v239'; // v239(2026/09/15): ホームに「調整」モード。相手の1〜4枚目の速さ倍率・判断力・読み・封じ・能力・強化・先取・持ち時間を触ってその場で対戦。保存（端末）・コピー（TENKURU_TUNE {...} の1行）。ステージには cardSpeed:[m1,m2,m3,m4] で同じ数値を書ける
 // const APP_VER='v238'; // v238(2026/09/15): パズルクスの対戦画面をいつもの白背景に戻す（v231の背景・マット・札は外す。画像 img/pzx/battle-bg・hand-mat・card-* は削除）
@@ -4195,11 +4196,11 @@ window.playShatterFx=playShatterFx;
 function FxLayer(){const r=useRef(null);useEffect(()=>{fxCanvas=r.current;return()=>{if(fxCanvas===r.current)fxCanvas=null;};},[]);return h('div',{className:'fx-layer'},h('canvas',{ref:r}));}
 // ── v239 調整モード：相手の速さ・強さを触って、その場で対戦して試す。保存＝この端末に残す、コピー＝設定を文字にしてクリップボードへ（Claudeに貼るだけで読める） ──
 const TUNE_KEY='tenkuru-tune';
-const TUNE_DEFAULT={cardSpeed:[1,1,1,1],firstMs:0,winMs:0,diff:'hard',smart:true,deny:false,ability:'',boost:true,winPt:10,timeLimit:10}; // firstMs=1枚目の初速(ms)、winMs=決定打(10を作る一手)までの時間(ms)。0＝メーター通り
+const TUNE_DEFAULT={cardSpeed:[1,1,1,1],winMs:0,diff:'hard',smart:true,deny:false,ability:'',boost:true,winPt:10,timeLimit:10}; // winMs=決定打(10を作る一手)までの時間(ms)。0＝メーター通り
 function loadTune(){try{const j=JSON.parse(localStorage.getItem(TUNE_KEY)||'null');return j?{...TUNE_DEFAULT,...j,cardSpeed:(j.cardSpeed||TUNE_DEFAULT.cardSpeed).slice(0,4)}:{...TUNE_DEFAULT};}catch(e){return {...TUNE_DEFAULT};}}
 function saveTune(t){try{localStorage.setItem(TUNE_KEY,JSON.stringify(t));}catch(e){}}
-function tuneToStage(t){return {no:900,rivalName:'TEST',name:'調整',description:'',icon:'card',winPt:t.winPt,timeLimit:t.timeLimit,diff:t.diff,rule:'normal',smart:!!t.smart,deny:!!t.deny,ability:t.ability||undefined,noBoost:!t.boost,cardSpeed:t.cardSpeed.map(Number),firstMs:t.firstMs>0?t.firstMs:undefined,winMsAbs:t.winMs>0?t.winMs:undefined};}
-function tuneText(t){return 'TENKURU_TUNE '+JSON.stringify({cardSpeed:t.cardSpeed.map(v=>Math.round(v*100)/100),firstMs:t.firstMs||0,winMs:t.winMs||0,diff:t.diff,smart:!!t.smart,deny:!!t.deny,ability:t.ability||'',boost:!!t.boost,winPt:t.winPt,timeLimit:t.timeLimit});}
+function tuneToStage(t){return {no:900,rivalName:'TEST',name:'調整',description:'',icon:'card',winPt:t.winPt,timeLimit:t.timeLimit,diff:t.diff,rule:'normal',smart:!!t.smart,deny:!!t.deny,ability:t.ability||undefined,noBoost:!t.boost,cardSpeed:t.cardSpeed.map(Number),winMsAbs:t.winMs>0?t.winMs:undefined};}
+function tuneText(t){return 'TENKURU_TUNE '+JSON.stringify({cardSpeed:t.cardSpeed.map(v=>Math.round(v*100)/100),winMs:t.winMs||0,diff:t.diff,smart:!!t.smart,deny:!!t.deny,ability:t.ability||'',boost:!!t.boost,winPt:t.winPt,timeLimit:t.timeLimit});}
 function TuneScreen({onBattle,onBack}){
   const[t,setT]=useState(loadTune);const[msg,setMsg]=useState('');
   const set=(k,v)=>setT(o=>({...o,[k]:v}));const setCS=(i,v)=>setT(o=>{const a=o.cardSpeed.slice();a[i]=v;return{...o,cardSpeed:a};});
@@ -4210,8 +4211,7 @@ function TuneScreen({onBattle,onBack}){
     h('div',{className:'hd'},h('button',{className:'back',onClick:onBack},'‹ ホーム'),h('div',{className:'k'},'TUNE'),h('div',{className:'sp'})),
     h('div',{className:'sec'},h('div',{className:'t'},'出す速さ（1枚目〜4枚目）'),h('div',{className:'note'},'1.00＝今のまま　小さいほど速い。考える時間・カーソル移動・タップ・降下の全部に掛かる'),
       [0,1,2,3].map(i=>h('label',{key:i,className:'row'},h('span',{className:'l'},(i+1)+'枚目'),h('input',{type:'range',min:.2,max:2,step:.05,value:t.cardSpeed[i],onChange:e=>setCS(i,parseFloat(e.target.value))}),h('span',{className:'v'},Number(t.cardSpeed[i]).toFixed(2)))),
-      h('div',{className:'note',style:{marginTop:'6px'}},'下の2つは「考える時間」を秒で直接決める（0＝メーター通り）。カーソル・降下は1枚目のメーターが掛かる'),
-      h('label',{className:'row'},h('span',{className:'l'},'1枚目の初速'),h('input',{type:'range',min:0,max:1500,step:10,value:t.firstMs,onChange:e=>set('firstMs',parseInt(e.target.value))}),h('span',{className:'v'},t.firstMs?t.firstMs+'ms':'—')),
+      h('div',{className:'note',style:{marginTop:'6px'}},'決定打＝10を作る一手までの時間。ms で直接（0＝メーター通り）'),
       h('label',{className:'row'},h('span',{className:'l'},'決定打'),h('input',{type:'range',min:0,max:1500,step:10,value:t.winMs,onChange:e=>set('winMs',parseInt(e.target.value))}),h('span',{className:'v'},t.winMs?t.winMs+'ms':'—'))),
     h('div',{className:'sec'},h('div',{className:'t'},'強さ'),
       h('div',{className:'row'},h('span',{className:'l'},'判断力'),seg('diff',[['easy','EASY'],['normal','NORMAL'],['hard','HARD'],['master','MASTER']])),
