@@ -3223,7 +3223,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v246'; // v246(2026/09/15): ミッション3を実装（くるみ決定の相手設定＋条件「勝つ＋相手にストレートを1回作らせる」＋フィールド効果「1ラウンド1回、両者の手札1枚が3秒凍結」）。相手側の凍結（dFrz、札IDで管理）を追加。ステージには frzBoth:{sec:3}
+const APP_VER='v247'; // v247(2026/09/15): ミッション4を実装（くるみ決定の相手設定＋条件「勝つ＋タイムアップ0回」）
+// const APP_VER='v246'; // v246(2026/09/15): ミッション3を実装（くるみ決定の相手設定＋条件「勝つ＋相手にストレートを1回作らせる」＋フィールド効果「1ラウンド1回、両者の手札1枚が3秒凍結」）。相手側の凍結（dFrz、札IDで管理）を追加。ステージには frzBoth:{sec:3}
 // const APP_VER='v245'; // v245(2026/09/15): ミッション2を実装（くるみ決定の相手設定＋条件「勝つ＋3を決定打にして10を2回」）。10の記録に決定打の数字（last）を追加
 // const APP_VER='v244'; // v244(2026/09/15): ミッション1を実装（くるみ決定の相手設定＋条件「勝つ＋バースト1回以内」、フィールド効果なし）
 // const APP_VER='v243'; // v243(2026/09/15): ミッション6を実装（くるみ決定の相手設定＋条件「勝つ＋自分の手で9を2回」＋フィールド効果「9」＝9にした側が相手を2秒止める、両者平等、星環なし）。ステージには nineStop:true / winMsAbs / cardSpeed で書ける
@@ -3507,7 +3508,8 @@ const PZX_WORLD={
 };
 // ── v237 パズルクス：6ミッション＋ネフィラ。「対戦」1個で今のミッションの相手と即対戦。達成した勝ちでピース、15枚そろったらネフィラ戦 ──
 // ★ 条件と相手の強さはくるみが決める。今は全部「仮」（勝てば達成、相手はふつうのDEALER）。1行＝1ミッション、ここを書き換えるだけで反映される
-// 判定に使えるもの：m.win（勝ち）／m.pp（自分の点）／m.dp（相手の点）／m.bursts（自分のバースト回数）／m.tens（自分が作った10の一覧 {voice:役名, n:枚数, last:決定打の数字}）／m.dtens（相手が作った10の一覧、同じ形）／m.nines（自分の手で9にした回数）／m.sec（試合秒数）
+// 判定に使えるもの：m.win（勝ち）／m.pp（自分の点）／m.dp（相手の点）／m.bursts（自分のバースト回数）／m.tens（自分が作った10の一覧 {voice:役名, n:枚数, last:決定打の数字}）／m.dtens（相手が作った10の一覧、同じ形）／m.nines（自分の手で9にした回数）／m.timeups（タイムアップの回数）／m.sec（試合秒数）
+// ★ 全ピース共通：勝つこと必須。勝ち＋条件を同時に満たした時だけピース
 // 相手の強さに使えるもの：diff（easy/normal/hard/master、通常は+2段の強化が乗る）、speed（小さいほど速い）、smart（読む）、deny（10を作らせない）、ability（'freeze'/'orbit'）、playerRing、winPt、timeLimit、noBoost（強化を乗せない）
 const PZX_MISSION_TODO=m=>m.win; // 仮の判定：勝てば達成
 const PZX_STAGES=[
@@ -3520,7 +3522,9 @@ const PZX_STAGES=[
   // v246 くるみ決定：相手＝MASTER・読み・封じなし・速さ[.2,.3,.3,.3]・決定打550ms・通常の強化あり・先取10・持ち時間5秒。フィールド効果＝1ラウンドに1回、自分と相手の手札から1枚ずつ3秒凍結（開始1〜3秒後にランダム）
   {no:103,rivalName:'DEALER',name:'MISSION 3',icon:'card',winPt:10,timeLimit:5,diff:'master',rule:'normal',smart:true,cardSpeed:[.2,.3,.3,.3],winMsAbs:550,frzBoth:{sec:3},
     mission:{text:'勝つ ＋ 相手にストレートを1回作らせる（毎ラウンド1回、両者の手札1枚が3秒凍る）',check:m=>m.win&&m.dtens.some(t=>t.voice==='ストレート')}},
-  {no:104,rivalName:'DEALER',name:'MISSION 4',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  // v247 くるみ決定：相手＝MASTER・読み・封じなし・速さ[.2,.3,.3,.3]・決定打510ms・通常の強化あり・先取10・持ち時間5秒。フィールド効果なし
+  {no:104,rivalName:'DEALER',name:'MISSION 4',icon:'card',winPt:10,timeLimit:5,diff:'master',rule:'normal',smart:true,cardSpeed:[.2,.3,.3,.3],winMsAbs:510,
+    mission:{text:'勝つ ＋ バトル中に一度もタイムアップを起こさない',check:m=>m.win&&(m.timeups||0)===0}},
   {no:105,rivalName:'DEALER',name:'MISSION 5',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
   // v243 くるみ決定：相手＝MASTER・読み・封じ・全部0.2・決定打420ms・通常の強化あり・先取10・持ち時間5秒。フィールド効果「9」（場の合計が9になったら9にした側が相手を2秒止める、両者平等）。星環なし
   {no:106,rivalName:'DEALER',name:'MISSION 6',icon:'card',winPt:10,timeLimit:5,diff:'master',rule:'normal',smart:true,deny:true,cardSpeed:[.2,.2,.2,.2],winMsAbs:420,nineStop:true,
@@ -5177,7 +5181,7 @@ function App(){
   function startGame(diff){
     { const so=stageR.current?(stageOptsR.current||{}):{};if(diff&&stageR.current&&!so.challenge&&!so.noBoost)diff=boostDiff(diff); } // v196 通常ステージは判断力を底上げ
     if(diff){setDifficulty(diff);diffRef.current=diff;}
-    matchStatsR.current={bursts:0,tens:[],dtens:[],nines:0,start:Date.now()}; // v217/v243/v246 nines=自分の手で場を9にした回数、dtens=相手が作った10
+    matchStatsR.current={bursts:0,tens:[],dtens:[],nines:0,timeups:0,start:Date.now()}; // v217/v243/v246/v247 nines=自分の手で場を9にした回数、dtens=相手が作った10、timeups=タイムアップ回数
     clearTimers();lockR.current=false;
     const p=createDeck(),d=createDeck();
     const opts=stageR.current?(stageOptsR.current||{}):{};
@@ -5330,6 +5334,7 @@ function App(){
     clearTimeout(aiRef.current);scheduleAi(rnR.current,600);
   }
   function doTimeUp(rn){
+    matchStatsR.current.timeups=(matchStatsR.current.timeups||0)+1; // v247 タイムアップの回数
     if(FLOW_CFG.enabled){clearTimers();lockR.current=true;resolvingR.current=true;resumeAC();playMissSE();setTimeUpShow(true);const tok=roundTokR.current;setTimeout(()=>{if(tok!==roundTokR.current)return;setTimeUpShow(false);endGame(pPtR.current,dPtR.current,true);},1400);return;} // v175 時間切れ＝試合終了、点が多い方の勝ち
     clearTimers();lockR.current=true;resolvingR.current=true; // 時間切れ演出中はカードを出せない
     resumeAC();playMissSE();
