@@ -2066,6 +2066,9 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .tune .sub{flex:1;min-height:calc(38 * var(--u));border-radius:999px;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.7);color:#d6cfff;font-family:inherit;font-size:calc(12 * var(--u));cursor:pointer;}
 .tune .go{min-height:calc(48 * var(--u));border-radius:999px;border:1px solid rgba(255,224,138,.55);background:linear-gradient(135deg,rgba(255,224,138,.22),rgba(150,120,255,.22));color:#fff3c4;font-family:inherit;font-size:calc(15 * var(--u));font-weight:700;letter-spacing:.24em;cursor:pointer;}
 .tune .toast{position:fixed;left:50%;bottom:calc(80 * var(--u));transform:translateX(-50%);padding:calc(8 * var(--u)) calc(16 * var(--u));border-radius:999px;background:rgba(255,224,138,.92);color:#2a1e4a;font-size:calc(12 * var(--u));font-weight:700;}
+.gp-dealer-card.dfrz{filter:saturate(.4) brightness(1.15);box-shadow:0 0 0 1px rgba(160,230,255,.9),0 0 10px rgba(140,220,255,.6);} /* v246 相手の凍結 */
+.gp-dealer-card.dfrz::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(160deg,rgba(200,245,255,.55),rgba(120,200,255,.25) 50%,rgba(220,250,255,.5));pointer-events:none;}
+.gp-dealer-card .dfrz-sec{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);font-size:9px;font-family:'Fira Code',monospace;color:#0b3f63;background:rgba(220,250,255,.9);border-radius:6px;padding:0 4px;z-index:3;}
 /* v234 パズルクス結果 */
 .pzx-res .k2{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#b9a8ff;margin-bottom:calc(-4 * var(--u));}
 .pzx-res .cond{width:100%;margin-top:calc(8 * var(--u));padding:calc(9 * var(--u)) calc(12 * var(--u));border-radius:calc(10 * var(--u));background:rgba(255,255,255,.04);border:1px solid rgba(190,180,255,.25);font-size:calc(12 * var(--u));line-height:1.65;color:#d6d2ea;text-align:left;}
@@ -3220,7 +3223,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v245'; // v245(2026/09/15): ミッション2を実装（くるみ決定の相手設定＋条件「勝つ＋3を決定打にして10を2回」）。10の記録に決定打の数字（last）を追加
+const APP_VER='v246'; // v246(2026/09/15): ミッション3を実装（くるみ決定の相手設定＋条件「勝つ＋相手にストレートを1回作らせる」＋フィールド効果「1ラウンド1回、両者の手札1枚が3秒凍結」）。相手側の凍結（dFrz、札IDで管理）を追加。ステージには frzBoth:{sec:3}
+// const APP_VER='v245'; // v245(2026/09/15): ミッション2を実装（くるみ決定の相手設定＋条件「勝つ＋3を決定打にして10を2回」）。10の記録に決定打の数字（last）を追加
 // const APP_VER='v244'; // v244(2026/09/15): ミッション1を実装（くるみ決定の相手設定＋条件「勝つ＋バースト1回以内」、フィールド効果なし）
 // const APP_VER='v243'; // v243(2026/09/15): ミッション6を実装（くるみ決定の相手設定＋条件「勝つ＋自分の手で9を2回」＋フィールド効果「9」＝9にした側が相手を2秒止める、両者平等、星環なし）。ステージには nineStop:true / winMsAbs / cardSpeed で書ける
 // const APP_VER='v242'; // v242(2026/09/15): 調整から「1枚目の初速」を外す（1枚目のメーターで足りる）。決定打だけ残す
@@ -3503,7 +3507,7 @@ const PZX_WORLD={
 };
 // ── v237 パズルクス：6ミッション＋ネフィラ。「対戦」1個で今のミッションの相手と即対戦。達成した勝ちでピース、15枚そろったらネフィラ戦 ──
 // ★ 条件と相手の強さはくるみが決める。今は全部「仮」（勝てば達成、相手はふつうのDEALER）。1行＝1ミッション、ここを書き換えるだけで反映される
-// 判定に使えるもの：m.win（勝ち）／m.pp（自分の点）／m.dp（相手の点）／m.bursts（自分のバースト回数）／m.tens（自分が作った10の一覧 {voice:役名, n:枚数, last:決定打の数字}）／m.nines（自分の手で9にした回数）／m.sec（試合秒数）
+// 判定に使えるもの：m.win（勝ち）／m.pp（自分の点）／m.dp（相手の点）／m.bursts（自分のバースト回数）／m.tens（自分が作った10の一覧 {voice:役名, n:枚数, last:決定打の数字}）／m.dtens（相手が作った10の一覧、同じ形）／m.nines（自分の手で9にした回数）／m.sec（試合秒数）
 // 相手の強さに使えるもの：diff（easy/normal/hard/master、通常は+2段の強化が乗る）、speed（小さいほど速い）、smart（読む）、deny（10を作らせない）、ability（'freeze'/'orbit'）、playerRing、winPt、timeLimit、noBoost（強化を乗せない）
 const PZX_MISSION_TODO=m=>m.win; // 仮の判定：勝てば達成
 const PZX_STAGES=[
@@ -3513,7 +3517,9 @@ const PZX_STAGES=[
   // v245 くるみ決定：相手＝MASTER・読み・封じなし・速さ[.2,.35,.35,.35]・決定打550ms・通常の強化あり・先取10・持ち時間5秒。フィールド効果なし
   {no:102,rivalName:'DEALER',name:'MISSION 2',icon:'card',winPt:10,timeLimit:5,diff:'master',rule:'normal',smart:true,cardSpeed:[.2,.35,.35,.35],winMsAbs:550,
     mission:{text:'勝つ ＋ 「3」を決定打にして10を2回作る',check:m=>m.win&&m.tens.filter(t=>t.last===3).length>=2}},
-  {no:103,rivalName:'DEALER',name:'MISSION 3',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
+  // v246 くるみ決定：相手＝MASTER・読み・封じなし・速さ[.2,.3,.3,.3]・決定打550ms・通常の強化あり・先取10・持ち時間5秒。フィールド効果＝1ラウンドに1回、自分と相手の手札から1枚ずつ3秒凍結（開始1〜3秒後にランダム）
+  {no:103,rivalName:'DEALER',name:'MISSION 3',icon:'card',winPt:10,timeLimit:5,diff:'master',rule:'normal',smart:true,cardSpeed:[.2,.3,.3,.3],winMsAbs:550,frzBoth:{sec:3},
+    mission:{text:'勝つ ＋ 相手にストレートを1回作らせる（毎ラウンド1回、両者の手札1枚が3秒凍る）',check:m=>m.win&&m.dtens.some(t=>t.voice==='ストレート')}},
   {no:104,rivalName:'DEALER',name:'MISSION 4',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
   {no:105,rivalName:'DEALER',name:'MISSION 5',icon:'card',winPt:10,diff:'normal',rule:'normal',mission:{text:'（未定）勝つ',check:PZX_MISSION_TODO}},
   // v243 くるみ決定：相手＝MASTER・読み・封じ・全部0.2・決定打420ms・通常の強化あり・先取10・持ち時間5秒。フィールド効果「9」（場の合計が9になったら9にした側が相手を2秒止める、両者平等）。星環なし
@@ -4415,7 +4421,7 @@ function App(){
   function setPlayerRing(i){pRingR.current=i;setPRing(i);}
   function setTsLeft2(n){tsLeftR.current=n;setTsLeft(n);}
   function setFrz(m){pFrzR.current=m;setPFrz(m);}
-  function clearFrz(){setFrz({});}
+  function clearFrz(){setFrz({});setDFrz({});frzRoundR.current=-1;}
   const[cmdIdx,setCmdIdx]=useState(null);const cmdIdxR=useRef(null);
   const[rStop,setRStop]=useState(false);const rStopR=useRef(false);const rStopT=useRef([]);
   // v91 一時停止（対戦中・カウントダウン外・演出外のみ）
@@ -5132,7 +5138,7 @@ function App(){
       if(CHRONO_CONFIG.guaranteeFirstUnlock&&firstChrono&&st.no===firstChrono.no&&!saveR.current.chronoIntro){chrono=true;updSave(s=>{s.chronoIntro=true;return s;});}
       else chrono=Math.random()<CHRONO_CONFIG.appearRate;
     }
-    stageOptsR.current={chrono,noBoost:!!st.noBoost,cardSpeed:st.cardSpeed||null,winMsAbs:st.winMsAbs||null,nineStop:!!st.nineStop,firstMs:st.firstMs||null,firstJit:st.firstJit||0,curStepFirst:st.curStepFirst||null,curArrFirst:st.curArrFirst||null,curHoldFirst:st.curHoldFirst||null,flyMsFirst:st.flyMsFirst||null,winMs:st.winMs||null,winJit:st.winJit||0,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,ch9:!!st.ch9,ch10:!!st.ch10,smart:!!st.smart,deny:!!st.deny,playerRing:!!st.playerRing,speed:st.speed||1,curStep:st.curStep||null,curArr:st.curArr||null,curHold:st.curHold||null,flyMs:st.flyMs||null,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
+    stageOptsR.current={chrono,noBoost:!!st.noBoost,cardSpeed:st.cardSpeed||null,winMsAbs:st.winMsAbs||null,nineStop:!!st.nineStop,frzBoth:st.frzBoth||null,firstMs:st.firstMs||null,firstJit:st.firstJit||0,curStepFirst:st.curStepFirst||null,curArrFirst:st.curArrFirst||null,curHoldFirst:st.curHoldFirst||null,flyMsFirst:st.flyMsFirst||null,winMs:st.winMs||null,winJit:st.winJit||0,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,ch9:!!st.ch9,ch10:!!st.ch10,smart:!!st.smart,deny:!!st.deny,playerRing:!!st.playerRing,speed:st.speed||1,curStep:st.curStep||null,curArr:st.curArr||null,curHold:st.curHold||null,flyMs:st.flyMs||null,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
     if(st.challenge&&typeof SHIFT_VIDEO!=='undefined'){try{[SHIFT_VIDEO.v1,SHIFT_VIDEO.v2].forEach(u=>fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(()=>{}));}catch(e){}} // v78: 変身動画を先読み
     if(quick===2){clearTimers();roundTokR.current++;setPendingDiff(st.diff||null);startGame(st.diff);return;} // v234 パズルクス：説明も飛ばして即開始
     if(quick){goBrief(st.diff);return;} // v195 パズルモードはチャレンジの登場ムービーも飛ばす（テンポ優先）
@@ -5171,7 +5177,7 @@ function App(){
   function startGame(diff){
     { const so=stageR.current?(stageOptsR.current||{}):{};if(diff&&stageR.current&&!so.challenge&&!so.noBoost)diff=boostDiff(diff); } // v196 通常ステージは判断力を底上げ
     if(diff){setDifficulty(diff);diffRef.current=diff;}
-    matchStatsR.current={bursts:0,tens:[],nines:0,start:Date.now()}; // v217/v243 nines=自分の手で場を9にした回数
+    matchStatsR.current={bursts:0,tens:[],dtens:[],nines:0,start:Date.now()}; // v217/v243/v246 nines=自分の手で場を9にした回数、dtens=相手が作った10
     clearTimers();lockR.current=false;
     const p=createDeck(),d=createDeck();
     const opts=stageR.current?(stageOptsR.current||{}):{};
@@ -5253,11 +5259,27 @@ function App(){
   // v127 セトラ: 凍結の残り秒を1つ減らす。0になった札は解凍される
   function tickFreeze(){
     const cur=pFrzR.current;const keys=Object.keys(cur);
-    if(!keys.length)return;
-    const m={};let thawed=false;
-    keys.forEach(k=>{const v=cur[k]-1;if(v>0)m[k]=v;else thawed=true;});
-    setFrz(m);
-    if(thawed){try{resumeAC();fxIceThaw();}catch(e){}} // v130
+    if(keys.length){const m={};let thawed=false;
+      keys.forEach(k=>{const v=cur[k]-1;if(v>0)m[k]=v;else thawed=true;});
+      setFrz(m);
+      if(thawed){try{resumeAC();fxIceThaw();}catch(e){}}} // v130
+    const dc=dFrzR.current,dk=Object.keys(dc); // v246 相手の凍結も1秒ずつ減らす
+    if(dk.length){const m={};dk.forEach(k=>{const v=dc[k]-1;if(v>0)m[k]=v;});setDFrz(m);}
+  }
+  // v246 相手の手札を凍らせる（札の固有IDで管理。凍った札は出せない）
+  const dFrzR=useRef({});const[dFrz,setDFrzS]=useState({});function setDFrz(m){dFrzR.current=m;setDFrzS(m);}
+  function freezeDealer(n,sec){
+    const ids=dIdsR.current,rf=dRingR.current,cur=dFrzR.current;
+    const cand=ids.map((id,i)=>(id!=null&&cur[id]==null&&!isHoldRing(rf[i]))?id:-1).filter(id=>id!==-1);
+    if(!cand.length)return 0;const pick=cand.sort(()=>Math.random()-0.5).slice(0,n);
+    const m={...cur};pick.forEach(id=>{m[id]=sec;});setDFrz(m);return pick.length;
+  }
+  const frzRoundR=useRef(-1);
+  function frzBothTick(rn){ // v246 フィールド効果：1ラウンドに1回、自分と相手の手札から1枚ずつ3秒凍結（ラウンド開始から1〜3秒後にランダム）
+    const so=stageOptsR.current;if(!so||!so.frzBoth||frzRoundR.current===rn)return;frzRoundR.current=rn;
+    const tok=roundTokR.current,ms=1000+Math.random()*2000;
+    setTimeout(()=>{if(tok!==roundTokR.current||phaseR.current!=='playing'||resolvingR.current||countNumR.current>=0)return;
+      const a=freezeHand(1,so.frzBoth.sec||3),b=freezeDealer(1,so.frzBoth.sec||3);if(a||b)showSkillCustom('凍結','FREEZE','#8fe0ff');},ms);
   }
   // 相手の手札にある札のうち、まだ凍っていない札を最大n枚凍らせる
   function freezeHand(n,sec){
@@ -5272,6 +5294,7 @@ function App(){
     return pick.length;
   }
   function startTimer(rn,from){
+    if(from==null)frzBothTick(rn); // v246 新しいラウンドの開始時だけ
     clearInterval(timerRef.current);
     let t=(from==null)?roundSecR.current:from;setTimeLeft(t);timeLeftR.current=t;
     timerRef.current=setInterval(()=>{
@@ -5587,7 +5610,7 @@ function App(){
     const dHand=dHR.current,cf=fieldR.current,cs=fieldSumR.current;
     if(!dHand.length)return;
     const rf=dRingR.current;
-    const eligible=i=>!isHoldRing(rf[i])&&dIdsR.current[i]!==r2PendingCardR.current;
+    const eligible=i=>!isHoldRing(rf[i])&&dIdsR.current[i]!==r2PendingCardR.current&&dFrzR.current[dIdsR.current[i]]==null; // v246 凍った札は出せない
     const avail=dHand.filter((v,i)=>eligible(i));
     const playable=avail.filter(v=>canPlay(v,cs,cf)&&cs+v<=10);
     if(!playable.length)return;
@@ -5636,7 +5659,7 @@ function App(){
     const dHand=dHR.current,cf=fieldR.current,cs=fieldSumR.current;
     if(!dHand.length)return;
     const rf=dRingR.current;
-    const eligible=i=>!isHoldRing(rf[i])&&dIdsR.current[i]!==r2PendingCardR.current;
+    const eligible=i=>!isHoldRing(rf[i])&&dIdsR.current[i]!==r2PendingCardR.current&&dFrzR.current[dIdsR.current[i]]==null; // v246 凍った札は出せない
     const avail=dHand.filter((v,i)=>eligible(i)); // v79: 星環付きは温存。v121: レイピアが今タップした札は専用処理に任せる
     const playable=avail.filter(v=>canPlay(v,cs,cf));
     if(denyActive())oLog('call');
@@ -5685,7 +5708,7 @@ function App(){
     if(flyR.current||resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current||eraseBusyR.current||pausedR.current){if(phaseR.current==='playing'&&!resolvingR.current)scheduleAi(rn);return;}
     const idx=dIdsR.current.indexOf(pick.id);
     const dHand=dHR.current,rf=dRingR.current,cf=fieldR.current,cs=fieldSumR.current;
-    if(idx<0||dHand[idx]!==pick.value||isHoldRing(rf[idx])||pick.id===r2PendingCardR.current||!canPlay(dHand[idx],cs,cf)||countNumR.current>=0){scheduleAi(rn);return;}
+    if(idx<0||dHand[idx]!==pick.value||isHoldRing(rf[idx])||pick.id===r2PendingCardR.current||dFrzR.current[pick.id]!=null||!canPlay(dHand[idx],cs,cf)||countNumR.current>=0){scheduleAi(rn);return;}
     const chosen=dHand[idx],pickedRf=rf[idx];
     const face=isTapped(pickedRf)?pickedRf.slice(7):((pickedRf==='morpho'||pickedRf==='setra'||pickedRf==='orby')?pickedRf:null);
     resumeAC();setTimeout(()=>playPlaceSE(false),100);
@@ -5858,7 +5881,7 @@ function App(){
   function completeTen(nf,who,rn){
       clearTimers();lockR.current=true;resolvingR.current=true;
       const pts=calcPts(nf);
-      if(who==='player')matchStatsR.current.tens.push({voice:pts.voice||'役なし',n:nf.length,last:nf[nf.length-1]}); // v217/v245 last=決定打に使った札の数字
+      if(who==='player')matchStatsR.current.tens.push({voice:pts.voice||'役なし',n:nf.length,last:nf[nf.length-1]});else matchStatsR.current.dtens.push({voice:pts.voice||'役なし',n:nf.length,last:nf[nf.length-1]}); // v217/v245/v246
       const prevPPv=pPtR.current;
       const newPP=who==='player'?pPtR.current+pts.total:pPtR.current;
       const newDP=who==='dealer'?dPtR.current+pts.total:dPtR.current;
@@ -6064,7 +6087,7 @@ function App(){
       h('div',{className:'gp-area-label'},(so.rivalName?'✦ ':'💀 ')+rival+' — '+dH.length+'枚'),
       h('div',{className:'gp-dealer-cards'+(endFx&&endFx.winner==='player'?' defeated':'')}, // v198/v202 相手の敗北：決着と同時に光に溶ける
         dSlots.map((id,s)=>{const i=id==null?-1:dIdsR.current.indexOf(id);if(i<0||i>=dH.length)return h('div',{key:'e'+s,className:'gp-dealer-card empty'});const v=dH[i];
-          return h('div',{key:'c'+id,'data-card-id':id,className:'gp-dealer-card'+(justStolen.includes(id)?' just-stolen':'')+(hideLeft>0&&dRing[i]!=='orby'?' hidden-card':'')+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dRing[i]==='setra'?' sring':'')+(dRing[i]==='orby'?' oring':'')+(dCur.id===id?' dsel':'')},h('span',{className:'dv'},v),
+          return h('div',{key:'c'+id,'data-card-id':id,className:'gp-dealer-card'+(justStolen.includes(id)?' just-stolen':'')+(hideLeft>0&&dRing[i]!=='orby'?' hidden-card':'')+(dRing[i]?' ringed':'')+(dRing[i]==='morpho'?' mring':'')+(dRing[i]==='setra'?' sring':'')+(dRing[i]==='orby'?' oring':'')+(dCur.id===id?' dsel':'')+(dFrz[id]!=null?' dfrz':'')},h('span',{className:'dv'},v),dFrz[id]!=null&&h('span',{className:'dfrz-sec'},dFrz[id]+'s'),
           dCur.id===id&&h('div',{className:'dcur'+(dCur.tap?' tap':'')}),dCur.id===id&&dCur.tap&&h('div',{className:'dcur-ripple'}),(dRing[i]&&dRing[i]!=='morpho'&&dRing[i]!=='setra'&&dRing[i]!=='orby'&&!(typeof dRing[i]==='string'&&dRing[i].indexOf('tapped-')===0))&&h('div',{className:'star-ring'+(typeof dRing[i]==='string'?' t-'+(isGk(dRing[i])?REIPIA_RINGS[GIMMICKS[dRing[i].slice(3)].ring]?dRing[i].slice(3):'':dRing[i]):'')+(tapCardId===id?' tap':''),'data-ring-color':typeof dRing[i]==='string'?(isGk(dRing[i])?REIPIA_RINGS[GIMMICKS[dRing[i].slice(3)].ring].ringColor:REIPIA_RINGS[dRing[i]].ringColor):undefined}));})
       )
     ),
