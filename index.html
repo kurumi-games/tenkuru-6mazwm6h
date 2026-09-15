@@ -2054,6 +2054,11 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-screen.nephira .gp-dealer-card .dv{color:#3a2a6a;text-shadow:0 0 3px rgba(255,255,255,.9);}
 .gp-screen.nephira .gp-dealer-card .dcur{border-color:rgba(190,170,255,.95);box-shadow:0 0 10px rgba(170,150,255,.8),inset 0 0 8px rgba(170,150,255,.35);}
 .gp-screen.nephira .fly-card{background:url('img/pzx/card-opponent.webp') center/100% 100% no-repeat;border:none;box-shadow:none;color:#3a2a6a;text-shadow:0 0 4px rgba(255,255,255,.9);}
+/* v232 パネルに入る演出：パネルがサイコロみたいにパラパラ割れて落ちる */
+.pzx-shatter{position:absolute;inset:0;perspective:calc(600 * var(--u));pointer-events:none;z-index:3;}
+.pzx-shatter .tile{position:absolute;background-repeat:no-repeat;will-change:transform,opacity;animation:pzxShatter var(--dur) cubic-bezier(.4,0,.9,.4) var(--delay) both;box-shadow:0 0 0 .5px rgba(190,180,255,.25);}
+@keyframes pzxShatter{0%{transform:none;opacity:1;}12%{transform:translate(calc(var(--dx) * .08),calc(var(--dy) * -.12)) rotateX(calc(var(--rx) * .2)) rotateY(calc(var(--ry) * .2));opacity:1;}100%{transform:translate(var(--dx),var(--dy)) rotateX(var(--rx)) rotateY(var(--ry)) rotate(var(--rz));opacity:0;}}
+.pzx-panel.breaking>img{visibility:hidden;}
 /* v200 ともしび：灯りの当たっていない札 */
 .card-stage.lantern-dark{filter:brightness(.28) saturate(.4);transition:filter .3s;}
 .card-stage.lantern-dark .cs-num,.card-stage.lantern-dark .num{color:#6b6f8a!important;text-shadow:none!important;}
@@ -3192,7 +3197,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v231'; // v231(2026/09/15): ネフィラの世界の対戦画面（通常・ボス共通）に nephira-battle-assets を適用：背景・手札マット・自分の札・相手の札（img/pzx/battle-bg・hand-mat・card-player・card-opponent）。確認用に仮のステージ7つ（相手・条件は未定）と最小の結果画面
+const APP_VER='v232'; // v232(2026/09/15): 「中へ入る」でパネルがサイコロみたいにパラパラ割れて落ちる演出（10×6のかけら、1.5秒で絵の中へ）
+// const APP_VER='v231'; // v231(2026/09/15): ネフィラの世界の対戦画面（通常・ボス共通）に nephira-battle-assets を適用：背景・手札マット・自分の札・相手の札（img/pzx/battle-bg・hand-mat・card-player・card-opponent）。確認用に仮のステージ7つ（相手・条件は未定）と最小の結果画面
 // const APP_VER='v230'; // v230(2026/09/15): 通常ステージ6つをボスを囲む円に並べる（1番が真下、時計回り）。星環がその輪の外側で回る
 // const APP_VER='v229'; // v229(2026/09/15): 足場を全体に大きく上へ（ステージ1が下すぎた）。番号・BOSS の文字は描かない（絵だけ）
 // const APP_VER='v228'; // v228(2026/09/15): 足場を完成版の丸ボタン絵（nephira-stage-buttons）に差し替え。中央に番号／BOSS を描く
@@ -4095,16 +4101,33 @@ function GameEndScreen({data,onRestart,onHome}){
 function PzxPanel({save,onEnter,onBack,onReset}){
   const st=pzxState(save),N=PZX.pieces.length,done=st.got.length>=N;
   const[ask,setAsk]=useState(false); // v218 リセットは2回押し
+  const panelR=useRef(null);const[tiles,setTiles]=useState(null); // v232 割れる演出のかけら
+  const enter=()=>{ // 中へ入る：パネルを 10×6 のかけらにして散らし、落ちきったら絵の中へ
+    if(tiles)return;const el=panelR.current;if(!el){onEnter();return;}
+    const r=el.getBoundingClientRect(),PW=r.width,PH=r.height,C=10,R=6,tw=PW/C,th=PH/R;
+    const layers=[];const pieceIdx=done?[]:PZX.pieces.map((p,i)=>i).filter(i=>st.got.includes(i));
+    const imgs=done?[{u:PZX.dir+PZX.complete,x:0,y:0,w:PW,h:PH}]:[...pieceIdx.map(i=>{const p=PZX.pieces[i];return{u:PZX.dir+p.id+'.webp',x:p.x/PZX.w*PW,y:p.y/PZX.h*PH,w:p.w/PZX.w*PW,h:p.h/PZX.h*PH};}),{u:PZX.dir+PZX.outline,x:0,y:0,w:PW,h:PH}];
+    const list=[];
+    for(let j=0;j<R;j++)for(let i=0;i<C;i++){const tx=i*tw,ty=j*th;
+      list.push({key:j*C+i,style:{left:tx+'px',top:ty+'px',width:(tw+.6)+'px',height:(th+.6)+'px',
+        backgroundImage:imgs.map(m=>'url('+m.u+')').join(','),backgroundSize:imgs.map(m=>m.w+'px '+m.h+'px').join(','),backgroundPosition:imgs.map(m=>(m.x-tx)+'px '+(m.y-ty)+'px').join(','),
+        '--dx':((Math.random()-.5)*PW*.9)+'px','--dy':(PH*.9+Math.random()*PH*1.4)+'px','--rx':((Math.random()-.5)*720)+'deg','--ry':((Math.random()-.5)*720)+'deg','--rz':((Math.random()-.5)*360)+'deg',
+        '--delay':(Math.random()*.35+j*.04)+'s','--dur':(.8+Math.random()*.4)+'s'}});}
+    setTiles(list);
+    try{resumeAC();[0,60,130,220].forEach(ms=>setTimeout(()=>fxTone({f:2200+Math.random()*900,f2:400,type:'triangle',v:0.035,a:0.002,d:0.09,rev:0.25}),ms));}catch(e){}
+    setTimeout(onEnter,1500);
+  };
   const has=st.got.length;
   return h('div',{className:'pzx-screen'},
     h('div',{className:'k'},'PUZZLUX'),h('div',{className:'t'},'パズルクス'),h('div',{className:'sub'},'ネフィラ'),
-    h('div',{className:'pzx-panel'},
+    h('div',{className:'pzx-panel'+(tiles?' breaking':''),ref:panelR},
+      tiles&&h('div',{className:'pzx-shatter'},tiles.map(t=>h('div',{key:t.key,className:'tile',style:t.style}))),
       h('img',{className:'ol',src:PZX.dir+PZX.outline,alt:'',draggable:false}),
       !done&&PZX.pieces.map((p,i)=>st.got.includes(i)&&h('img',{key:p.id,className:'pc',src:PZX.dir+p.id+'.webp',alt:'',draggable:false,style:{left:(p.x/PZX.w*100)+'%',top:(p.y/PZX.h*100)+'%',width:(p.w/PZX.w*100)+'%',height:(p.h/PZX.h*100)+'%'}})),
       done&&h('img',{className:'cp',src:PZX.dir+PZX.complete,alt:'',draggable:false})
     ),
     h('div',{className:'prog'},'PIECE '+st.got.length+' / '+N),
-    h('button',{className:'enter',onClick:onEnter},'中へ入る'),
+    h('button',{className:'enter',onClick:enter},'中へ入る'),
     h('button',{className:'home',onClick:onBack},'ホームへ'),
     !!has&&h('button',{className:'reset'+(ask?' ask':''),onClick:()=>{if(!ask){setAsk(true);return;}setAsk(false);onReset();}},ask?'ほんまに消す？（もう一度押す）':'はじめから'), // v218
     ask&&h('button',{className:'reset',onClick:()=>setAsk(false)},'やめる')
