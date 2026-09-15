@@ -2125,7 +2125,7 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .pzx-res .cond .mk{float:right;font-weight:700;font-size:calc(14 * var(--u));}
 .pzx-res .cond.ok .mk{color:#ffe08a;}
 .pzx-res .cond.ng .mk{color:#9f9ac0;}
-.pzx-res .piece{width:min(50vw,calc(150 * var(--u)));object-fit:contain;border-radius:calc(6 * var(--u));margin:calc(10 * var(--u)) auto 0;display:block;box-shadow:0 0 0 1px rgba(255,224,138,.5),0 0 calc(24 * var(--u)) rgba(255,210,110,.35);animation:pzxIn .8s cubic-bezier(.2,1.2,.4,1) .2s both;}
+.pzx-res .piece{width:min(30vw,calc(90 * var(--u)));/* v252 ピースを小さく（元は50vw/150u） */object-fit:contain;border-radius:calc(6 * var(--u));margin:calc(10 * var(--u)) auto 0;display:block;box-shadow:0 0 0 1px rgba(255,224,138,.5),0 0 calc(24 * var(--u)) rgba(255,210,110,.35);animation:pzxIn .8s cubic-bezier(.2,1.2,.4,1) .2s both;}
 .pzx-res .pget{font-size:calc(13 * var(--u));font-weight:700;letter-spacing:.3em;color:#ffe08a;text-align:center;margin-top:calc(8 * var(--u));text-shadow:0 0 calc(12 * var(--u)) rgba(255,224,138,.6);animation:pzxIn .6s ease .7s both;}
 .pzx-res .stats{display:flex;justify-content:center;gap:calc(14 * var(--u));margin-top:calc(8 * var(--u));font-family:'Fira Code',monospace;font-size:calc(10.5 * var(--u));color:#9f9ac0;}
 .pzx-res .stats b{color:#e6ecfa;font-weight:400;}
@@ -3271,7 +3271,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v251'; // v251(2026/09/15): フィールド効果の凍結（frzBoth）でも「凍った札だけ」になったら配り直すように修正（セトラのabilityの時しか効いていなかった）。パズルクスのリザルトから「次の対戦へ／もう一度」を廃止し、毎回パネルに戻る
+const APP_VER='v252'; // v252(2026/09/15): リザルトの獲得ピース画像を小さく（50vw/150u → 30vw/90u）
+// const APP_VER='v251'; // v251(2026/09/15): フィールド効果の凍結（frzBoth）でも「凍った札だけ」になったら配り直すように修正（セトラのabilityの時しか効いていなかった）。パズルクスのリザルトから「次の対戦へ／もう一度」を廃止し、毎回パネルに戻る
 // const APP_VER='v250'; // v250: PUZZLUX画面刷新・2:3パネル・名前解放・中央の対戦ボタン・報酬とタップ拡大
 // const APP_VER='v249'; // v249(2026/09/15): ミッション3で決着後リザルトが出ないバグ修正（判定に渡す m に dtens/nines/timeups が入っておらず m.dtens が undefined でエラー→画面が止まっていた）。条件でエラーが出ても結果画面は出るようにガード
 // const APP_VER='v248'; // v248(2026/09/15): ミッション5を実装（くるみ決定の相手設定＋条件「バースト0で勝つ」＋フィールド効果「お互い相手の手札が見えない」）。ステージには blind:true（相手の手札は裏向き表示、相手の思考もこちらの手札を見ない＝1〜9どれでも持ってるかもで読む）
