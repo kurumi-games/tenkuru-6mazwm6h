@@ -3220,7 +3220,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v239'; // v239(2026/09/15): ホームに「調整」モード。相手の1〜4枚目の速さ倍率・判断力・読み・封じ・能力・強化・先取・持ち時間を触ってその場で対戦。保存（端末）・コピー（TENKURU_TUNE {...} の1行）。ステージには cardSpeed:[m1,m2,m3,m4] で同じ数値を書ける
+const APP_VER='v240'; // v240(2026/09/15): cardSpeed の倍率を、考える時間だけでなくカーソル移動・タップ・降下・決定打の下限にも掛ける（0.2で本当に速くなる）。調整画面に「通常の強化」の説明
+// const APP_VER='v239'; // v239(2026/09/15): ホームに「調整」モード。相手の1〜4枚目の速さ倍率・判断力・読み・封じ・能力・強化・先取・持ち時間を触ってその場で対戦。保存（端末）・コピー（TENKURU_TUNE {...} の1行）。ステージには cardSpeed:[m1,m2,m3,m4] で同じ数値を書ける
 // const APP_VER='v238'; // v238(2026/09/15): パズルクスの対戦画面をいつもの白背景に戻す（v231の背景・マット・札は外す。画像 img/pzx/battle-bg・hand-mat・card-* は削除）
 // const APP_VER='v237'; // v237(2026/09/15): チャッピー素材 nephira-puzzle-6 に全差し替え：縦長パネル 1024×1536、白い線画パネル、ガラス割れ形の6ピース（透過）。ミッション枠は6＋ネフィラ（中身は未定のまま）
 // const APP_VER='v236'; // v236(2026/09/15): チャッピーの15ピース素材（nephira-puzzle-15、1615×969、1枚323×323）を導入。完成絵・パネル・ピース差し替え
@@ -4206,7 +4207,7 @@ function TuneScreen({onBattle,onBack}){
   const seg=(k,opts)=>h('div',{className:'seg'},opts.map(([v,l])=>h('button',{key:String(v),className:t[k]===v?'on':'',onClick:()=>set(k,v)},l)));
   return h('div',{className:'tune'},
     h('div',{className:'hd'},h('button',{className:'back',onClick:onBack},'‹ ホーム'),h('div',{className:'k'},'TUNE'),h('div',{className:'sp'})),
-    h('div',{className:'sec'},h('div',{className:'t'},'出す速さ（1枚目〜4枚目）'),h('div',{className:'note'},'1.00＝今のまま　小さいほど速い'),
+    h('div',{className:'sec'},h('div',{className:'t'},'出す速さ（1枚目〜4枚目）'),h('div',{className:'note'},'1.00＝今のまま　小さいほど速い。考える時間・カーソル移動・タップ・降下の全部に掛かる'),
       [0,1,2,3].map(i=>h('label',{key:i,className:'row'},h('span',{className:'l'},(i+1)+'枚目'),h('input',{type:'range',min:.2,max:2,step:.05,value:t.cardSpeed[i],onChange:e=>setCS(i,parseFloat(e.target.value))}),h('span',{className:'v'},Number(t.cardSpeed[i]).toFixed(2))))),
     h('div',{className:'sec'},h('div',{className:'t'},'強さ'),
       h('div',{className:'row'},h('span',{className:'l'},'判断力'),seg('diff',[['easy','EASY'],['normal','NORMAL'],['hard','HARD'],['master','MASTER']])),
@@ -4214,6 +4215,7 @@ function TuneScreen({onBattle,onBack}){
       h('div',{className:'row'},h('span',{className:'l'},'封じ'),seg('deny',[[true,'ON'],[false,'OFF']])),
       h('div',{className:'row'},h('span',{className:'l'},'能力'),seg('ability',[['','なし'],['freeze','凍結'],['orbit','軌道']])),
       h('div',{className:'row'},h('span',{className:'l'},'通常の強化'),seg('boost',[[true,'乗せる'],[false,'乗せない']])),
+      h('div',{className:'note'},'通常の強化＝本編の相手と同じ土台。判断力を2段上げる（NORMAL→MASTER）＋考える時間×0.6'),
       h('label',{className:'row'},h('span',{className:'l'},'先取'),h('input',{type:'range',min:5,max:20,step:1,value:t.winPt,onChange:e=>set('winPt',parseInt(e.target.value))}),h('span',{className:'v'},t.winPt+' pt')),
       h('label',{className:'row'},h('span',{className:'l'},'持ち時間'),h('input',{type:'range',min:4,max:12,step:1,value:t.timeLimit,onChange:e=>set('timeLimit',parseInt(e.target.value))}),h('span',{className:'v'},t.timeLimit+' 秒'))),
     h('div',{className:'btns'},
@@ -4654,9 +4656,11 @@ function App(){
   const _so=stageOptsR.current||{};
   // v135: 初手（場が0枚）だけカーソルも降下も速める。人のタップ速度を上回らせるため
   const _first=()=>fieldR.current.length===0&&!!_so.firstMs;
-  const CUR_STEP=()=>_first()?(_so.curStepFirst||_so.curStep||55):(_so.curStep||(_so.speed<1?55:110));
-  const CUR_HOLD=()=>_first()?(_so.curHoldFirst||_so.curHold||120):(_so.curHold||(_so.speed<1?120:230));
-  const CUR_ARR =()=>_first()?(_so.curArrFirst||_so.curArr||120):(_so.curArr||120);
+  // v240 cardSpeed（調整モード／ステージの cardSpeed:[1枚目,2枚目,3枚目,4枚目]）は考える時間だけでなく、カーソルの移動・タップ・降下の速さにも同じ倍率を掛ける
+  const _csK=()=>{const so=stageOptsR.current||{};if(!so.cardSpeed)return 1;const k=so.cardSpeed[Math.min(fieldR.current.length,3)];return (k!=null&&k>0)?k:1;};
+  const CUR_STEP=()=>Math.max(12,Math.round((_first()?(_so.curStepFirst||_so.curStep||55):(_so.curStep||(_so.speed<1?55:110)))*_csK()));
+  const CUR_HOLD=()=>Math.max(30,Math.round((_first()?(_so.curHoldFirst||_so.curHold||120):(_so.curHold||(_so.speed<1?120:230)))*_csK()));
+  const CUR_ARR =()=>Math.max(30,Math.round((_first()?(_so.curArrFirst||_so.curArr||120):(_so.curArr||120))*_csK()));
   function cursorToCard(targetId,onArrive,check,onCancel){ // v121: 手札番号ではなくカード固有IDを追う
     if(curBusyR.current||targetId==null)return false;
     const order=dSlotsR.current.filter(id=>id!=null&&dIdsR.current.includes(id));
@@ -5314,7 +5318,7 @@ function App(){
     if(delay===null&&_canWin10&&so135.winMs)d=Math.max(d,so135.winMs+Math.round(Math.random()*(so135.winJit||0)));
     // v113: 10を完成させる一手だけは、速度倍率のあとでも下限220msを守る（v40の趣旨）
     // ここを消すと人が反応できない速さになる。モルフォを更に強くしたい時もこの行は残す
-    if(delay===null&&_canWin10)d=Math.max(d,220);
+    if(delay===null&&_canWin10)d=Math.max(d,stageOptsR.current&&stageOptsR.current.cardSpeed?Math.max(80,Math.round(220*_csK())):220); // v240 調整の cardSpeed がある時は下限もその倍率（最低80ms）
     aiRef.current=setTimeout(()=>{if(phaseR.current==='playing'&&countNumR.current<0&&!linkR.current)aiPlay(rn);},d);
   }
 
@@ -5660,7 +5664,7 @@ function App(){
     setDealer(newDH,newRf,newIds);
     const _so2=stageOptsR.current||{};
     // v135: 初手だけ降下も速める
-    const FLY_MS=(fieldR.current.length===0&&_so2.flyMsFirst)?_so2.flyMsFirst:(_so2.flyMs||(_so2.speed<1?380:680));
+    const FLY_MS=Math.max(120,Math.round(((fieldR.current.length===0&&_so2.flyMsFirst)?_so2.flyMsFirst:(_so2.flyMs||(_so2.speed<1?380:680)))*_csK())); // v240 降下も cardSpeed で速く
     flyR.current={id:pick.id,value:chosen,face,rf:pickedRf};setFlyCard({k:Date.now(),value:chosen,face,x0,y0,x1,y1,w:cardW,d:FLY_MS});
     try{fxAir({v:0.03,a:0.02,d:0.5,hp:4000,rev:0.5});}catch(e){}
     setTimeout(()=>{
