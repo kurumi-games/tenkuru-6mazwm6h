@@ -2003,29 +2003,77 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .gp-dealer-cards.defeated .gp-dealer-card:nth-child(2n){animation-delay:.04s}.gp-dealer-cards.defeated .gp-dealer-card:nth-child(3n){animation-delay:.08s}
 @keyframes endVanish{0%{filter:brightness(1);opacity:1;transform:none}35%{filter:brightness(2.2) blur(0)}100%{filter:brightness(3) blur(6px);opacity:0;transform:translateY(-14px) scale(.9)}}
 .gp-screen.end-hold{filter:brightness(.85);}
-/* ===== v214 パズルクス：線画パネルの中にステージが広がる（条件・ステージは後で） ===== */
-.pzx-screen{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#0a0d24 url('img/panel-bg.webp') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(14 * var(--u));padding:calc(18 * var(--u)) calc(12 * var(--u));font-family:'Noto Serif JP',serif;color:#e6ecfa;overflow:hidden;}
-.pzx-screen::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,30,.55),rgba(6,8,30,.8));pointer-events:none;}
-.pzx-screen>*{position:relative;z-index:1;}
-.pzx-screen .k{font-family:'Cinzel',serif;font-size:calc(10 * var(--u));letter-spacing:.35em;color:#b9a8ff;}
-.pzx-screen .t{font-size:calc(16 * var(--u));font-weight:700;letter-spacing:.14em;margin-top:calc(-8 * var(--u));}
-.pzx-panel{position:relative;width:min(96vw,calc(340 * var(--u)),calc((100dvh - 260 * var(--u)) * 1024 / 1536));aspect-ratio:1024 / 1536;border-radius:calc(6 * var(--u));overflow:hidden;box-shadow:0 0 0 1px rgba(190,180,255,.35),0 18px 40px rgba(0,0,0,.55),0 0 calc(30 * var(--u)) rgba(150,130,255,.25);background:#0b1030;}
-.pzx-panel img{position:absolute;display:block;pointer-events:none;-webkit-user-drag:none;}
-.pzx-panel .ol{inset:0;width:100%;height:100%;}
-.pzx-panel .pc{animation:pzxIn .6s cubic-bezier(.2,1.2,.4,1) both;box-shadow:0 0 calc(10 * var(--u)) rgba(200,190,255,.35);}
-@keyframes pzxCard{0%{opacity:0;}100%{opacity:1;}}
-@keyframes pzxIn{0%{opacity:0;transform:scale(1.12);}100%{opacity:1;transform:none;}}
-.pzx-panel .cp{inset:0;width:100%;height:100%;animation:pzxIn 1.2s ease both;}
-.pzx-screen .mission{width:min(94vw,calc(340 * var(--u)));padding:calc(9 * var(--u)) calc(14 * var(--u));border-radius:calc(10 * var(--u));background:rgba(255,224,138,.07);border:1px solid rgba(255,224,138,.3);font-size:calc(12.5 * var(--u));line-height:1.6;color:#fff3c4;text-align:center;}
-.pzx-screen .mission .l{font-family:'Cinzel',serif;font-size:calc(9 * var(--u));letter-spacing:.3em;color:#ffd27a;display:block;margin-bottom:calc(2 * var(--u));}
-.pzx-screen .mission .foe{font-size:calc(10.5 * var(--u));color:#c9c2ea;margin-top:calc(3 * var(--u));}
-.pzx-screen .prog{font-family:'Fira Code',monospace;font-size:calc(12 * var(--u));color:#ded2b1;letter-spacing:.1em;}
-.pzx-screen .enter{margin-top:calc(4 * var(--u));min-height:calc(46 * var(--u));padding:0 calc(34 * var(--u));border-radius:999px;border:1px solid rgba(255,224,138,.55);background:linear-gradient(135deg,rgba(255,224,138,.22),rgba(150,120,255,.22));color:#fff3c4;font-family:inherit;font-size:calc(14 * var(--u));font-weight:700;letter-spacing:.2em;cursor:pointer;box-shadow:0 0 calc(18 * var(--u)) rgba(255,210,110,.25);}
-.pzx-screen .enter:active{transform:scale(.97);}
-.pzx-screen .sub{font-size:calc(11 * var(--u));letter-spacing:.3em;color:#c9c2ea;margin-top:calc(-10 * var(--u));}
-.pzx-screen .reset{min-height:calc(30 * var(--u));padding:0 calc(14 * var(--u));border-radius:999px;border:1px solid rgba(255,140,160,.35);background:transparent;color:#c9a0aa;font-family:inherit;font-size:calc(10.5 * var(--u));cursor:pointer;margin-top:calc(-4 * var(--u));}
-.pzx-screen .reset.ask{border-color:#ff8fa3;color:#ffd0d8;background:rgba(255,80,110,.12);}
-.pzx-screen .home{min-height:calc(38 * var(--u));padding:0 calc(22 * var(--u));border-radius:999px;border:1px solid rgba(190,180,255,.35);background:rgba(20,16,50,.65);color:#d6cfff;font-family:inherit;font-size:calc(12.5 * var(--u));cursor:pointer;}
+/* ===== v250 PUZZLUX：承認済みの星空パネルと読みやすい詳細表示 ===== */
+.pzx-screen{position:fixed;inset:0;display:block;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;background:#0a1026 url('img/pzx/v250/background.webp') center/cover no-repeat;color:#f3f0ff;font-family:'Noto Serif JP',serif;-webkit-tap-highlight-color:transparent;}
+.pzx-screen::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,rgba(6,10,29,.16),rgba(7,11,32,.04) 45%,rgba(7,11,32,.35));pointer-events:none;}
+.pzx-layout{position:relative;z-index:1;width:min(100%,560px);margin:0 auto;padding:env(safe-area-inset-top,0px) 20px max(24px,env(safe-area-inset-bottom,0px));display:grid;grid-template-rows:clamp(72px,11svh,110px) 35svh max(50px,8svh) max(52px,8svh) auto;justify-items:center;}
+.pzx-top{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;}
+.pzx-wordmark{font-family:'Cinzel',serif;font-size:clamp(10px,1.5svh,14px);letter-spacing:.4em;color:#eee3c4;}
+.pzx-name{font-size:clamp(25px,4svh,38px);font-weight:500;line-height:1.3;letter-spacing:.3em;margin:0;padding-left:.3em;text-shadow:0 1px 15px #131334;}
+.pzx-name.revealed{animation:pzxNameReveal 1s ease both;}
+@keyframes pzxNameReveal{from{opacity:.1;filter:blur(8px);letter-spacing:.55em}to{opacity:1;filter:blur(0);letter-spacing:.3em}}
+.pzx-icon-button{display:grid;place-items:center;min-width:44px;min-height:44px;padding:9px;border:0;background:transparent;color:#eadcb1;cursor:pointer;}
+.pzx-icon-button svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.pzx-home{position:absolute;left:-10px;top:8px;}
+.pzx-menu-button{position:absolute;right:-10px;top:8px;}
+.pzx-hero{height:100%;width:100%;display:flex;justify-content:center;align-items:center;}
+.pzx-panel{position:relative;display:block;flex:none;box-sizing:border-box;height:100%;width:auto;max-width:100%;aspect-ratio:2 / 3;padding:0;border:0;border-radius:0;background:#0b1030;overflow:hidden;box-shadow:0 12px 30px #0006,0 0 22px #afa7ff26;cursor:zoom-in;}
+.pzx-panel img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none;}
+.pzx-panel .pc{animation:pzxIn .65s cubic-bezier(.2,1.2,.4,1) both;}
+.pzx-panel .cp{animation:pzxIn 1s ease both;}
+.pzx-panel .cracks{z-index:2;}
+@keyframes pzxCard{from{opacity:0}to{opacity:1}}
+@keyframes pzxIn{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
+.pzx-progress{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%;font-size:clamp(12px,1.8svh,17px);letter-spacing:.15em;color:#eee7d7;}
+.pzx-progress-label{display:flex;align-items:center;gap:16px;}
+.pzx-progress-label::before,.pzx-progress-label::after{content:'';width:38px;height:1px;background:linear-gradient(90deg,transparent,#b7a675);}
+.pzx-progress-label::after{transform:rotate(180deg);}
+.pzx-diamonds{display:flex;gap:18px;padding:2px;}
+.pzx-diamonds span{display:block;width:10px;height:10px;transform:rotate(45deg);border:1px solid #aaa8c1;background:#aeb8ec0c;box-shadow:inset 0 0 5px #b7c5ff33;}
+.pzx-diamonds .on{border-color:#e7f4ff;background:linear-gradient(135deg,#f1f3ff,#88a9ff 50%,#b9a0ff);box-shadow:0 0 9px #8ba7ff,0 0 18px #8473ff;}
+.pzx-action{display:flex;align-items:center;justify-content:center;width:100%;}
+.pzx-battle,.pzx-close{position:relative;min-height:52px;width:87%;padding:10px 38px;border:1px solid #ead398;border-radius:999px;color:#fff8ee;font:600 clamp(20px,3svh,27px)/1.3 'Noto Serif JP',serif;letter-spacing:.2em;background:radial-gradient(ellipse at 12% 10%,#a9a1ff88,transparent 50%),radial-gradient(ellipse at 80% 95%,#b58ffd88,transparent 45%),linear-gradient(150deg,#5364be,#292263 65%,#5e5ca6);box-shadow:inset 0 0 0 2px #dce2ff40,inset 0 2px 7px #eef0ff66,0 0 0 2px #0e1536,0 0 0 3px #cfb37190,0 6px 25px #11164099,0 0 25px #777bfc40;cursor:pointer;}
+.pzx-battle::after{content:'›';position:absolute;right:22px;top:50%;transform:translateY(-54%);font:36px/1 sans-serif;color:#f6f3ff;text-shadow:0 0 8px #a1b6ff;}
+.pzx-battle:active,.pzx-close:active{transform:scale(.98);}
+.pzx-lower{width:100%;padding-top:clamp(18px,3svh,28px);}
+.pzx-mission{position:relative;display:block;width:100%;padding:16px 15px 12px;border:1px solid #c5b789;border-radius:16px;color:#f5f1ff;background:linear-gradient(135deg,#101a38ed,#11152cdd);box-shadow:inset 0 0 32px #889bd40a,0 10px 25px #03061740;font-family:inherit;text-align:center;cursor:zoom-in;}
+.pzx-mission .expand{position:absolute;right:8px;top:8px;color:#eeedff;}
+.pzx-mission .expand svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;}
+.pzx-eyebrow{display:block;color:#e4c789;font:500 11px/1.4 'Cinzel',serif;letter-spacing:.25em;}
+.pzx-conditions{display:block;margin:10px 0;font-size:clamp(13px,1.9svh,17px);line-height:1.65;font-weight:500;}
+.pzx-conditions>span{display:block;}
+.pzx-rule-summary{display:block;border-top:1px solid #c6b78650;padding-top:9px;color:#d6d5eb;font:12px/1.7 'Noto Sans JP',sans-serif;}
+.pzx-rule-summary>span{display:block;}
+.pzx-reward{display:flex;align-items:center;justify-content:center;gap:13px;margin-top:12px;padding:4px 10px;border:1px solid #c4b07c80;border-radius:999px;background:#9194d508;font-size:12px;color:#f4ecd8;}
+.pzx-reward img{display:block;width:42px;height:48px;object-fit:contain;filter:drop-shadow(0 0 4px #aaaaff90);}
+.pzx-reward .amount{font-size:23px;font-weight:400;letter-spacing:.06em;}
+.pzx-hint{text-align:center;color:#e3def2;font-size:11px;letter-spacing:.05em;margin:15px 0 0;}
+.pzx-screen button:focus-visible,.pzx-dialog button:focus-visible{outline:2px solid #e7f6ff;outline-offset:5px;}
+.pzx-dialog{position:fixed;inset:0;margin:auto;width:min(92vw,540px);max-width:none;max-height:88svh;box-sizing:border-box;padding:24px 22px;border:1px solid #dfc98d;border-radius:16px;background:linear-gradient(140deg,#12203d,#10162f 65%,#192341);color:#f4f0ff;font-family:'Noto Serif JP',serif;box-shadow:0 0 0 3px #c0ac7530,0 24px 80px #000b;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;}
+.pzx-dialog::backdrop{background:#020719c9;backdrop-filter:blur(5px);}
+.pzx-dialog .pzx-dialog-x{position:absolute;right:5px;top:5px;color:white;}
+.pzx-dialog h2{font-weight:500;font-size:clamp(24px,5vw,32px);margin:8px 32px 24px 0;line-height:1.45;}
+.pzx-detail-section{margin:18px 0;padding-top:18px;border-top:1px solid #c7b78260;}
+.pzx-detail-section h3{font-size:17px;color:#efd398;margin:0 0 12px;font-weight:500;letter-spacing:.08em;}
+.pzx-detail-section p{font:17px/1.8 'Noto Sans JP',sans-serif;margin:4px 0;}
+.pzx-detail-conditions{font-size:clamp(20px,5vw,25px);line-height:1.7;padding-left:1.5em;margin:0;}
+.pzx-detail-conditions li{padding-left:.15em;margin:5px 0;}
+.pzx-detail-note{font:14px/1.7 'Noto Sans JP',sans-serif!important;color:#c9cbe1;margin-top:12px!important;}
+.pzx-dialog .pzx-reward{border:0;border-radius:0;background:none;margin:0;padding:0;justify-content:flex-start;font-size:18px;}
+.pzx-dialog .pzx-reward img{width:78px;height:90px;}
+.pzx-dialog .pzx-reward .amount{font-size:34px;}
+.pzx-close{display:block;margin:24px auto 3px;font-size:18px;width:100%;min-height:48px;}
+.pzx-art-dialog{width:min(92vw,620px);padding:12px;}
+.pzx-art-dialog h2{font-size:18px;margin:6px 42px 14px 6px;}
+.pzx-art-dialog .pzx-panel{height:auto;width:min(100%,44svh);aspect-ratio:2 / 3;margin:auto;cursor:default;}
+.pzx-menu-options{display:grid;gap:12px;}
+.pzx-menu-options button{min-height:48px;padding:10px;border:1px solid #b8acd480;border-radius:10px;background:#b5a8ff0c;color:#f2edff;font:16px 'Noto Sans JP',sans-serif;cursor:pointer;}
+.pzx-menu-options .danger{color:#ffd0d8;border-color:#db8e9b88;}
+.pzx-reset-note{font:16px/1.8 'Noto Sans JP',sans-serif;}
+.pzx-res img.piece{border:0;box-shadow:none;filter:drop-shadow(0 0 15px #aab5ff66);}
+@media (max-height:650px){.pzx-layout{padding-left:16px;padding-right:16px}.pzx-lower{padding-top:16px}.pzx-mission{padding-top:12px}.pzx-progress{gap:8px}.pzx-name{font-size:25px}.pzx-dialog{max-height:92svh;padding:20px 18px}.pzx-detail-section{margin:14px 0;padding-top:14px}}
+@media (prefers-reduced-motion:reduce){.pzx-panel .pc,.pzx-panel .cp,.pzx-name.revealed{animation:none;}}
+
 /* ===== v217 パズルクス：絵の中の世界（浮遊マップ）と結果 ===== */
 .pzx-world{--u:min(calc(100vw / 360),calc(100dvh / 640));position:fixed;inset:0;background:#07091b;display:flex;flex-direction:column;align-items:center;font-family:'Noto Serif JP',serif;color:#e6ecfa;overflow:hidden;}
 .pzx-world .top{position:absolute;left:0;top:0;width:100%;display:flex;align-items:center;justify-content:space-between;padding:calc(10 * var(--u)) calc(12 * var(--u)) calc(4 * var(--u));z-index:2;background:linear-gradient(180deg,rgba(7,9,27,.7),transparent);}
@@ -3223,7 +3271,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v249'; // v249(2026/09/15): ミッション3で決着後リザルトが出ないバグ修正（判定に渡す m に dtens/nines/timeups が入っておらず m.dtens が undefined でエラー→画面が止まっていた）。条件でエラーが出ても結果画面は出るようにガード
+const APP_VER='v250'; // v250: PUZZLUX画面刷新・2:3パネル・名前解放・中央の対戦ボタン・報酬とタップ拡大
+// const APP_VER='v249'; // v249(2026/09/15): ミッション3で決着後リザルトが出ないバグ修正（判定に渡す m に dtens/nines/timeups が入っておらず m.dtens が undefined でエラー→画面が止まっていた）。条件でエラーが出ても結果画面は出るようにガード
 // const APP_VER='v248'; // v248(2026/09/15): ミッション5を実装（くるみ決定の相手設定＋条件「バースト0で勝つ」＋フィールド効果「お互い相手の手札が見えない」）。ステージには blind:true（相手の手札は裏向き表示、相手の思考もこちらの手札を見ない＝1〜9どれでも持ってるかもで読む）
 // const APP_VER='v247'; // v247(2026/09/15): ミッション4を実装（くるみ決定の相手設定＋条件「勝つ＋タイムアップ0回」）
 // const APP_VER='v246'; // v246(2026/09/15): ミッション3を実装（くるみ決定の相手設定＋条件「勝つ＋相手にストレートを1回作らせる」＋フィールド効果「1ラウンド1回、両者の手札1枚が3秒凍結」）。相手側の凍結（dFrz、札IDで管理）を追加。ステージには frzBoth:{sec:3}
@@ -3489,9 +3538,9 @@ const DEALER_BOOST={enabled:true,diffUp:2,speed:0.6};
 const DIFF_ORDER=['easy','normal','hard','master'];
 
 // ── v214 パズルクス：線画のパネル（3×2）に四角いピースがはまる。ピースは勝利では貰えず「各ステージの条件」で貰う（条件・ステージは後で作る） ──
-const PZX={dir:'img/pzx/',w:1024,h:1536,outline:'outline.webp',complete:'complete.webp',
-  // v237 6ピース（ガラスが割れたような不規則な形）。チャッピー素材 nephira-puzzle-6：完成絵・線画パネルは 1024×1536（縦長）。各ピースは透過webp、x/y/w/h はパネル上の位置
-  pieces:[{id:'piece_01',x:0,y:0,w:717,h:553},{id:'piece_02',x:440,y:0,w:584,h:614},{id:'piece_03',x:440,y:522,w:584,h:691},{id:'piece_04',x:512,y:1014,w:512,h:522},{id:'piece_05',x:0,y:1014,w:625,h:522},{id:'piece_06',x:0,y:415,w:584,h:691}],
+const PZX={dir:'img/pzx/',w:1024,h:1536,outline:'v250/outline.webp',complete:'v250/complete.webp',cracks:'v250/cracks.webp',
+  // v250 透過ピースは切り詰めず、パネルと同じ座標で配置。報酬用の小画像は別途用意。
+  pieces:Array.from({length:6},(_,i)=>{const n=String(i+1).padStart(2,'0');return{id:'v250/piece_'+n,thumb:'v250/thumb_'+n+'.webp',x:0,y:0,w:1024,h:1536};}),
   // マップの仮ノード（viewBox 330×420、下から上へ）。ステージの中身は未定
   map:[{no:1,x:60,y:370},{no:2,x:170,y:330},{no:3,x:270,y:270},{no:4,x:180,y:210},{no:5,x:80,y:150},{no:6,x:170,y:60}],
 };
@@ -3508,7 +3557,7 @@ const PZX_WORLD={
     {x:.52,y:.90,s:.06,bob:4,per:6.8,rot:3,a:.6},{x:.22,y:.10,s:.05,bob:3,per:7.4,rot:14,a:.5},{x:.80,y:.92,s:.05,bob:3,per:6.4,rot:-5,a:.5},
   ],
 };
-// ── v237 パズルクス：6ミッション＋ネフィラ。「対戦」1個で今のミッションの相手と即対戦。達成した勝ちでピース、15枚そろったらネフィラ戦 ──
+// ── v237 パズルクス：6ミッション＋ネフィラ。「対戦」1個で今のミッションの相手と即対戦。達成した勝ちでピース、6枚そろったらネフィラ戦 ──
 // ★ 条件と相手の強さはくるみが決める。今は全部「仮」（勝てば達成、相手はふつうのDEALER）。1行＝1ミッション、ここを書き換えるだけで反映される
 // 判定に使えるもの：m.win（勝ち）／m.pp（自分の点）／m.dp（相手の点）／m.bursts（自分のバースト回数）／m.tens（自分が作った10の一覧 {voice:役名, n:枚数, last:決定打の数字}）／m.dtens（相手が作った10の一覧、同じ形）／m.nines（自分の手で9にした回数）／m.timeups（タイムアップの回数）／m.sec（試合秒数）
 // ★ 全ピース共通：勝つこと必須。勝ち＋条件を同時に満たした時だけピース
@@ -3539,7 +3588,7 @@ const PZX_BOSS=PZX_STAGES.length-1; // ボスの添字
 const PZX_AREA={id:'pzx',name:'絵の中',stages:PZX_STAGES};
 STAGES.areas[1]=PZX_AREA;
 function pzxNodes(W,FH){const C=PZX_WORLD.circle,r=C.r*W;const n=[];for(let i=0;i<6;i++){const a=(C.start+i*60)*Math.PI/180;n.push({x:C.cx*W+Math.cos(a)*r,y:C.cy*FH+Math.sin(a)*r});}n.push({x:C.cx*W,y:C.cy*FH});return n;} // 6つは円周、最後がボス（中心）
-function pzxState(save){const P=(save&&save.pzx)||{};return {got:P.got||[],boss:!!P.boss};}
+function pzxState(save){const P=(save&&save.pzx)||{};return {got:[...new Set((Array.isArray(P.got)?P.got:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<PZX.pieces.length))],boss:!!P.boss};}
 function pzxCurrent(save){const P=pzxState(save);if(P.boss)return PZX_BOSS;const i=PZX_STAGES.findIndex((st,k)=>k<PZX_BOSS&&!P.got.includes(k));return i<0?PZX_BOSS:i;} // 今のミッション（ピースが無い最初のもの。全部あればネフィラ）
 function boostDiff(d){if(!DEALER_BOOST.enabled)return d;const i=DIFF_ORDER.indexOf(d);return i<0?d:DIFF_ORDER[Math.min(3,i+DEALER_BOOST.diffUp)];}
 // ── v197 パズル用の新ギミック（相手の星環カードを場に出した瞬間だけ発動）：数値はここだけで調整 ──
@@ -4253,36 +4302,82 @@ function TuneScreen({onBattle,onBack}){
     msg&&h('div',{className:'toast'},msg)
   );
 }
-function PzxPanel({save,onEnter,onBack,onReset,onBattle}){
-  const st=pzxState(save),N=PZX.pieces.length,done=st.got.length>=N;
-  const cur=pzxCurrent(save),ms=PZX_STAGES[cur],cleared=st.boss; // v234 今のミッション
-  const[ask,setAsk]=useState(false); // v218 リセットは2回押し
-  const panelR=useRef(null);const[breaking,setBreaking]=useState(false);
-  const enter=()=>{ // v233 中へ入る：パネルを写真に撮って、ガラスみたいにヒビ→パリッと割れて破片が落ちる（FX_SHATTER）
-    if(breaking)return;const el=panelR.current;if(!el||!window.playShatterFx){onEnter();return;}
-    setBreaking(true);
-    const r=el.getBoundingClientRect();
-    const snap=document.createElement('canvas');const dpr=Math.min(window.devicePixelRatio||1,2);snap.width=Math.round(r.width*dpr);snap.height=Math.round(r.height*dpr);
-    const g=snap.getContext&&snap.getContext('2d');if(!g){onEnter();return;}g.scale(dpr,dpr);g.fillStyle='#0b1030';g.fillRect(0,0,r.width,r.height);
-    el.querySelectorAll('img').forEach(im=>{if(!im.complete||!im.naturalWidth)return;const b=im.getBoundingClientRect();try{g.drawImage(im,b.left-r.left,b.top-r.top,b.width,b.height);}catch(e){}});
-    playShatterFx({snap,rect:{x:r.left,y:r.top,w:r.width,h:r.height},onCracked:()=>onEnter()});
-  };
-  const has=st.got.length||st.boss;
-  return h('div',{className:'pzx-screen'},
-    h('div',{className:'k'},'PUZZLUX'),h('div',{className:'t'},'パズルクス'),h('div',{className:'sub'},'ネフィラ'),
-    h('div',{className:'pzx-panel'+(breaking?' breaking':''),ref:panelR},
-      h('img',{className:'ol',src:PZX.dir+PZX.outline,alt:'',draggable:false}),
-      !done&&PZX.pieces.map((p,i)=>st.got.includes(i)&&h('img',{key:p.id,className:'pc',src:PZX.dir+p.id+'.webp',alt:'',draggable:false,style:{left:(p.x/PZX.w*100)+'%',top:(p.y/PZX.h*100)+'%',width:(p.w/PZX.w*100)+'%',height:(p.h/PZX.h*100)+'%'}})),
-      done&&h('img',{className:'cp',src:PZX.dir+PZX.complete,alt:'',draggable:false})
-    ),
-    h('div',{className:'prog'},'PIECE '+st.got.length+' / '+N+(cleared?'　CLEAR':'')),
-    h('div',{className:'mission'},h('span',{className:'l'},cleared?'CLEAR':(cur===PZX_BOSS?'BOSS':'MISSION '+(cur+1))),cleared?'絵は完成した。ネフィラは何度でも':ms.mission.text,!cleared&&h('div',{className:'foe'},'相手：'+ms.rivalName+'　先取 '+ms.winPt+' pt')),
-    h('button',{className:'enter',onClick:()=>onBattle(cur)},'対戦'),
-    h('button',{className:'home',onClick:onBack},'ホームへ'),
-    !!has&&h('button',{className:'reset'+(ask?' ask':''),onClick:()=>{if(!ask){setAsk(true);return;}setAsk(false);onReset();}},ask?'ほんまに消す？（もう一度押す）':'はじめから'), // v218
-    ask&&h('button',{className:'reset',onClick:()=>setAsk(false)},'やめる')
-  );
+// v250 パネル・ピース・ヒビはすべて同じ1024×1536座標で重ねる。
+function PzxIcon({kind}){
+  const paths={home:'M3 11 12 3 21 11 M5 10v11h5v-7h4v7h5V10',expand:'M9 3H3v6 M15 3h6v6 M3 15v6h6 M21 15v6h-6',close:'m5 5 14 14 M19 5 5 19',menu:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20 M7 12h.01 M12 12h.01 M17 12h.01'};
+  return h('svg',{viewBox:'0 0 24 24','aria-hidden':'true'},h('path',{d:paths[kind]}));
 }
+function PzxArtwork({got,done,onClick}){
+  const children=[h('img',{key:'outline',className:'ol',src:PZX.dir+PZX.outline,alt:'',draggable:false}),
+    ...(!done?PZX.pieces.map((p,i)=>got.includes(i)&&h('img',{key:p.id,className:'pc',src:PZX.dir+p.id+'.webp',alt:'',draggable:false})):[]),
+    done&&h('img',{key:'complete',className:'cp',src:PZX.dir+PZX.complete,alt:'',draggable:false}),
+    !done&&h('img',{key:'cracks',className:'cracks',src:PZX.dir+PZX.cracks,alt:'',draggable:false})];
+  return onClick?h('button',{type:'button',className:'pzx-panel',onClick,'aria-label':'パネルを拡大'},children):h('div',{className:'pzx-panel',role:'img','aria-label':done?'完成したパネル':'復元中のパネル'},children);
+}
+function pzxMissionInfo(stage){
+  const text=stage.mission.text;
+  // 条件とフィールド効果を分けて表示する。判定関数や対戦設定は変更しない。
+  const ruleStart=stage.boss?-1:text.indexOf('（');
+  const condition=ruleStart<0?text:text.slice(0,ruleStart);
+  return {conditions:condition.split(/\s*＋\s*/).map(s=>s==='勝つ'?'勝利する':s),rule:ruleStart<0?'':text.slice(ruleStart+1).replace(/）$/,'')};
+}
+function PzxReward({piece,showLabel=true}){
+  return h('span',{className:'pzx-reward'},showLabel&&h('span',null,'クリア報酬'),h('img',{src:PZX.dir+piece.thumb,alt:'獲得できるピース',draggable:false}),h('span',{className:'amount'},'×1'));
+}
+function PzxDialog({title,onClose,children,art=false}){
+  const dialogR=useRef(null);
+  useEffect(()=>{
+    const dialog=dialogR.current,previous=document.activeElement;
+    dialog.showModal();
+    return()=>{if(dialog.open)dialog.close();if(previous&&previous.isConnected)previous.focus({preventScroll:true});};
+  },[]);
+  return h('dialog',{ref:dialogR,className:'pzx-dialog'+(art?' pzx-art-dialog':''),'aria-labelledby':'pzx-dialog-title',onCancel:e=>{e.preventDefault();onClose();},onClick:e=>{if(e.target===e.currentTarget)onClose();}},
+    h('button',{type:'button',className:'pzx-icon-button pzx-dialog-x',onClick:onClose,'aria-label':'閉じる'},h(PzxIcon,{kind:'close'})),
+    h('h2',{id:'pzx-dialog-title'},title),children,
+    h('button',{type:'button',className:'pzx-close',onClick:onClose},'閉じる'));
+}
+function PzxPanel({save,onBack,onReset,onBattle}){
+  const st=pzxState(save),N=PZX.pieces.length,done=PZX.pieces.every((_,i)=>st.got.includes(i));
+  const cur=pzxCurrent(save),ms=PZX_STAGES[cur],cleared=st.boss,info=pzxMissionInfo(ms);
+  const [modal,setModal]=useState(null),[ask,setAsk]=useState(false);
+  const close=()=>{setModal(null);setAsk(false);};
+  const reward=!done&&cur<PZX_BOSS?PZX.pieces[cur]:null;
+  const missionLabel=cleared?'CLEAR':ms.boss?'BOSS':'MISSION '+(cur+1);
+  return h('div',{className:'pzx-screen'},
+    h('main',{className:'pzx-layout'},
+      h('header',{className:'pzx-top'},
+        h('button',{type:'button',className:'pzx-icon-button pzx-home',onClick:onBack,'aria-label':'ホームへ'},h(PzxIcon,{kind:'home'})),
+        h('span',{className:'pzx-wordmark'},'PUZZLUX'),
+        h('h1',{className:'pzx-name'+(done?' revealed':''),'aria-live':'polite'},done?'ネフィラ':'？？？'),
+        h('button',{type:'button',className:'pzx-icon-button pzx-menu-button',onClick:()=>setModal('menu'),'aria-label':'メニューを開く'},h(PzxIcon,{kind:'menu'}))),
+      h('div',{className:'pzx-hero'},h(PzxArtwork,{got:st.got,done,onClick:()=>setModal('art')})),
+      h('div',{className:'pzx-progress','aria-label':'復元 '+st.got.length+' / '+N},
+        h('span',{className:'pzx-progress-label'},'復元 '+st.got.length+' / '+N+(cleared?'　CLEAR':'')),
+        h('span',{className:'pzx-diamonds','aria-hidden':'true'},PZX.pieces.map((_,i)=>h('span',{key:i,className:st.got.includes(i)?'on':''})))),
+      h('div',{className:'pzx-action'},h('button',{type:'button',className:'pzx-battle',onClick:()=>onBattle(cur)},'対戦する')),
+      h('div',{className:'pzx-lower'},
+        h('button',{type:'button',className:'pzx-mission',onClick:()=>setModal('mission'),'aria-label':'ミッション詳細を拡大'},
+          h('span',{className:'expand'},h(PzxIcon,{kind:'expand'})),
+          h('span',{className:'pzx-eyebrow'},missionLabel),
+          h('span',{className:'pzx-conditions'},cleared?h('span',null,'絵は完成した。ネフィラは何度でも'):info.conditions.map((s,i)=>h('span',{key:i},s))),
+          h('span',{className:'pzx-rule-summary'},h('span',null,'相手：'+ms.rivalName+' ／ '+ms.winPt+'pt先取'),info.rule&&h('span',null,info.rule)),
+          reward&&h(PzxReward,{piece:reward})),
+        h('p',{className:'pzx-hint'},'パネル・ミッションはタップで拡大'))),
+    modal&&h(PzxDialog,{key:modal,title:modal==='art'?(done?'ネフィラ':'復元パネル'):modal==='mission'?'ミッション詳細':'メニュー',onClose:close,art:modal==='art'},
+      modal==='art'&&h(PzxArtwork,{got:st.got,done}),
+      modal==='mission'&&h(React.Fragment,null,
+        h('span',{className:'pzx-eyebrow'},missionLabel),
+        h('section',{className:'pzx-detail-section'},h('h3',null,'クリア条件'),h('ol',{className:'pzx-detail-conditions'},info.conditions.map((s,i)=>h('li',{key:i},s))),info.conditions.length>1&&h('p',{className:'pzx-detail-note'},'上の条件をすべて達成するとクリア。')),
+        h('section',{className:'pzx-detail-section'},h('h3',null,'対戦ルール'),h('p',null,'相手：'+ms.rivalName+' ／ '+ms.winPt+'pt先取'),info.rule&&h('p',null,info.rule)),
+        reward&&h('section',{className:'pzx-detail-section'},h('h3',null,'クリア報酬'),h(PzxReward,{piece:reward,showLabel:false}))),
+      modal==='menu'&&h('div',{className:'pzx-menu-options'},
+        h('button',{type:'button',onClick:onBack},'ホームへ'),
+        !!(st.got.length||st.boss)&&h(React.Fragment,null,
+          ask&&h('p',{className:'pzx-reset-note'},'パズルクスの進行を最初に戻します。本編の記録は残ります。'),
+          h('button',{type:'button',className:'danger',onClick:()=>{if(!ask){setAsk(true);return;}close();onReset();}},ask?'進行をリセットする':'はじめから'),
+          ask&&h('button',{type:'button',onClick:()=>setAsk(false)},'やめる')))));
+}
+
 // ── v234 パズルクス：結果。勝ち負け・ミッション達成・ピース ──
 function PzxResult({data,st,idx,gotNow,onRetry,onPanel}){
   const win=data.winner==='player',m=data.pzx,ok=!!m.ok,isBoss=idx===PZX_BOSS;
@@ -4299,7 +4394,7 @@ function PzxResult({data,st,idx,gotNow,onRetry,onPanel}){
       ),
       h('div',{className:'stats'},h('span',null,'バースト ',h('b',null,m.bursts)),h('span',null,'役 ',h('b',null,m.tens.filter(t=>t.voice!=='役なし').length)),h('span',null,'9 ',h('b',null,m.nines||0)),h('span',null,h('b',null,m.sec),'秒')),
       h('div',{className:'cond '+(ok?'ok':'ng')},h('span',{className:'mk'},ok?'達成':'未達'),h('span',{className:'l'},'MISSION'),st.mission.text),
-      gotNow&&!isBoss&&h('img',{className:'piece',src:PZX.dir+PZX.pieces[idx].id+'.webp',alt:'',draggable:false,style:{aspectRatio:PZX.pieces[idx].w+' / '+PZX.pieces[idx].h}}),
+      gotNow&&!isBoss&&h('img',{className:'piece',src:PZX.dir+PZX.pieces[idx].thumb,alt:'獲得したピース',draggable:false}),
       gotNow&&h('div',{className:'pget'},isBoss?'絵の中を制覇した':'ピース獲得'),
       h('button',{className:'sg-btn',onClick:onRetry},gotNow&&!isBoss?'次の対戦へ':'もう一度'),
       h('button',{className:'sg-btn ghost',onClick:onPanel},'パネルへ')
