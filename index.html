@@ -3271,7 +3271,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v250'; // v250: PUZZLUX画面刷新・2:3パネル・名前解放・中央の対戦ボタン・報酬とタップ拡大
+const APP_VER='v251'; // v251(2026/09/15): フィールド効果の凍結（frzBoth）でも「凍った札だけ」になったら配り直すように修正（セトラのabilityの時しか効いていなかった）。パズルクスのリザルトから「次の対戦へ／もう一度」を廃止し、毎回パネルに戻る
+// const APP_VER='v250'; // v250: PUZZLUX画面刷新・2:3パネル・名前解放・中央の対戦ボタン・報酬とタップ拡大
 // const APP_VER='v249'; // v249(2026/09/15): ミッション3で決着後リザルトが出ないバグ修正（判定に渡す m に dtens/nines/timeups が入っておらず m.dtens が undefined でエラー→画面が止まっていた）。条件でエラーが出ても結果画面は出るようにガード
 // const APP_VER='v248'; // v248(2026/09/15): ミッション5を実装（くるみ決定の相手設定＋条件「バースト0で勝つ」＋フィールド効果「お互い相手の手札が見えない」）。ステージには blind:true（相手の手札は裏向き表示、相手の思考もこちらの手札を見ない＝1〜9どれでも持ってるかもで読む）
 // const APP_VER='v247'; // v247(2026/09/15): ミッション4を実装（くるみ決定の相手設定＋条件「勝つ＋タイムアップ0回」）
@@ -4396,8 +4397,7 @@ function PzxResult({data,st,idx,gotNow,onRetry,onPanel}){
       h('div',{className:'cond '+(ok?'ok':'ng')},h('span',{className:'mk'},ok?'達成':'未達'),h('span',{className:'l'},'MISSION'),st.mission.text),
       gotNow&&!isBoss&&h('img',{className:'piece',src:PZX.dir+PZX.pieces[idx].thumb,alt:'獲得したピース',draggable:false}),
       gotNow&&h('div',{className:'pget'},isBoss?'絵の中を制覇した':'ピース獲得'),
-      h('button',{className:'sg-btn',onClick:onRetry},gotNow&&!isBoss?'次の対戦へ':'もう一度'),
-      h('button',{className:'sg-btn ghost',onClick:onPanel},'パネルへ')
+      h('button',{className:'sg-btn',onClick:onPanel},'パネルへ') // v251 「次の対戦へ／もう一度」は廃止。毎回パネルに戻る
     )
   );
 }
@@ -5404,7 +5404,7 @@ function App(){
       if(gkR.current.timeCut){t=Math.max(1,t-gkR.current.timeCut);gkR.current.timeCut=0;} // v197 砂時計
       t--;setTimeLeft(t);timeLeftR.current=t;
       tickFreeze(); // v127: 凍結解除のカウントはこのタイマーと同じ歩幅で進む
-      if(freezeActive())reliefIfAllFrozen(); // v136: 凍った札だけになったら配り直して詰みを回避
+      if(freezeActive()||(stageOptsR.current&&stageOptsR.current.frzBoth))reliefIfAllFrozen(); // v136/v251: 凍った札だけになったら配り直して詰みを回避（フィールド効果の凍結でも同じ）
       if(t===4&&r2Active())r2Think(rn,'late'); // v85 残り4秒での判断
 
       if(t<=0){clearInterval(timerRef.current);clearTimeout(aiRef.current);doTimeUp(rn);}
