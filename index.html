@@ -2142,6 +2142,17 @@ body{background:linear-gradient(180deg,#0a0020 0%,#12002e 40%,#180040 70%,#1a003
 .skip-veil.light{background:rgba(4,6,20,.35);}
 .skip-veil span{font-family:'Noto Serif JP',serif;font-size:calc(15 * var(--u));letter-spacing:.25em;color:#e8ecff;text-shadow:0 0 12px rgba(140,180,255,.8);padding:calc(8 * var(--u)) calc(18 * var(--u));border:1px solid rgba(200,210,255,.45);border-radius:999px;background:rgba(10,14,40,.55);animation:skipPulse 1.4s ease-in-out infinite;}
 @keyframes skipPulse{0%,100%{opacity:.75}50%{opacity:1}}
+
+/* v253 10秒ラッシュ */
+.rush-screen{position:fixed;inset:0;z-index:100;overflow-y:auto;touch-action:pan-y;background:linear-gradient(155deg,#edf4fc,#f3eefb);color:#263650;padding:max(24px,env(safe-area-inset-top)) 18px max(24px,env(safe-area-inset-bottom));}
+.rush-card{width:min(100%,440px);margin:0 auto;background:#ffffffed;border:1px solid #d7dff0;border-radius:22px;padding:24px;box-shadow:0 12px 40px #35467413;text-align:center;}
+.rush-card h1{font-size:30px;margin:8px 0 12px;color:#534181;}.rush-eyebrow{font-size:12px;letter-spacing:3px;color:#6b7290;margin:0;}.rush-lead{font-size:16px;line-height:1.6;}
+.rush-rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0;}.rush-rule-grid>div{display:grid;gap:3px;background:#f1f0fa;border-radius:14px;padding:12px;font-size:13px;}.rush-rule-grid b{font-size:30px;color:#60499a;}
+.rush-rules{text-align:left;padding-left:20px;font-size:16px;line-height:1.65;margin:18px 0;}.rush-rules li+li{margin-top:8px;}.rush-difficulty{border:1px solid #d8dcec;border-radius:12px;padding:12px;margin:20px 0;display:flex;justify-content:center;gap:20px;}.rush-difficulty legend{font-size:14px;padding:0 8px;}.rush-difficulty label{display:flex;align-items:center;gap:6px;min-height:36px;cursor:pointer;}.rush-difficulty input{accent-color:#60499a;width:18px;height:18px;}
+.rush-primary,.rush-secondary{display:block;width:100%;min-height:48px;border-radius:12px;padding:12px;font:inherit;font-size:17px;font-weight:700;cursor:pointer;margin-top:12px;}.rush-primary{background:#60499a;color:#fff;border:1px solid #60499a;}.rush-secondary{background:#fff;color:#52617c;border:1px solid #d1d9e8;}.rush-screen button:focus-visible{outline:3px solid #2886ec;outline-offset:3px;}
+.rush-final-score{display:flex;justify-content:center;align-items:center;gap:18px;margin:22px 0;font-size:12px;}.rush-final-score b{font-size:38px;color:#60499a;}.rush-history{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums;}.rush-history caption{font-size:16px;font-weight:700;margin-bottom:10px;}.rush-history td,.rush-history th{padding:9px 3px;border-bottom:1px solid #e4e9f1;}
+.gp-screen.rush-playing .gp-score .sub{font-size:calc(11 * var(--u))!important;letter-spacing:0!important;white-space:nowrap;}.rush-break{position:fixed;inset:0;background:#edf3f9de;z-index:190;display:flex;align-items:center;justify-content:center;padding:24px;pointer-events:none;}.rush-break>div{width:min(100%,340px);padding:28px;border-radius:22px;border:1px solid #d3daec;background:white;text-align:center;color:#293953;box-shadow:0 14px 50px #20334b22;}.rush-break h2{font-size:28px;margin:12px 0;}.rush-break p{font-size:17px;line-height:1.6;}.rush-break strong{font-size:28px;}.rush-break small{font-size:14px;}
+
 </style>
 </head>
 <body>
@@ -3271,7 +3282,8 @@ function TutorialScreen({pendingDiff,onFinish,onExit,trackNum,toggleMusic,coachN
 
 
 // ── MenuScreen ──
-const APP_VER='v252'; // v252(2026/09/15): リザルトの獲得ピース画像を小さく（50vw/150u → 30vw/90u）
+const APP_VER='v253'; // v253: ホームに10秒ラッシュ（10秒間の得点勝負・5ラウンド先取）
+// const APP_VER='v252'; // v252(2026/09/15): リザルトの獲得ピース画像を小さく（50vw/150u → 30vw/90u）
 // const APP_VER='v251'; // v251(2026/09/15): フィールド効果の凍結（frzBoth）でも「凍った札だけ」になったら配り直すように修正（セトラのabilityの時しか効いていなかった）。パズルクスのリザルトから「次の対戦へ／もう一度」を廃止し、毎回パネルに戻る
 // const APP_VER='v250'; // v250: PUZZLUX画面刷新・2:3パネル・名前解放・中央の対戦ボタン・報酬とタップ拡大
 // const APP_VER='v249'; // v249(2026/09/15): ミッション3で決着後リザルトが出ないバグ修正（判定に渡す m に dtens/nines/timeups が入っておらず m.dtens が undefined でエラー→画面が止まっていた）。条件でエラーが出ても結果画面は出るようにガード
@@ -3779,15 +3791,16 @@ function SkillPanel(){
     )
   );
 }
-function TitleScreen({onPlay,onPuzzlux,onTune,onTutorial,musicOn,toggleMusic}){
+function TitleScreen({onPlay,onPuzzlux,onRush,onTune,onTutorial,musicOn,toggleMusic}){
   const btnBase={borderRadius:14,padding:'15px 0',fontSize:13,fontWeight:800,letterSpacing:2,cursor:'pointer',fontFamily:"'Inter',sans-serif",background:'rgba(255,255,255,.78)',boxShadow:'0 4px 16px rgba(70,100,150,.16), inset 0 1px 0 #fff',width:'100%'};
-  return h('div',{style:{minHeight:'100vh',background:"url('img/title-bg.jpg') center/cover no-repeat, #eef2f8",display:'flex',alignItems:'center',justifyContent:'center',padding:16,position:'relative'}},
-    h('div',{style:{textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:18,width:'100%',maxWidth:340,animation:'fadeUp 0.5s ease'}},
+  return h('div',{style:{height:'100dvh',overflowY:'auto',touchAction:'pan-y',flexDirection:'column',background:"url('img/title-bg.jpg') center/cover no-repeat, #eef2f8",display:'flex',alignItems:'center',justifyContent:'flex-start',padding:16,position:'relative'}},
+    h('div',{style:{margin:'auto',flexShrink:0,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:18,width:'100%',maxWidth:340,animation:'fadeUp 0.5s ease'}},
       h('div',{style:{fontSize:10,letterSpacing:8,color:'#5a80ab',fontWeight:700,fontFamily:"'Inter',sans-serif"}},'✦ CARD GAME ✦'),
       h('img',{src:'img/logo.webp',alt:'テンクル',style:{width:'100%',maxWidth:330,height:'auto',filter:'drop-shadow(0 8px 22px rgba(80,110,160,.28))',animation:'float 3.5s ease-in-out infinite'}}),
       h('div',{style:{display:'flex',flexDirection:'column',gap:12,width:'100%',marginTop:6}},
         h('button',{onClick:onPlay,style:{...btnBase,padding:'17px 0',fontSize:16,letterSpacing:6,border:'1.5px solid rgba(46,127,232,.55)',color:'#2e7fe8',boxShadow:'0 6px 20px rgba(46,127,232,.22), inset 0 1px 0 #fff'}},'遊ぶ'),
         h('button',{onClick:onPuzzlux,style:{...btnBase,padding:'13px 0',fontSize:13,letterSpacing:4,border:'1.5px solid rgba(80,160,230,.5)',color:'#2b7fb8',boxShadow:'0 5px 18px rgba(80,160,230,.2), inset 0 1px 0 #fff'}},'パズルクス'), // v214
+        h('button',{onClick:onRush,style:{...btnBase,fontSize:15,border:'1.5px solid #b29ade',color:'#60499a'}},'10秒ラッシュ',h('span',{style:{display:'block',fontSize:11,letterSpacing:1,marginTop:5}},'10秒間、何度でも取り返せる')),
         h('button',{onClick:onTune,style:{...btnBase,padding:'11px 0',fontSize:12,letterSpacing:4,border:'1.5px solid rgba(120,120,140,.4)',color:'#6a6a80',boxShadow:'inset 0 1px 0 #fff'}},'調整'), // v239
         h('button',{onClick:onTutorial,style:{...btnBase,padding:'10px 0',fontSize:11,fontWeight:700,background:'rgba(255,255,255,.55)',border:'1.5px solid rgba(120,150,190,.35)',color:'#5a80ab',boxShadow:'0 3px 10px rgba(70,100,150,.12)'}},'✦ あそびかた')
       ),
@@ -3798,6 +3811,36 @@ function TitleScreen({onPlay,onPuzzlux,onTune,onTutorial,musicOn,toggleMusic}){
       )
     )
   );
+}
+
+// ── v253 10秒ラッシュ ──
+const RUSH_CFG={roundSec:10,target:5,settleMs:180,breakMs:1800};
+function rushRoundResult(match,pp,dp,rn){
+  const winner=pp>dp?'player':pp<dp?'dealer':'draw';
+  const next={pWins:match.pWins+(winner==='player'?1:0),dWins:match.dWins+(winner==='dealer'?1:0),history:[...match.history,{rn,pp,dp,winner}]};
+  return {...next,finished:next.pWins>=RUSH_CFG.target||next.dWins>=RUSH_CFG.target};
+}
+function rushStage(diff){return {no:1,name:'10秒ラッシュ',rivalName:'DEALER',rush:true,diff:diff==='hard'?'hard':'normal',noBoost:true,winPt:RUSH_CFG.target,timeLimit:RUSH_CFG.roundSec,smart:true,firstMs:400,firstJit:150,winMsAbs:diff==='hard'?400:650,flyMs:300,curStep:70,curArr:80,curHold:80};}
+function RushScreen({onBattle,onBack}){
+  const[diff,setDiff]=useState('normal');
+  return h('main',{className:'rush-screen'},h('section',{className:'rush-card'},
+    h('p',{className:'rush-eyebrow'},'TEN-KURU'),h('h1',null,'10秒ラッシュ'),
+    h('p',{className:'rush-lead'},'取られても、すぐ取り返せる。'),
+    h('div',{className:'rush-rule-grid'},h('div',null,h('b',null,'10秒'),'1ラウンド'),h('div',null,h('b',null,'5勝'),'先に取れば勝利')),
+    h('ul',{className:'rush-rules'},h('li',null,'10を作ると役の得点を獲得。場を空にして続行！'),h('li',null,'バーストは相手に1点。時間は止まらない。'),h('li',null,'10秒終了時、得点が多い側が1ラウンド獲得。'),h('li',null,'同点は引き分け。勝ち数は増えず、次へ。'),h('li',null,'手札は使い切ったら補充。各ラウンド開始時も配り直し。')),
+    h('fieldset',{className:'rush-difficulty'},h('legend',null,'相手の強さ'),[['normal','ふつう'],['hard','むずかしい']].map(([value,label])=>h('label',{key:value},h('input',{type:'radio',name:'rush-difficulty',value,checked:diff===value,onChange:()=>setDiff(value)}),label))),
+    h('button',{className:'rush-primary',onClick:()=>onBattle(diff)},'チャレンジする'),
+    h('button',{className:'rush-secondary',onClick:onBack},'ホームへ')
+  ));
+}
+function RushResult({data,onRetry,onBack}){
+  const win=data.winner==='player';
+  return h('main',{className:'rush-screen'},h('section',{className:'rush-card'},
+    h('p',{className:'rush-eyebrow'},'10秒ラッシュ'),h('h1',null,win?'勝利！':'敗北'),h('p',{className:'rush-lead'},win?'5ラウンド獲得！':'次は、取り返そう。'),
+    h('div',{className:'rush-final-score'},h('span',null,'YOU ',h('b',null,data.pPt)),h('span',null,'—'),h('span',null,h('b',null,data.dPt),' DEALER')),
+    h('table',{className:'rush-history'},h('caption',null,'各ラウンドの得点'),h('thead',null,h('tr',null,h('th',null,'R'),h('th',null,'YOU'),h('th',null,'DEALER'),h('th',null,'結果'))),h('tbody',null,data.rush.history.map(r=>h('tr',{key:r.rn},h('td',null,r.rn),h('td',null,r.pp),h('td',null,r.dp),h('td',null,r.winner==='draw'?'引き分け':r.winner==='player'?'獲得':'相手'))))),
+    h('button',{className:'rush-primary',onClick:onRetry},'もう一度'),h('button',{className:'rush-secondary',onClick:onBack},'モード選択へ')
+  ));
 }
 
 // ── マップ（v54: AREA 01 星環アリーナ） ──
@@ -4475,6 +4518,12 @@ function App(){
   const stageOptsR=useRef(null);// v56: {chrono, timeLimit, ability}
   const chronoR=useRef({armed:false,count:0,pending:false,deals:0}); // 1試合ぶんのクロノリンク状態
   const[chronoFx,setChronoFx]=useState(null); // 'in' | 'out' | null
+  const[rushMatch,setRushMatch]=useState({pWins:0,dWins:0,history:[]});
+  const rushMatchR=useRef({pWins:0,dWins:0,history:[]});
+  const[rushBreak,setRushBreak]=useState(null);
+  const rushClosedR=useRef(true),rushDeadlineR=useRef(0);
+  const rushNextR=useRef(null),rushSettleR=useRef(null),rushToastR=useRef(null);
+  function isRush(){return !!(stageOptsR.current&&stageOptsR.current.rush);}
   const[ptFly,setPtFly]=useState(null); // v175 +pt 吸い寄せ演出
   const[skipOn,setSkipOn]=useState(false);const skipR=useRef(null); // v183 役完成の演出スキップ
   const countSkipR=useRef(null); // v194 カウントダウンのスキップ
@@ -5138,7 +5187,7 @@ function App(){
       return next;
     });
   }
-  function clearTimers(){clearTimeout(aiRef.current);clearInterval(timerRef.current);clearTimeout(countRef.current);}
+  function clearTimers(){clearTimeout(aiRef.current);clearInterval(timerRef.current);clearTimeout(countRef.current);clearTimeout(rushNextR.current);clearTimeout(rushSettleR.current);clearTimeout(rushToastR.current);}
   // v54: プレイヤー手札を配る（特殊フラグも同時に付与）
   // プレイヤーへ手札10枚を配る。何周目かを数え、appearOnDeal 周目からクロノリンクを1枚付ける
   function dealPlayer(hand){
@@ -5204,6 +5253,8 @@ function App(){
   }
   // ── ストーリー進行 ──
   function goTune(){goMap();setPhase('tune');phaseR.current='tune';} // v239
+  function goRush(){goMap();rushClosedR.current=true;setRushBreak(null);setPtFly(null);setPhase('rush');phaseR.current='rush';}
+  function startRushBattle(diff){if(phaseR.current==='playing')return;STAGES.areas[3]={id:'rush',name:'10秒ラッシュ',stages:[rushStage(diff)]};hitFxR.current=false;startStage(3,0,2);}
   function startTuneBattle(t){if(phaseR.current==='brief'||phaseR.current==='playing'||phaseR.current==='intro')return;STAGES.areas[2]={id:'tune',name:'調整',stages:[tuneToStage(t)]};stageR.current=null;stageOptsR.current=null;hitFxR.current=false;startStage(2,0,2);} // v239 調整モードの対戦（記録なし）
   function goPzxPanel(){goMap();setPhase('pzx');phaseR.current='pzx';} // v234 goMap と同じ後始末をしてパネルへ
   function goPzxWorld(){goMap();setPhase('pzxmap');phaseR.current='pzxmap';} // v231 絵の中へ（今はホームから行けない）
@@ -5242,7 +5293,7 @@ function App(){
       if(CHRONO_CONFIG.guaranteeFirstUnlock&&firstChrono&&st.no===firstChrono.no&&!saveR.current.chronoIntro){chrono=true;updSave(s=>{s.chronoIntro=true;return s;});}
       else chrono=Math.random()<CHRONO_CONFIG.appearRate;
     }
-    stageOptsR.current={chrono,noBoost:!!st.noBoost,cardSpeed:st.cardSpeed||null,winMsAbs:st.winMsAbs||null,nineStop:!!st.nineStop,frzBoth:st.frzBoth||null,blind:!!st.blind,firstMs:st.firstMs||null,firstJit:st.firstJit||0,curStepFirst:st.curStepFirst||null,curArrFirst:st.curArrFirst||null,curHoldFirst:st.curHoldFirst||null,flyMsFirst:st.flyMsFirst||null,winMs:st.winMs||null,winJit:st.winJit||0,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,ch9:!!st.ch9,ch10:!!st.ch10,smart:!!st.smart,deny:!!st.deny,playerRing:!!st.playerRing,speed:st.speed||1,curStep:st.curStep||null,curArr:st.curArr||null,curHold:st.curHold||null,flyMs:st.flyMs||null,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
+    stageOptsR.current={chrono,rush:!!st.rush,noBoost:!!st.noBoost,cardSpeed:st.cardSpeed||null,winMsAbs:st.winMsAbs||null,nineStop:!!st.nineStop,frzBoth:st.frzBoth||null,blind:!!st.blind,firstMs:st.firstMs||null,firstJit:st.firstJit||0,curStepFirst:st.curStepFirst||null,curArrFirst:st.curArrFirst||null,curHoldFirst:st.curHoldFirst||null,flyMsFirst:st.flyMsFirst||null,winMs:st.winMs||null,winJit:st.winJit||0,timeLimit:st.timeLimit||10,ability:st.ability||null,champion:st.champion||null,challenge:!!st.challenge,ch8:!!st.ch8,ch9:!!st.ch9,ch10:!!st.ch10,smart:!!st.smart,deny:!!st.deny,playerRing:!!st.playerRing,speed:st.speed||1,curStep:st.curStep||null,curArr:st.curArr||null,curHold:st.curHold||null,flyMs:st.flyMs||null,rivalName:st.rivalName||null,form2Name:st.form2Name||null,shiftPt:st.shiftPt||null,bgm:st.bgm||null};
     if(st.challenge&&typeof SHIFT_VIDEO!=='undefined'){try{[SHIFT_VIDEO.v1,SHIFT_VIDEO.v2].forEach(u=>fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(()=>{}));}catch(e){}} // v78: 変身動画を先読み
     if(quick===2){clearTimers();roundTokR.current++;setPendingDiff(st.diff||null);startGame(st.diff);return;} // v234 パズルクス：説明も飛ばして即開始
     if(quick){goBrief(st.diff);return;} // v195 パズルモードはチャレンジの登場ムービーも飛ばす（テンポ優先）
@@ -5285,6 +5336,8 @@ function App(){
     clearTimers();lockR.current=false;
     const p=createDeck(),d=createDeck();
     const opts=stageR.current?(stageOptsR.current||{}):{};
+    rushMatchR.current={pWins:0,dWins:0,history:[]};setRushMatch(rushMatchR.current);setRushBreak(null);rushClosedR.current=true;setPtFly(null);
+    pStopR.current=false;setPStop(false);fxLockR.current=false;dLandAtR.current=0;pLandAtR.current=0;
     chronoR.current={armed:!!opts.chrono,count:0,pending:false,deals:0};
     roundSecR.current=FLOW_CFG.enabled?FLOW_CFG.matchSec:(opts.timeLimit||10); // v175 試合全体で1本
     coreShiftR.current={active:opts.ability==='coreShift',used:false};setCoreShiftUsed(false);
@@ -5323,10 +5376,12 @@ function App(){
     setFieldColors([]); // v46: 時間切れ後に前ラウンドの色記録が残って自分のカードがオレンジになるバグ修正
     setFlashMsg(null);if(!keepT)setTimeLeft(roundSecR.current);setComboShow(null);setTimeUpShow(false);setFieldShift([]);
     const skip=rn>1&&COUNT_CFG.laterSkip; // v174 区切りなし
-    let c=goOnly?0:(rn===1?COUNT_CFG.firstFrom:COUNT_CFG.laterFrom);if(!skip){setCountNum(c);countNumR.current=c;} // v173 / v183 スキップ時はGOだけ
+    let c=isRush()?(rn===1?3:0):(goOnly?0:(rn===1?COUNT_CFG.firstFrom:COUNT_CFG.laterFrom));if(!skip){setCountNum(c);countNumR.current=c;} // v173 / v183 スキップ時はGOだけ
     // v194 カウント中に手札エリアをタップ → 残りを飛ばして即GO
     countSkipR.current=()=>{if(c<=0)return;clearTimeout(countRef.current);c=0;tick();};
+    const countTok=roundTokR.current;
     function tick(){
+      if(countTok!==roundTokR.current)return;
       if(c<=0)countSkipR.current=null;
       if(!skip){setCountNum(c);countNumR.current=c;}
       // カウント中は無音（GOだけ鳴らす）
@@ -5334,6 +5389,7 @@ function App(){
         // GO！音（ワープSE）
         if(!skip)playGoSE();
         setTimeout(()=>{
+          if(countTok!==roundTokR.current||phaseR.current!=='playing')return;
           setCountNum(-1);countNumR.current=-1;
           aiFirstFastRef.current=Math.random()<0.90;
           if(!keepT)startTimer(rn);
@@ -5397,7 +5453,60 @@ function App(){
     try{resumeAC();fxIceFreeze();}catch(e){} // v130
     return pick.length;
   }
+  function rushExpired(){
+    if(rushClosedR.current)return true;
+    if(performance.now()>=rushDeadlineR.current){finishRushRound(rnR.current);return true;}
+    return false;
+  }
+  function finishRushBoard(who,pts,text){
+    if(rushExpired())return;
+    if(who==='player'){pPtR.current+=pts;setPPt(pPtR.current);}
+    if(who==='dealer'){dPtR.current+=pts;setDPt(dPtR.current);}
+    clearTimeout(aiRef.current);cancelCursor();
+    // Return an opponent card already in flight before clearing the board.
+    const f=flyR.current;if(f){setDealer([...dHR.current,f.value],[...dRingR.current,f.rf||false],[...dIdsR.current,f.id]);flyR.current=null;setFlyCard(null);}
+    lockR.current=true;resolvingR.current=true;
+    const tok=roundTokR.current;
+    if(pts){setPtFly({id:Date.now()+Math.random(),text,pts,who,color:who==='player'?'#2e7fe8':'#f5912a'});clearTimeout(rushToastR.current);rushToastR.current=setTimeout(()=>{if(tok===roundTokR.current)setPtFly(null);},850);}
+    clearTimeout(rushSettleR.current);
+    rushSettleR.current=setTimeout(()=>{
+      if(tok!==roundTokR.current||!isRush()||phaseR.current!=='playing'||rushExpired())return;
+      resetField();dLandAtR.current=0;pLandAtR.current=0;
+      lockR.current=false;resolvingR.current=false;
+      if(!pHR.current.some(v=>v!==null))dealPlayer(createDeck());
+      ensureDealerRefill();scheduleAi(rnR.current);
+    },RUSH_CFG.settleMs);
+  }
+  function finishRushRound(rn){
+    if(!isRush()||rushClosedR.current||phaseR.current!=='playing')return;
+    rushClosedR.current=true;clearTimers();roundTokR.current++;
+    lockR.current=true;resolvingR.current=true;cancelCursor();flyR.current=null;setFlyCard(null);setPtFly(null);
+    timeLeftR.current=0;setTimeLeft(0);
+    const next=rushRoundResult(rushMatchR.current,pPtR.current,dPtR.current,rn);
+    rushMatchR.current=next;setRushMatch(next);
+    if(next.finished){endGame(next.pWins,next.dWins);return;}
+    setRushBreak(next.history[next.history.length-1]);
+    const tok=roundTokR.current;
+    rushNextR.current=setTimeout(()=>{
+      if(tok!==roundTokR.current||!isRush()||phaseR.current!=='playing')return;
+      setRushBreak(null);setPPt(0);setDPt(0);pPtR.current=0;dPtR.current=0;
+      const ph=createDeck(),dh=createDeck();dealPlayer(ph);setDealer(dh);
+      dLandAtR.current=0;pLandAtR.current=0;setRNum(rn+1);doCountdown(ph,dh,0,0,rn+1,true);
+    },RUSH_CFG.breakMs);
+  }
   function startTimer(rn,from){
+    if(isRush()){
+      clearInterval(timerRef.current);rushClosedR.current=false;
+      rushDeadlineR.current=performance.now()+(from==null?RUSH_CFG.roundSec:from)*1000;
+      const update=()=>{
+        if(!isRush()||phaseR.current!=='playing'||rushClosedR.current)return;
+        const left=Math.max(0,(rushDeadlineR.current-performance.now())/1000);
+        timeLeftR.current=left;setTimeLeft(Math.ceil(left));
+        if(left<=0)finishRushRound(rn);
+      };
+      update();if(!rushClosedR.current)timerRef.current=setInterval(update,50);return;
+    }
+
     if(from==null)frzBothTick(rn); // v246 新しいラウンドの開始時だけ
     clearInterval(timerRef.current);
     let t=(from==null)?roundSecR.current:from;setTimeLeft(t);timeLeftR.current=t;
@@ -5434,6 +5543,7 @@ function App(){
     clearTimeout(aiRef.current);scheduleAi(rnR.current,600);
   }
   function doTimeUp(rn){
+    if(isRush()){finishRushRound(rn);return;}
     matchStatsR.current.timeups=(matchStatsR.current.timeups||0)+1; // v247 タイムアップの回数
     if(FLOW_CFG.enabled){clearTimers();lockR.current=true;resolvingR.current=true;resumeAC();playMissSE();setTimeUpShow(true);const tok=roundTokR.current;setTimeout(()=>{if(tok!==roundTokR.current)return;setTimeUpShow(false);endGame(pPtR.current,dPtR.current,true);},1400);return;} // v175 時間切れ＝試合終了、点が多い方の勝ち
     clearTimers();lockR.current=true;resolvingR.current=true; // 時間切れ演出中はカードを出せない
@@ -5738,6 +5848,7 @@ function App(){
   // 「出したいのに札が無い」状態で再開しないようにする
   function refillPlayerIfEmpty(rn,reason){
     if(pHR.current.filter(v=>v!==null).length)return false;
+    if(isRush()){if(!rushClosedR.current)dealPlayer(createDeck());return true;}
     clearTimeout(aiRef.current);cancelCursor();
     pStopR.current=true;setPStop(true);fxLockR.current=true; // v169
     setFxNote({t:'手札を補充しています',c:'#9fe8ff'});
@@ -5756,6 +5867,7 @@ function App(){
   }
   function denyActive(){const so=stageOptsR.current;return !!(so&&so.deny);}
   function aiPlay(rn){
+    if(isRush()&&rushExpired())return;
     // 場が完成した直後にAIの出す動作が間に合ってしまった場合 → カード返却（出さない）
     // ※lockRは見ない：あれはラウンド開始時のプレイヤー用ハンデロックと共用のため
     if(pStopR.current)return; // v148: 時間停止中は出そうとする動作自体をしない
@@ -5810,6 +5922,7 @@ function App(){
   }
 
   function commitDealerPlay(pick,rn){
+    if(isRush()&&rushExpired())return;
     if(flyR.current||resolvingR.current||(linkR.current&&!rStopR.current)||sceneOnR.current||eraseBusyR.current||pausedR.current){if(phaseR.current==='playing'&&!resolvingR.current)scheduleAi(rn);return;}
     const idx=dIdsR.current.indexOf(pick.id);
     const dHand=dHR.current,rf=dRingR.current,cf=fieldR.current,cs=fieldSumR.current;
@@ -5831,8 +5944,9 @@ function App(){
     const FLY_MS=Math.max(120,Math.round(((fieldR.current.length===0&&_so2.flyMsFirst)?_so2.flyMsFirst:(_so2.flyMs||(_so2.speed<1?380:680)))*_csK())); // v240 降下も cardSpeed で速く
     flyR.current={id:pick.id,value:chosen,face,rf:pickedRf};setFlyCard({k:Date.now(),value:chosen,face,x0,y0,x1,y1,w:cardW,d:FLY_MS});
     try{fxAir({v:0.03,a:0.02,d:0.5,hp:4000,rev:0.5});}catch(e){}
+    const flight=flyR.current; // 返却した同じ札を再び投げても、古い着地処理と区別する
     setTimeout(()=>{
-      const f=flyR.current;flyR.current=null;if(!f)return;
+      const f=flyR.current;if(!f||f!==flight)return;flyR.current=null;
       const cf2=fieldR.current,cs2=fieldSumR.current;
       const ok=phaseR.current==='playing'&&countNumR.current<0&&!resolvingR.current&&!eraseBusyR.current&&!pausedR.current&&!pStopR.current&&canPlay(f.value,cs2,cf2); // v137: 時間停止中は着地させず手札へ返す（10超えはバーストとして着地する）
       if(!ok){ // 戻す
@@ -5863,6 +5977,7 @@ function App(){
   }
 
   function playCard(idx){
+    if(isRush()&&countNumR.current<0&&rushExpired())return;
     if(phaseR.current!=='playing'||countNumR.current>=0||sceneOnR.current)return; // v75: 変身演出中は操作不可
     if(pFrzR.current[idx]!=null){ // v127: 凍っている札は出せない
       try{resumeAC();fxIceTap();}catch(e){} // v130: 氷を触った手応え
@@ -5910,7 +6025,7 @@ function App(){
     if(pLockR.current.length)r2CheckUnlock(newPH); // v84
     if(confuseR.current[idx]!=null){const m={...confuseR.current};delete m[idx];setConf(m);} // v112
     const emptied=!newPH.filter(Boolean).length;
-    if(emptied){const nd=createDeck();setTimeout(()=>{dealPlayer(nd);},100);}
+    if(emptied){const nd=createDeck();if(isRush())dealPlayer(nd);else setTimeout(()=>{dealPlayer(nd);},100);}
     // v136: 凍った札しか残っていない＝手詰まり。凍った札は残したまま他を配り直す
     else if(Object.keys(pFrzR.current).length&&!newPH.some((v,i)=>v!==null&&pFrzR.current[i]==null)){
       setTimeout(()=>{refillAroundFrozen();},120);
@@ -5950,6 +6065,7 @@ function App(){
   }
 
   function resolvePlay(value,curField,curSum,who,rn,isSp,shifted){
+    if(isRush()&&rushExpired())return true;
     const nf=[...curField,value],ns=curSum+value;
     setField(nf);setFieldSum(ns);fieldR.current=nf;fieldSumR.current=ns;
     setFieldColors(prev=>[...prev,who]);colorsR.current=[...colorsR.current,who];
@@ -5957,6 +6073,7 @@ function App(){
     setFieldShift(prev=>[...prev,!!shifted]);
     {const tf=tapFaceR.current||false;tapFaceR.current=null;setFieldRing(prev=>[...prev,tf]);} // v104/v106: レイピアがタップした環の札はその色の表面（更新関数は遅延実行されるので先に値を取る）
     if(ns>10){
+      if(isRush()){if(who==='player')matchStatsR.current.bursts++;playBurstSE();finishRushBoard(who==='player'?'dealer':'player',1,'バースト');return true;}
       clearTimers();lockR.current=true;resolvingR.current=true;playBurstSE();setBurstAnim(true);
       if(who==='player')matchStatsR.current.bursts++; // v217
       const pen=(who==='player'&&gkR.current.heavyRn===rn)?GIMMICKS.heavy.pen:2; // v197 重罰
@@ -5973,6 +6090,7 @@ function App(){
     if(ns===7&&r2Active()&&nf.length<4){setTimeout(()=>{if(phaseR.current==='playing'&&!resolvingR.current&&fieldSumR.current===7)r2TimeStop(rn);},250);} // v84 合計7で時間停止
     if(ns===9&&stageOptsR.current&&stageOptsR.current.nineStop&&nf.length<4){if(who==='player')matchStatsR.current.nines=(matchStatsR.current.nines||0)+1;setTimeout(()=>{if(phaseR.current==='playing'&&!resolvingR.current&&fieldSumR.current===9)nineStop(who,rn);},250);} // v243 合計9で相手停止
     if(nf.length>=4){
+      if(isRush()){finishRushBoard(null,0,'場をリセット');return true;}
       clearTimers();lockR.current=true;resolvingR.current=true;setResetFA(true);
       setFlashMsg({text:'4枚！強制リセット',color:DIM});
       const tokF=roundTokR.current;
@@ -5984,6 +6102,7 @@ function App(){
 
   // 10完成の得点処理（プレイヤー／相手／星環 共通）
   function completeTen(nf,who,rn){
+      if(isRush()){if(rushExpired())return;const pts=calcPts(nf);playComboSfx(pts.voice||'役なし');finishRushBoard(who,pts.total,pts.voice||'10達成');return;}
       clearTimers();lockR.current=true;resolvingR.current=true;
       const pts=calcPts(nf);
       if(who==='player')matchStatsR.current.tens.push({voice:pts.voice||'役なし',n:nf.length,last:nf[nf.length-1]});else matchStatsR.current.dtens.push({voice:pts.voice||'役なし',n:nf.length,last:nf[nf.length-1]}); // v217/v245/v246
@@ -6033,6 +6152,7 @@ function App(){
     roundTokR.current++;stopBGM();
     let stars=0;
     const c=stageR.current;
+    if(c&&c.ar===3){clearTimers();rushClosedR.current=true;lockR.current=true;resolvingR.current=true;setRushBreak(null);setGameEndData({pPt:pp,dPt:dp,winner:win,diff:diffRef.current,rush:rushMatchR.current});setPhase('gameEnd');phaseR.current='gameEnd';exitLink();try{if(win==='player')playWinSE2(false);else playLoseSE();}catch(e){}return;}
     if(c&&c.ar===2){setGameEndData({pPt:pp,dPt:dp,winner:win,draw:win==='draw',diff:diffRef.current,stars:0,rivalName:'TEST'});setPhase('gameEnd');phaseR.current='gameEnd';exitLink();return;} // v239 調整モード：何も記録しない
     if(c&&c.ar===1){ // v234 パズルクス：ミッション判定→ピース／ネフィラ制覇。本編の★には触らない
       const i=c.st,st=PZX_STAGES[i],S=matchStatsR.current,won=(win==='player');
@@ -6048,13 +6168,14 @@ function App(){
     setGameEndData({pPt:pp,dPt:dp,winner:win,draw:win==='draw',diff:diffRef.current,stars,rivalName:stageOptsR.current&&((form2R.current&&stageOptsR.current.form2Name)||stageOptsR.current.rivalName)||null});
     setPhase('gameEnd');phaseR.current='gameEnd';exitLink();
   }
-  function goHome(){if(stageR.current&&stageR.current.ar===2){goTune();return;}if(stageR.current&&stageR.current.ar===1){goPzxPanel();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
+  function goHome(){if(stageR.current&&stageR.current.ar===3){goRush();return;}if(stageR.current&&stageR.current.ar===2){goTune();return;}if(stageR.current&&stageR.current.ar===1){goPzxPanel();return;}if(stageR.current){goMap();return;}roundTokR.current++;clearTimers();exitLink();stopBGM();setPhase('menu');}
 
   const curStage=stageCtx?STAGES.areas[stageCtx.ar].stages[stageCtx.st]:null;
+  if(phase==='rush')return h(RushScreen,{onBattle:startRushBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';}});
   if(phase==='tune')return h(TuneScreen,{onBattle:startTuneBattle,onBack:()=>{setPhase('menu');phaseR.current='menu';}}); // v239
   if(phase==='pzx')return h(PzxPanel,{save,onBattle:startPzxStage,onEnter:()=>{setPhase('pzxmap');phaseR.current='pzxmap';},onBack:()=>{setPhase('menu');phaseR.current='menu';},onReset:()=>{updSave(s=>{s.pzx={got:[],boss:false};return s;});}}); // v214/v218 リセットは進行だけ消す（本編の★は無関係）
   if(phase==='pzxmap')return h(PzxWorld,{onPick:startPzxStage,onBack:()=>{setPhase('pzx');phaseR.current='pzx';}}); // v225/v231
-  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzlux:()=>{setPhase('pzx');phaseR.current='pzx';},onTune:()=>{setPhase('tune');phaseR.current='tune';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
+  if(phase==='menu')return h(TitleScreen,{onPlay:()=>{setPhase('map');phaseR.current='map';},onPuzzlux:()=>{setPhase('pzx');phaseR.current='pzx';},onRush:goRush,onTune:()=>{setPhase('tune');phaseR.current='tune';},onTutorial:()=>openTutorial(null),musicOn:musicEnabled,toggleMusic});
   if(phase==='champIntro'&&curStage&&curStage.champion)return h(ChampionIntroScreen,{champ:CHAMPIONS[curStage.champion],stage:curStage,onStart:()=>goIntro(pendingDiff)});
   if(phase==='intro'&&curStage&&curStage.intro)return h(IntroVideoScreen,{src:curStage.intro,onDone:()=>goBrief(pendingDiff)}); // v120
   if(phase==='brief'&&curStage)return h(BriefScreen,{stage:curStage,onStart:()=>startGame(pendingDiff)}); // v119
@@ -6072,6 +6193,7 @@ function App(){
       setTimeout(()=>startStage(0,si),80);
     }});
   if(phase==='gameEnd'&&gameEndData){
+    if(stageCtx&&stageCtx.ar===3&&gameEndData.rush)return h(RushResult,{data:gameEndData,onRetry:()=>startRushBattle(gameEndData.diff),onBack:goRush});
     if(stageCtx&&stageCtx.ar===2){const win=gameEndData.winner==='player';return h('div',{className:'sg-screen sg-end'},h('div',{className:'sg-end-card'},h('div',{className:'title'},'調整'),h('div',{className:'badge'+(win?' win':'')},win?'勝利':'まけ…'),h('div',{className:'score'},h('div',null,h('div',{className:'l'},'YOU'),h('div',{className:'v you'},gameEndData.pPt)),h('div',{className:'vs'},'vs'),h('div',null,h('div',{className:'l'},'TEST'),h('div',{className:'v'},gameEndData.dPt))),h('button',{className:'sg-btn',onClick:()=>startTuneBattle(loadTune())},'もう一度'),h('button',{className:'sg-btn ghost',onClick:goTune},'調整へ')));} // v239
     if(stageCtx&&stageCtx.ar===1&&gameEndData.pzx){const L=pzxLastR.current||{};const i=stageCtx.st;return h(PzxResult,{key:'pr'+(L.t||0),data:gameEndData,st:PZX_STAGES[i],idx:i,gotNow:!!L.gotNow,onRetry:()=>startPzxStage(pzxCurrent(saveR.current)),onPanel:goPzxPanel});} // v234
     if(stageCtx)return h(StageEndScreen,{data:gameEndData,stage:curStage,stars:gameEndData.stars||0,onNext:stageNext,onRetry:()=>startStage(stageCtx.ar,stageCtx.st),onMap:goMap,isLast:(()=>{const nx=STAGES.areas[stageCtx.ar].stages[stageCtx.st+1];return !nx||!!nx.comingSoon||!!nx.challenge;})()});
@@ -6081,7 +6203,7 @@ function App(){
   const so=stageOptsR.current||{};
   const rival=(form2&&so.form2Name)||so.rivalName||'DEALER';
   // v62: 第7は「ルナ」／v70: 第2形態は「レイピア」
-  return h('div',{className:'gp-screen'+(endHold?' end-hold':'')+(so.challenge?' ch7':'')+(so.ch8?' ch8':'')+(so.ch9?' ch9':'')+(so.ch10?' ch10':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
+  return h('div',{className:'gp-screen'+(so.rush?' rush-playing':'')+(endHold?' end-hold':'')+(so.challenge?' ch7':'')+(so.ch8?' ch8':'')+(so.ch9?' ch9':'')+(so.ch10?' ch10':'')+(form2?' f2':'')+(screenPop?' form2-pop':'')+(lkFx?' lk-on':'')},
     h(ChampionLayer,{champ:stageOptsR.current&&stageOptsR.current.champion?CHAMPIONS[stageOptsR.current.champion]:null}), // v61 チャンピオン戦は立ち絵
     so.challenge&&h('div',{className:'champ-layer'},
       form2
@@ -6128,6 +6250,7 @@ function App(){
       h('div',{style:{background:flashMsg.who==='player'?'#00203088':'#3a001088',backdropFilter:'blur(8px)',borderRadius:14,padding:'14px 26px',fontSize:18,fontWeight:900,color:flashMsg.who==='player'?'#00d4ff':'#ff2d6e',boxShadow:'0 4px 32px '+(flashMsg.who==='player'?'#00d4ff55':'#ff2d6e55'),border:'2px solid '+(flashMsg.who==='player'?'#00d4ff':'#ff2d6e'),animation:'slideIn 0.2s ease',maxWidth:'88vw',textAlign:'center'}},flashMsg.text)
     ),
 
+    so.rush&&rushBreak&&h('div',{className:'rush-break',role:'status'},h('div',null,h('small',null,'ROUND '+rushBreak.rn),h('h2',null,rushBreak.winner==='draw'?'引き分け':rushBreak.winner==='player'?'ラウンド獲得！':'相手が獲得'),h('p',null,'得点 ',h('strong',null,rushBreak.pp+' — '+rushBreak.dp)),h('p',null,'獲得ラウンド '+rushMatch.pWins+' — '+rushMatch.dWins),h('small',null,'次のラウンドへ…'))),
     // TOP BAR
     h('div',{className:'gp-top-bar'},
       h('div',{className:'gp-time-box'+(timeLeft<=5?' urgent':'')+(linkMode?' frozen':'')+(rStop?' frozen2':'')},
@@ -6135,18 +6258,18 @@ function App(){
         h('div',{className:'val'},timeLeft)
       ),
       h('div',{className:'gp-score you'+(ptBurst?' pt-burst':'')},
-        h('div',{className:'lbl'},'YOU'),
+        h('div',{className:'lbl'},so.rush?'YOU 得点':'YOU'),
         h('div',{className:'val'},pPt),
-        FLOW_CFG.enabled?h('div',{className:'sub'},'pt'):h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-pPt)),'pt')
+        so.rush?h('div',{className:'sub'},'獲得 ',h('b',null,rushMatch.pWins),' / 5 R'):FLOW_CFG.enabled?h('div',{className:'sub'},'pt'):h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-pPt)),'pt')
       ),
       h('div',{className:'gp-round-pill '+difficulty},
         h('span',{className:'r'},'R'+rNum),
-        h('span',{className:'lvl'},curStage?(curStage.boss?'BOSS':'ST '+curStage.no):(difficulty==='easy'?'EASY':difficulty==='hard'?'HARD':difficulty==='master'?'MASTER':'NORMAL'))
+        h('span',{className:'lvl'},so.rush?'RUSH':curStage?(curStage.boss?'BOSS':'ST '+curStage.no):(difficulty==='easy'?'EASY':difficulty==='hard'?'HARD':difficulty==='master'?'MASTER':'NORMAL'))
       ),
       h('div',{className:'gp-score dealer'},
-        h('div',{className:'lbl'},rival),
+        h('div',{className:'lbl'},so.rush?'相手 得点':rival),
         h('div',{className:'val'},dPt),
-        FLOW_CFG.enabled?h('div',{className:'sub'},'pt'):h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-dPt)),'pt')
+        so.rush?h('div',{className:'sub'},'獲得 ',h('b',null,rushMatch.dWins),' / 5 R'):FLOW_CFG.enabled?h('div',{className:'sub'},'pt'):h('div',{className:'sub'},'あと ',h('b',null,Math.max(0,winPt-dPt)),'pt')
       ),
       h('div',{className:'gp-icon-btn',onClick:goHome,title:'ホームに戻る'},h('span',null,'⌂')),
       h('div',{className:'gp-track-btn',onClick:toggleMusic,title:'曲を変更（1→2→ミュート）'},
